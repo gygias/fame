@@ -181,7 +181,7 @@ static CGFloat gLastYOffset = 0; // XXX
 //    }
 //}
 
-#define MULTI_TAP_THRESHOLD 0.1
+#define MULTI_TAP_THRESHOLD 0.2
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -230,27 +230,75 @@ static CGFloat gLastYOffset = 0; // XXX
 {
     point = [self _snapLocationToSidewalk:point];
     NSLog(@"%@: %0.2f,%0.2f",action, point.x, point.y);
+    NSString *soundName = nil;
+    
     if ( [action isEqualToString:@"action1"] )
     {
         SKAction *moveAction = [SKAction moveTo:point duration:MOVE_SPEED];
         [self.playerNode runAction:moveAction];
+        soundName = [self _randomGrunt:YES];
     }
     if ( [action isEqualToString:@"action2"] )
     {
         SKAction *moveAction = [SKAction moveTo:point duration:MOVE_SPEED / 2];
         [self.playerNode runAction:moveAction];
+        soundName = [self _randomGrunt:YES];
     }
     if ( [action isEqualToString:@"action3"] )
     {
         SKAction *moveAction = [SKAction moveTo:point duration:MOVE_SPEED / 3];
         [self.playerNode runAction:moveAction];
+        soundName = [self _randomScream:YES];
     }
     else if ( [action isEqualToString:@"action4"] )
     {
         //NSLog(@"charge!");
         SKAction *moveAction = [SKAction moveTo:point duration:MOVE_SPEED / 5];
         [self.playerNode runAction:moveAction];
+        soundName = [self _randomScream:YES];
     }
+    
+    if ( soundName )
+    {
+        SKAction *soundEffect = [SKAction playSoundFileNamed:soundName waitForCompletion:NO];
+        [self runAction:soundEffect];
+    }
+}
+
+NSInteger   gMaxMaleGrunt = -1,
+            gMaxFemaleGrunt = -1;
+- (NSString *)_randomGrunt:(BOOL)male
+{
+    NSString *base = male ? @"male_" : @"female_";
+    NSString *type = @"grunt";
+    NSInteger *idx = male ? &gMaxMaleGrunt : &gMaxFemaleGrunt;
+    if ( *idx == -1 )
+        [self _loadMaxSoundFileIdxWithBase:base type:type storage:idx];
+    
+    return *idx > 0 ? [NSString stringWithFormat:@"%@%@_%02u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
+}
+
+- (void)_loadMaxSoundFileIdxWithBase:(NSString *)base type:(NSString *)type storage:(NSInteger *)storage
+{
+    NSInteger testIdx = 1;
+    NSString *fileName = nil, *filePath = nil;
+    while ( ( fileName = [NSString stringWithFormat:@"%@%@_%02u",base,type,(unsigned)testIdx] ) &&
+        [[NSBundle mainBundle] pathForResource:fileName ofType:@"wav"] )
+        testIdx++;
+    *storage = testIdx - 1;
+}
+
+NSInteger   gMaxMaleScream = -1,
+            gMaxFemaleScream = -1;
+- (NSString *)_randomScream:(BOOL)male
+{
+    NSString *base = male ? @"male_" : @"female_";
+    NSString *type = @"scream";
+    NSInteger *idx = male ? &gMaxMaleScream : &gMaxFemaleScream;
+    if ( *idx == -1 )
+        [self _loadMaxSoundFileIdxWithBase:base type:type storage:idx];
+    
+    return *idx > 0 ? [NSString stringWithFormat:@"%@%@_%02u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
 }
 
 - (CGPoint)_snapLocationToSidewalk:(CGPoint)point
@@ -336,6 +384,9 @@ static CGFloat gLastYOffset = 0; // XXX
         CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
         SKAction *action = [SKAction rotateByAngle:angle duration:1];
         [celebPhysics.node runAction:action];
+        NSString *sound = [self _randomScream:NO];
+        SKAction *scream = [SKAction playSoundFileNamed:sound waitForCompletion:NO];
+        [self runAction:scream];
     }
 }
 

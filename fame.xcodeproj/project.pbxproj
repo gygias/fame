@@ -21,6 +21,16 @@
 		637D564F1B747A640013B155 /* Celeb.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D564E1B747A640013B155 /* Celeb.m */; };
 		637D56521B747B000013B155 /* Bouncer.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D56511B747B000013B155 /* Bouncer.m */; };
 		637D56561B7481BC0013B155 /* Pedestrian.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D56551B7481BC0013B155 /* Pedestrian.m */; };
+		639945271B753F0300A62D1B /* chid_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451D1B753F0300A62D1B /* chid_scream_01.wav */; };
+		639945281B753F0300A62D1B /* female_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451E1B753F0300A62D1B /* female_scream_01.wav */; };
+		639945291B753F0300A62D1B /* female_scream_02.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451F1B753F0300A62D1B /* female_scream_02.wav */; };
+		6399452A1B753F0300A62D1B /* male_grunt_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945201B753F0300A62D1B /* male_grunt_01.wav */; };
+		6399452B1B753F0300A62D1B /* male_grunt_02.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945211B753F0300A62D1B /* male_grunt_02.wav */; };
+		6399452C1B753F0300A62D1B /* male_grunt_03.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945221B753F0300A62D1B /* male_grunt_03.wav */; };
+		6399452D1B753F0300A62D1B /* male_grunt_compilation.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945231B753F0300A62D1B /* male_grunt_compilation.wav */; };
+		639945301B753F0300A62D1B /* woman_scream_long_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945261B753F0300A62D1B /* woman_scream_long_01.wav */; };
+		639945331B75449500A62D1B /* male_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945311B75449500A62D1B /* male_scream_01.wav */; };
+		639945341B75449500A62D1B /* male_scream_02.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945321B75449500A62D1B /* male_scream_02.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +71,16 @@
 		637D56531B747BEF0013B155 /* Fame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Fame.h; sourceTree = "<group>"; };
 		637D56541B7481BC0013B155 /* Pedestrian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pedestrian.h; sourceTree = "<group>"; };
 		637D56551B7481BC0013B155 /* Pedestrian.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Pedestrian.m; sourceTree = "<group>"; };
+		6399451D1B753F0300A62D1B /* chid_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = chid_scream_01.wav; path = Sound/chid_scream_01.wav; sourceTree = "<group>"; };
+		6399451E1B753F0300A62D1B /* female_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_01.wav; path = Sound/female_scream_01.wav; sourceTree = "<group>"; };
+		6399451F1B753F0300A62D1B /* female_scream_02.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_02.wav; path = Sound/female_scream_02.wav; sourceTree = "<group>"; };
+		639945201B753F0300A62D1B /* male_grunt_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = male_grunt_01.wav; path = Sound/male_grunt_01.wav; sourceTree = "<group>"; };
+		639945211B753F0300A62D1B /* male_grunt_02.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = male_grunt_02.wav; path = Sound/male_grunt_02.wav; sourceTree = "<group>"; };
+		639945221B753F0300A62D1B /* male_grunt_03.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = male_grunt_03.wav; path = Sound/male_grunt_03.wav; sourceTree = "<group>"; };
+		639945231B753F0300A62D1B /* male_grunt_compilation.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = male_grunt_compilation.wav; path = Sound/male_grunt_compilation.wav; sourceTree = "<group>"; };
+		639945261B753F0300A62D1B /* woman_scream_long_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = woman_scream_long_01.wav; path = Sound/woman_scream_long_01.wav; sourceTree = "<group>"; };
+		639945311B75449500A62D1B /* male_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = male_scream_01.wav; path = Sound/male_scream_01.wav; sourceTree = "<group>"; };
+		639945321B75449500A62D1B /* male_scream_02.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = male_scream_02.wav; path = Sound/male_scream_02.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +105,7 @@
 			isa = PBXGroup;
 			children = (
 				637D56171B7456200013B155 /* fame */,
+				6399451C1B753EEE00A62D1B /* Sound */,
 				637D56361B7456200013B155 /* fameTests */,
 				637D56161B7456200013B155 /* Products */,
 			);
@@ -152,6 +173,24 @@
 				637D56381B7456200013B155 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		6399451C1B753EEE00A62D1B /* Sound */ = {
+			isa = PBXGroup;
+			children = (
+				639945311B75449500A62D1B /* male_scream_01.wav */,
+				639945321B75449500A62D1B /* male_scream_02.wav */,
+				6399451D1B753F0300A62D1B /* chid_scream_01.wav */,
+				6399451E1B753F0300A62D1B /* female_scream_01.wav */,
+				6399451F1B753F0300A62D1B /* female_scream_02.wav */,
+				639945201B753F0300A62D1B /* male_grunt_01.wav */,
+				639945211B753F0300A62D1B /* male_grunt_02.wav */,
+				639945221B753F0300A62D1B /* male_grunt_03.wav */,
+				639945231B753F0300A62D1B /* male_grunt_compilation.wav */,
+				639945261B753F0300A62D1B /* woman_scream_long_01.wav */,
+			);
+			name = Sound;
+			path = fame;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -234,10 +273,20 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6399452D1B753F0300A62D1B /* male_grunt_compilation.wav in Resources */,
+				639945331B75449500A62D1B /* male_scream_01.wav in Resources */,
+				639945281B753F0300A62D1B /* female_scream_01.wav in Resources */,
 				637D562E1B7456200013B155 /* LaunchScreen.xib in Resources */,
+				6399452B1B753F0300A62D1B /* male_grunt_02.wav in Resources */,
 				637D562B1B7456200013B155 /* Images.xcassets in Resources */,
+				639945341B75449500A62D1B /* male_scream_02.wav in Resources */,
+				639945301B753F0300A62D1B /* woman_scream_long_01.wav in Resources */,
+				6399452A1B753F0300A62D1B /* male_grunt_01.wav in Resources */,
+				639945291B753F0300A62D1B /* female_scream_02.wav in Resources */,
 				637D56231B7456200013B155 /* GameScene.sks in Resources */,
+				639945271B753F0300A62D1B /* chid_scream_01.wav in Resources */,
 				637D56291B7456200013B155 /* Main.storyboard in Resources */,
+				6399452C1B753F0300A62D1B /* male_grunt_03.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -460,6 +509,7 @@
 				637D563F1B7456200013B155 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		637D56401B7456200013B155 /* Build configuration list for PBXNativeTarget "fameTests" */ = {
 			isa = XCConfigurationList;
@@ -468,6 +518,7 @@
 				637D56421B7456200013B155 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
