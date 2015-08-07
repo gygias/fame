@@ -12,6 +12,11 @@
 
 @implementation Entity
 
+- (void)introduceWithFrame:(CGRect)frame
+{
+    
+}
+
 @end
 
 @implementation Entity (Private)
@@ -23,14 +28,33 @@
 
 - (id)_initWithTextureName:(NSString *)name scale:(double)scale
 {
-    SKTexture *texture = [SKTexture textureWithImageNamed:name];    
+    SKTexture *texture = [SKTexture textureWithImageNamed:name];
     texture.filteringMode = SKTextureFilteringNearest;
     self.node = [SKSpriteNode spriteNodeWithTexture:texture];
+    self.node.name = name;
     self.node.xScale = scale;
     self.node.yScale = scale;
     self.node.zPosition = ENTITY_Z;
+        
+    SKPhysicsBody *physics = [SKPhysicsBody bodyWithRectangleOfSize:texture.size];//[SKPhysicsBody bodyWithTexture:texture size:texture.size];
+    physics.dynamic = YES;
+    physics.affectedByGravity = NO;
+    physics.categoryBitMask = [self _collisionMask];
+    physics.contactTestBitMask = [self _collisionTestMask];
+    physics.collisionBitMask = 0;
+    self.node.physicsBody = physics;
     
     return self;
+}
+
+- (uint8_t)_collisionMask
+{
+    return ColliderEntity;
+}
+
+- (uint8_t)_collisionTestMask
+{
+    return 0;
 }
 
 @end

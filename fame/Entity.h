@@ -14,11 +14,15 @@
 
 @property SKSpriteNode *node;
 
+- (void)introduceWithFrame:(CGRect)frame;
+
 @end
 
 @interface Entity (Private)
 
 - (id)_initWithTextureName:(NSString *)name;
 - (id)_initWithTextureName:(NSString *)name scale:(double)scale;
+- (uint8_t)_collisionCategory;
+- (uint8_t)_collisionTestMask;
 
 @end

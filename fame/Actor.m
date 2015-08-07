@@ -8,6 +8,18 @@
 
 #import "Actor.h"
 
+#import "Fame.h"
+
 @implementation Actor
+
+- (uint8_t)_collisionMask
+{
+    return ColliderAI;
+}
+
+- (uint8_t)_collisionTestMask
+{
+    return ColliderBouncer | ColliderCeleb | ColliderAI | ColliderProjectile | ColliderWall;
+}
 
 @end

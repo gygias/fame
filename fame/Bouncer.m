@@ -8,6 +8,8 @@
 
 #import "Bouncer.h"
 
+#import "Fame.h"
+
 @implementation Bouncer
 
 - (id)init
@@ -17,6 +19,16 @@
     }
     
     return self;
+}
+
+- (uint8_t)_collisionMask
+{
+    return ColliderBouncer;
+}
+
+- (uint8_t)_collisionTestMask
+{
+    return /*ColliderBouncer |*/ ColliderCeleb | ColliderAI | ColliderProjectile | ColliderWall;
 }
 
 @end

@@ -8,9 +8,12 @@
 
 #import <SpriteKit/SpriteKit.h>
 
-@interface GameScene : SKScene
+@interface GameScene : SKScene <SKPhysicsContactDelegate>
 
+@property SKNode *parentNode;
 @property SKNode *playerNode;
 @property SKNode *celebNode;
+@property CGPoint firstTapLocation;
+@property NSDate *lastTapDate;
 
 @end
