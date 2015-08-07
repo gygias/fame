@@ -67,9 +67,9 @@
         [node addChild:sprite];
         
         if ( [actor isKindOfClass:[Bouncer class]] )
-            self.playerNode = sprite;
+            self.bouncer = actor;
         else if ( [actor isKindOfClass:[Celeb class]] )
-            self.celebNode = sprite;
+            self.celeb = actor;
     }
 }
 
@@ -226,6 +226,9 @@ static CGFloat gLastYOffset = 0; // XXX
 //    }
 //}
 
+#define JUMP_HEIGHT 150.0
+#define EARTHQUAKE_RADIUS 200.0
+
 - (void)_playerAction:(NSString *)action targetPoint:(CGPoint)point
 {
     point = [self _snapLocationToSidewalk:point];
@@ -234,35 +237,78 @@ static CGFloat gLastYOffset = 0; // XXX
     
     if ( [action isEqualToString:@"action1"] )
     {
-        SKAction *moveAction = [SKAction moveTo:point duration:MOVE_SPEED];
-        [self.playerNode runAction:moveAction];
+        SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION];
+        [self.bouncer.node runAction:moveAction];
         soundName = [self _randomGrunt:YES];
     }
     if ( [action isEqualToString:@"action2"] )
     {
-        SKAction *moveAction = [SKAction moveTo:point duration:MOVE_SPEED / 2];
-        [self.playerNode runAction:moveAction];
-        soundName = [self _randomGrunt:YES];
+        CGPoint airPoint = CGPointMake(point.x, self.bouncer.node.position.y + JUMP_HEIGHT);
+        SKAction *flyAction = [SKAction moveTo:airPoint duration:STANDARD_MOVE_DURATION / 3];
+        self.bouncer.isAirborne = YES;
+        [self.bouncer.node runAction:flyAction completion:^{
+            SKPhysicsBody *origPhysics = self.bouncer.node.physicsBody;
+            self.bouncer.node.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:EARTHQUAKE_RADIUS];
+            NSTimeInterval landTime = STANDARD_MOVE_DURATION / 3;
+            SKAction *landAction = [SKAction moveTo:point duration:landTime];
+            //NSTimeInterval activateTime = landTime / 2;
+            //dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(activateTime * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
+            // XXX this is a hack
+            dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                //NSLog(@"eagle is active");
+                self.bouncer.isAirborne = NO;
+            });
+            //NSLog(@"landing");
+            [self _playSoundNamed:[self _randomScream:YES]];
+            [self.bouncer.node runAction:landAction completion:^{
+//                [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
+//                    if ( ! [childNode.name isEqualToString:@"bouncer"]
+//                            && [self.bouncer.node intersectsNode:childNode] )
+//                            NSLog(@"I hit %@",childNode.name);
+//                }];
+                //NSLog(@"eagle has landed");
+                self.bouncer.node.physicsBody = origPhysics;
+                [self _playSoundNamed:[self _randomBoom]];
+            }];
+            
+        }];
     }
-    if ( [action isEqualToString:@"action3"] )
-    {
-        SKAction *moveAction = [SKAction moveTo:point duration:MOVE_SPEED / 3];
-        [self.playerNode runAction:moveAction];
-        soundName = [self _randomScream:YES];
-    }
-    else if ( [action isEqualToString:@"action4"] )
-    {
-        //NSLog(@"charge!");
-        SKAction *moveAction = [SKAction moveTo:point duration:MOVE_SPEED / 5];
-        [self.playerNode runAction:moveAction];
-        soundName = [self _randomScream:YES];
-    }
+//    if ( [action isEqualToString:@"action3"] )
+//    {
+//        SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION / 3];
+//        [self.playerNode runAction:moveAction];
+//        soundName = [self _randomScream:YES];
+//    }
+//    else if ( [action isEqualToString:@"action4"] )
+//    {
+//        //NSLog(@"charge!");
+//        SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION / 5];
+//        [self.playerNode runAction:moveAction];
+//        soundName = [self _randomScream:YES];
+//    }
     
+    [self _playSoundNamed:soundName];
+}
+
+- (void)_playSoundNamed:(NSString *)soundName
+{
     if ( soundName )
     {
         SKAction *soundEffect = [SKAction playSoundFileNamed:soundName waitForCompletion:NO];
         [self runAction:soundEffect];
     }
+}
+
+NSInteger   gMaxBoom = -1;
+- (NSString *)_randomBoom
+{
+    NSString *base = @"";
+    NSString *type = @"boom";
+    NSInteger *idx = &gMaxBoom;
+    if ( *idx == -1 )
+        [self _loadMaxSoundFileIdxWithBase:base type:type storage:idx];
+    
+    return *idx > 0 ? [NSString stringWithFormat:@"%@%@_%02u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
 }
 
 NSInteger   gMaxMaleGrunt = -1,
@@ -281,7 +327,7 @@ NSInteger   gMaxMaleGrunt = -1,
 - (void)_loadMaxSoundFileIdxWithBase:(NSString *)base type:(NSString *)type storage:(NSInteger *)storage
 {
     NSInteger testIdx = 1;
-    NSString *fileName = nil, *filePath = nil;
+    NSString *fileName = nil;
     while ( ( fileName = [NSString stringWithFormat:@"%@%@_%02u",base,type,(unsigned)testIdx] ) &&
         [[NSBundle mainBundle] pathForResource:fileName ofType:@"wav"] )
         testIdx++;
@@ -316,7 +362,7 @@ NSInteger   gMaxMaleScream = -1,
 - (void)update:(CFTimeInterval)currentTime {
     /* Called before each frame is rendered */
     
-    if ( ( arc4random() % 30 ) == 0 )
+    if ( ( arc4random() % 10 ) == 0 )
         [self _addRandomAI];
 }
 
@@ -362,6 +408,12 @@ NSInteger   gMaxMaleScream = -1,
     {
         //NSLog(@"bouncer->ped %0.2f,%0.2f",contact.contactNormal.dx,contact.contactNormal.dy);
         //[pedPhysics applyImpulse:contact.contactNormal];
+        
+        if ( self.bouncer.isAirborne )
+        {
+            //NSLog(@"ignoring airborne player collision");
+            return;
+        }
         
         NSTimeInterval flightTime = 1;
         CGFloat randomX = ( arc4random() % 1000 );

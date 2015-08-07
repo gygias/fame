@@ -31,6 +31,7 @@
 		639945301B753F0300A62D1B /* woman_scream_long_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945261B753F0300A62D1B /* woman_scream_long_01.wav */; };
 		639945331B75449500A62D1B /* male_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945311B75449500A62D1B /* male_scream_01.wav */; };
 		639945341B75449500A62D1B /* male_scream_02.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945321B75449500A62D1B /* male_scream_02.wav */; };
+		639945361B754AE500A62D1B /* boom_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945351B754AE500A62D1B /* boom_01.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +82,7 @@
 		639945261B753F0300A62D1B /* woman_scream_long_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = woman_scream_long_01.wav; path = Sound/woman_scream_long_01.wav; sourceTree = "<group>"; };
 		639945311B75449500A62D1B /* male_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = male_scream_01.wav; path = Sound/male_scream_01.wav; sourceTree = "<group>"; };
 		639945321B75449500A62D1B /* male_scream_02.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = male_scream_02.wav; path = Sound/male_scream_02.wav; sourceTree = "<group>"; };
+		639945351B754AE500A62D1B /* boom_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = boom_01.wav; path = Sound/boom_01.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -178,6 +180,7 @@
 		6399451C1B753EEE00A62D1B /* Sound */ = {
 			isa = PBXGroup;
 			children = (
+				639945351B754AE500A62D1B /* boom_01.wav */,
 				639945311B75449500A62D1B /* male_scream_01.wav */,
 				639945321B75449500A62D1B /* male_scream_02.wav */,
 				6399451D1B753F0300A62D1B /* chid_scream_01.wav */,
@@ -280,6 +283,7 @@
 				6399452B1B753F0300A62D1B /* male_grunt_02.wav in Resources */,
 				637D562B1B7456200013B155 /* Images.xcassets in Resources */,
 				639945341B75449500A62D1B /* male_scream_02.wav in Resources */,
+				639945361B754AE500A62D1B /* boom_01.wav in Resources */,
 				639945301B753F0300A62D1B /* woman_scream_long_01.wav in Resources */,
 				6399452A1B753F0300A62D1B /* male_grunt_01.wav in Resources */,
 				639945291B753F0300A62D1B /* female_scream_02.wav in Resources */,

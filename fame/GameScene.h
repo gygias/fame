@@ -8,11 +8,13 @@
 
 #import <SpriteKit/SpriteKit.h>
 
+@class Bouncer, Celeb;
+
 @interface GameScene : SKScene <SKPhysicsContactDelegate>
 
 @property SKNode *parentNode;
-@property SKNode *playerNode;
-@property SKNode *celebNode;
+@property Bouncer *bouncer;
+@property Celeb *celeb;
 @property CGPoint firstTapLocation;
 @property NSDate *lastTapDate;
 

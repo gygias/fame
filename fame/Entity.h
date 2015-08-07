@@ -13,6 +13,7 @@
 @interface Entity : NSObject
 
 @property SKSpriteNode *node;
+@property BOOL isAirborne;
 
 - (void)introduceWithFrame:(CGRect)frame;
 
