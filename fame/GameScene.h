@@ -10,4 +10,7 @@
 
 @interface GameScene : SKScene
 
+@property SKNode *playerNode;
+@property SKNode *celebNode;
+
 @end

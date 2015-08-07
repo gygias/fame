@@ -8,9 +8,11 @@
 
 #import "GameScene.h"
 
+#import "Fame.h"
+
 @implementation GameScene
 
--(void)didMoveToView:(SKView *)view {
+- (void)didMoveToView:(SKView *)view {
     /* Setup your scene here */
 //    SKLabelNode *myLabel = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
 //    
@@ -24,20 +26,62 @@
     SKNode *cityscape = [SKNode new];
     [self addChild:cityscape];
     
-    NSArray *foregroundTextureNames = @[ @"road1", @"street1", @"background1" ];
-    for ( NSString *textureName in foregroundTextureNames )
-        [self _addForegroundTextureToNode:cityscape named:textureName];
+    [self _addWorldToNode:cityscape];
+    [self _addEntitiesToNode:cityscape];
+}
+
+- (void)_addEntitiesToNode:(SKNode *)node
+{
+    NSArray *startEntities = @[ [Celeb class], [Bouncer class] ];
+    CGFloat xOffset = 0;
+    for ( Class class in startEntities )
+    {
+        Actor *actor = [class new];
+        SKSpriteNode *sprite = actor.node;
+        sprite.position = CGPointMake(CGRectGetMidX(self.frame) + xOffset,
+                                      CGRectGetMidY(self.frame));
+        xOffset = -(sprite.size.width * 1.1);
+        
+        [node addChild:sprite];
+        
+        if ( [actor isKindOfClass:[Bouncer class]] )
+            self.playerNode = sprite;
+        else if ( [actor isKindOfClass:[Celeb class]] )
+            self.celebNode = sprite;
+    }
+}
+
+- (void)_addWorldToNode:(SKNode *)node
+{
+    NSNumber *foregroundSpeed = @( 0.02 );
+    NSNumber *foregroundZ = @( FOREGROUND_Z );
+    NSNumber *backgroundSpeed = @( 0.10 );
+    NSNumber *backgroundZ = @( BACKGROUND_Z );
+    NSArray *textureMap =           @[
+                                      @{ @"name" : @"road1",
+                                         @"speed" : foregroundSpeed,
+                                         @"yOffset" : @( 0 ),
+                                         @"zPosition" : foregroundZ },
+                                      @{ @"name" : @"street1",
+                                         @"speed" : foregroundSpeed,
+                                         @"yOffset" : @( 0 ),
+                                         @"zPosition" : foregroundZ },
+                                      @{ @"name" : @"background1",
+                                         @"speed" : backgroundSpeed,
+                                         @"yOffset" : @( 300 ),
+                                         @"zPosition" : backgroundZ }
+                                      ];
+    for ( NSDictionary *textureDict in textureMap )
+        [self _addForegroundTextureToNode:node info:textureDict];
 }
 
 static CGFloat gLastYOffset = 0; // XXX
-- (void)_addForegroundTextureToNode:(SKNode *)node named:(NSString *)imageName
+- (void)_addForegroundTextureToNode:(SKNode *)node info:(NSDictionary *)textureDict
 {
-    SKTexture *texture = [SKTexture textureWithImageNamed:imageName];
-    texture.filteringMode = SKTextureFilteringNearest; // antialiasing?
+    SKTexture *texture = [SKTexture textureWithImageNamed:textureDict[@"name"]];
+    texture.filteringMode = SKTextureFilteringNearest; // antialiasing? yes
     
-    BOOL isHills = [imageName isEqualToString:@"background1"];
-    
-    double speedScalar = isHills ? 0.08 : 0.02;
+    double speedScalar = ((NSNumber *)textureDict[@"speed"]).doubleValue;
     
     SKAction *movement = [SKAction moveByX:(-texture.size.width * 2.0) y:0 duration:(speedScalar * texture.size.width * 2.0)];
     SKAction *resetTexture = [SKAction moveByX:(texture.size.width * 2.0) y:0 duration:0];
@@ -52,41 +96,50 @@ static CGFloat gLastYOffset = 0; // XXX
         [sprite setScale:2.0];
         
         // XXX
-        CGFloat yOffset = gLastYOffset;
-        if ( isHills )
-            yOffset = 350;
+        NSNumber *yOffset = textureDict[@"yOffset"];
+        if ( yOffset.doubleValue == 0 )
+            yOffset = @(gLastYOffset);
         
-        [sprite setPosition:CGPointMake(i * sprite.size.width, yOffset + spriteHeight)];
+        [sprite setPosition:CGPointMake(i * sprite.size.width, yOffset.doubleValue + spriteHeight)];
         [sprite runAction:repeatForever];
         
-        if ( isHills )
-            sprite.zPosition = 1.0;
-        else
-            sprite.zPosition = 2.0;
+        sprite.zPosition = ((NSNumber *)textureDict[@"zPosition"]).doubleValue;
             
         [node addChild:sprite];
     }
     gLastYOffset += spriteHeight * 2;
 }
 
+#define TOP_OF_SIDEWALK 422.0
+#define BOTTOM_OF_SIDEWALK 32.0
+
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     /* Called when a touch begins */
     
-//    for (UITouch *touch in touches) {
-//        CGPoint location = [touch locationInNode:self];
-//        
-//        SKSpriteNode *sprite = [SKSpriteNode spriteNodeWithImageNamed:@"Spaceship"];
-//        
+    for (UITouch *touch in touches) {
+        CGPoint location = [touch locationInNode:self];
+        
+//        SKSpriteNode *sprite = [SKSpriteNode spriteNodeWithImageNamed:@"Spaceship"];        
 //        sprite.xScale = 0.5;
 //        sprite.yScale = 0.5;
-//        sprite.position = location;
-//        
-//        SKAction *action = [SKAction rotateByAngle:M_PI duration:1];
-//        
-//        [sprite runAction:[SKAction repeatActionForever:action]];
-//        
-//        [self addChild:sprite];
-//    }
+        //NSLog(@"move to %0.2f %0.2f",location.x,location.y);
+        location = [self _snapLocationToSidewalk:location];
+            
+        SKAction *moveAction = [SKAction moveTo:location duration:MOVE_SPEED];
+        [self.playerNode runAction:moveAction];
+    }
+}
+
+- (CGPoint)_snapLocationToSidewalk:(CGPoint)point
+{
+    CGPoint snappedPoint = point;
+    
+    if ( snappedPoint.y > TOP_OF_SIDEWALK )
+        snappedPoint.y = TOP_OF_SIDEWALK;
+    else if ( snappedPoint.y < BOTTOM_OF_SIDEWALK )
+        snappedPoint.y = BOTTOM_OF_SIDEWALK;
+    
+    return snappedPoint;
 }
 
 -(void)update:(CFTimeInterval)currentTime {
