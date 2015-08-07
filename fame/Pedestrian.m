@@ -24,14 +24,15 @@
 - (void)introduceWithFrame:(CGRect)frame
 {
     CGFloat textureWidth = self.node.texture.size.width;
+    CGFloat textureHeight = self.node.texture.size.height;
     CGFloat stageRight = frame.origin.x + frame.size.width + textureWidth;
     CGFloat stageLeft = frame.origin.x - textureWidth;
-    BOOL rightToLeft = ( arc4random() % 1 ) == 0;
-    BOOL upperOrLower = ( arc4random() % 1 ) == 0;
+    BOOL rightToLeft = ( arc4random() % 2 ) == 0;
+    BOOL upperOrLower = ( arc4random() % 2 ) == 0;
     double div = (double)(arc4random() % 100 + 1) / 100.0;
     CGFloat randomY = frame.origin.y +
-                            ( upperOrLower ? ( TOP_SIDEWALK_LOWER + div * TOP_SIDEWALK_HEIGHT ) :
-                                                ( BOTTOM_SIDEWALK_LOWER + div * BOTTOM_SIDEWALK_HEIGHT ) );
+                            ( upperOrLower ? ( TOP_SIDEWALK_LOWER + div * TOP_SIDEWALK_HEIGHT + textureHeight / 2 ) :
+                                                ( BOTTOM_SIDEWALK_LOWER + div * BOTTOM_SIDEWALK_HEIGHT + textureHeight / 2 ) );
     self.node.position = CGPointMake( rightToLeft ? stageRight : stageLeft,
                                         randomY );
     double speedScalar = (double)(arc4random() % 10);

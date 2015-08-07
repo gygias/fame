@@ -332,8 +332,9 @@ static CGFloat gLastYOffset = 0; // XXX
     }
     else if ( celebPhysics && pedPhysics )
     {
-        //NSLog(@"ped->celeb spin");
-        SKAction *action = [SKAction rotateByAngle:2*M_PI duration:1];
+        //NSLog(@"ped->celeb spin %0.2f, %0.2f",contact.contactNormal.dx,contact.contactNormal.dy);
+        CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
+        SKAction *action = [SKAction rotateByAngle:angle duration:1];
         [celebPhysics.node runAction:action];
     }
 }
