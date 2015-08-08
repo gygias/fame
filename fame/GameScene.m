@@ -579,7 +579,6 @@ NSInteger   gMaxMaleScream = -1,
             CGFloat groundEffectFPS = 0.2;
             NSUInteger animationRepetitions = remnantDuration / groundEffectFPS;
             
-#ifdef DEBUG_MASKS
             SKSpriteNode *collisionNode = [SKSpriteNode spriteNodeWithImageNamed:@"debugmask"];
             //CGPoint geCenter = CGPointMake(landedEndLoc.x, landedEndLoc.y - remnant.texture.size.height / 4 / 2);
             //NSLog(@"landed %0.1f,%0.1f, geCenter %0.1f,%0.1f",landedEndLoc.x,landedEndLoc.y,geCenter.x,geCenter.y);
@@ -595,13 +594,15 @@ NSInteger   gMaxMaleScream = -1,
             collisionNode.xScale = EARTHQUAKE_GROUND_EFFECT_RADIUS / collisionNode.texture.size.width;
             collisionNode.yScale = EARTHQUAKE_GROUND_EFFECT_RADIUS / collisionNode.texture.size.height;
             collisionNode.position = CGPointMake(landingEndLoc.x, landingEndLoc.y - landed.texture.size.height / 3.5);
+#ifndef DEBUG_MASKS
+            collisionNode.alpha = 0.0;
+#endif
             SKAction *moveCollision = [SKAction moveByX:(foregroundSpeed * landedDuration + foregroundSpeed * remnantDuration) y:0 duration:landedDuration + remnantDuration];
             [self.parentNode addChild:collisionNode];
             
             [collisionNode runAction:moveCollision completion:^{
                 [collisionNode removeFromParent];
             }];
-#endif
             
             //SKPhysicsJoint *fixToGround = [SKPhysicsJointFixed jointWithBodyA:<#(SKPhysicsBody *)#> bodyB:<#(SKPhysicsBody *)#> anchor:<#(CGPoint)#>];
             
