@@ -21,6 +21,8 @@
 
 #define ENTITY_Z 3.0
 #define EFFECT_Z 2.0
+#define INFO_PANEL_Z 4.0
+#define INFO_PANEL_CONTENT_Z 4.1
 
 #define STANDARD_MOVE_DURATION 0.3
 #define VELOCITY_THRESHOLD 50.0
@@ -37,7 +39,7 @@
 #define FLYAWAY_POINT ( CGPointMake( FLYAWAY_X, FLYAWAY_Y ) )
 
 #define JUMP_HEIGHT 150.0
-#define EARTHQUAKE_RADIUS 200.0
+#define EARTHQUAKE_RADIUS 150.0
 #define EARTHQUAKE_GROUND_EFFECT_RADIUS 100.0
 
 typedef enum : uint8_t {

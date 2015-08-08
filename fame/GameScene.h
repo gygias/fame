@@ -17,9 +17,22 @@
 @property SKNode *cityNode;
 @property Bouncer *bouncer;
 @property Celeb *celeb;
+
+// io events
 @property CGPoint firstTapLocation;
 @property NSDate *lastTapDate;
+
+// locking movement
 @property CGFloat foregroundXMovement;
 @property NSTimeInterval foregroundXMovementTime;
+
+// combo
+@property NSDate *lastKillDate;
+@property NSUInteger currentCombo;
+@property NSUInteger comboMultiplier;
+
+// info panel
+@property SKSpriteNode *infoPanelNode;
+@property SKLabelNode *labelNode;
 
 @end

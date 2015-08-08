@@ -176,7 +176,7 @@ static CGFloat gLastYOffset = 0; // XXX
 
 - (void)_handleNTaps:(NSUInteger)nTaps atLocation:(CGPoint)location
 {
-    NSString *action = [NSString stringWithFormat:@"action%lu",nTaps];
+    NSString *action = [NSString stringWithFormat:@"action%u",(unsigned)nTaps];
     [self _playerAction:action targetPoint:location];
 }
 
@@ -482,6 +482,7 @@ NSInteger   gMaxMaleScream = -1,
             [pedPhysics.node removeFromParent];
         }];
         [self runAction:scream];
+        [self _handleKill];
         
     }
     //else NSLog(@"some collisions between %@ and %@",contact.bodyA.node.name,contact.bodyB.node.name);
@@ -502,6 +503,75 @@ NSInteger   gMaxMaleScream = -1,
             [node removeFromParent];
         }];
     }];
+    
+    [self _handleKill];
+}
+
+#define COMBO_TIMEOUT 4.0
+#define COMBO_THRESHOLD 10
+#define INFO_PANEL_X_OFFSET 20.0
+#define INFO_PANEL_Y_OFFSET 40.0
+#define INFO_PANEL_CONTENT_X_OFFSET 2.0
+#define INFO_PANEL_CONTENT_Y_OFFSET 10.0
+#define INFO_PANEL_STANDARD_FONT_SIZE 20.0
+
+- (void)_handleKill
+{
+    NSDate *lastKillDate = self.lastKillDate;
+    self.lastKillDate = [NSDate date];
+    
+    if ( ! lastKillDate )
+        return;
+    
+    if ( [self.lastKillDate timeIntervalSinceDate:lastKillDate] < COMBO_TIMEOUT )
+    {
+        self.currentCombo += self.comboMultiplier ? self.comboMultiplier : 1;
+        //NSLog(@"combo: %u",self.currentCombo);
+        if ( self.currentCombo >= COMBO_THRESHOLD )
+        {
+            if ( ! self.infoPanelNode )
+            {
+                NSLog(@"presenting combo node");
+                SKSpriteNode *comboNode = [SKSpriteNode spriteNodeWithImageNamed:@"combo-background"];
+                comboNode.position = CGPointMake(CGRectGetMidX(self.frame),self.frame.size.height - INFO_PANEL_Y_OFFSET);
+                                    //CGPointMake( self.frame.origin.x - INFO_PANEL_X_OFFSET,
+                                     //           self.frame.origin.y + INFO_PANEL_Y_OFFSET );
+                comboNode.zPosition = INFO_PANEL_Z;
+                comboNode.xScale = 1.7;
+                comboNode.yScale = 1.7;
+                [self.parentNode addChild:comboNode];
+                self.infoPanelNode = comboNode;
+                
+                SKLabelNode *labelNode = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
+                labelNode.position = CGPointMake( comboNode.position.x + INFO_PANEL_CONTENT_X_OFFSET,
+                                                 comboNode.position.y - INFO_PANEL_CONTENT_Y_OFFSET );
+                labelNode.zPosition = INFO_PANEL_CONTENT_Z;
+                labelNode.fontSize = INFO_PANEL_STANDARD_FONT_SIZE;
+                labelNode.fontColor = [UIColor whiteColor];
+                [self.parentNode addChild:labelNode];
+                self.labelNode = labelNode;
+            }
+            
+            self.labelNode.text = [NSString stringWithFormat:@"combo!! %u",(unsigned)self.currentCombo];
+            
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(COMBO_TIMEOUT * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                if ( [[NSDate date] timeIntervalSinceDate:self.lastKillDate] > COMBO_TIMEOUT )
+                {
+                    NSLog(@"removing combo node");
+                    self.currentCombo = 0;
+                    
+                    SKAction *fade = [SKAction fadeOutWithDuration:1.0];
+                    [@[ self.infoPanelNode, self.labelNode] enumerateObjectsUsingBlock:^(SKNode *obj, NSUInteger idx, BOOL *stop) {
+                        [obj runAction:fade completion:^{
+                            [self.infoPanelNode removeFromParent];
+                            [self.labelNode removeFromParent];
+                            self.infoPanelNode = nil;
+                        }];
+                    }];
+                }
+            });
+        }
+    }
 }
 
 - (void)didEndContact:(SKPhysicsContact *)contact

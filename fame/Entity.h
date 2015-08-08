@@ -23,7 +23,7 @@
 
 - (id)_initWithTextureName:(NSString *)name;
 - (id)_initWithTextureName:(NSString *)name scale:(double)scale;
-- (uint8_t)_collisionCategory;
+//- (uint8_t)_collisionCategory;
 - (uint8_t)_collisionTestMask;
 
 @end
