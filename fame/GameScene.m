@@ -71,15 +71,26 @@
         Actor *actor = [class new];
         SKSpriteNode *sprite = actor.node;
         sprite.position = CGPointMake(CGRectGetMidX(self.frame) + xOffset,
-                                      CGRectGetMidY(self.frame));
+                                      CGRectGetMidY(self.frame) - 200);
         xOffset = -(sprite.size.width * 1.1);
         
         [node addChild:sprite];
         
-        if ( [actor isKindOfClass:[Bouncer class]] )
+        BOOL isBouncer = [actor isKindOfClass:[Bouncer class]];
+        if ( isBouncer )
             self.bouncer = (Bouncer *)actor;
-        else if ( [actor isKindOfClass:[Celeb class]] )
+        else
             self.celeb = (Celeb *)actor;
+        
+        CGFloat stepTime = isBouncer ? 0.5 : 0.7;
+        dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
+        dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, stepTime * NSEC_PER_SEC, stepTime * NSEC_PER_SEC);
+        dispatch_source_set_event_handler(timer, ^{
+            sprite.xScale = -(sprite.xScale);
+        });
+        dispatch_resume(timer);
+        
+        sprite.userData[@"stepTimer"] = timer;
     }
 }
 
@@ -170,13 +181,24 @@ static CGFloat gLastYOffset = 0; // XXX
 {
     CGPoint location = [recognizer locationInView:self.view];
     location = [self convertPointFromView:location];
-    [self _handleNTaps:recognizer.numberOfTapsRequired atLocation:location];
+    [self _handleNTaps:recognizer.numberOfTapsRequired nFingers:recognizer.numberOfTouches atLocation:location];
     //NSLog(@"tap");
 }
 
-- (void)_handleNTaps:(NSUInteger)nTaps atLocation:(CGPoint)location
+- (void)_handleNTaps:(NSUInteger)nTaps nFingers:(NSUInteger)nFingers atLocation:(CGPoint)location
 {
-    NSString *action = [NSString stringWithFormat:@"action%u",(unsigned)nTaps];
+    NSString *base = nil;
+    if ( nFingers == 1 )
+        base = @"";
+    if ( nFingers == 2 )
+        base = @"double-";
+    else if ( nFingers == 3 )
+        base = @"triple-";
+    else if ( nFingers == 4 )
+        base = @"quadruple-";
+    else if ( nFingers == 5 )
+        base = @"quintuple-";
+    NSString *action = [NSString stringWithFormat:@"%@action-%u",base,(unsigned)nTaps];
     [self _playerAction:action targetPoint:location];
 }
 
@@ -192,7 +214,7 @@ static CGFloat gLastYOffset = 0; // XXX
         //NSLog(@"pan velocity: %0.2f,%0.2f",velocity.x,velocity.y);
         CGPoint location = [recognizer locationInView:self.view];
         location = [self convertPointFromView:location];
-        [self _playerAction:@"action4" targetPoint:location];
+        [self _playerAction:@"action-4" targetPoint:location];
     }
 }
 
@@ -220,7 +242,7 @@ static CGFloat gLastYOffset = 0; // XXX
         
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MULTI_TAP_THRESHOLD * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             if ( nowAndLater == self.lastTapDate )
-                [self _handleNTaps:touch.tapCount atLocation:self.firstTapLocation];
+                [self _handleNTaps:touch.tapCount nFingers:touches.count atLocation:self.firstTapLocation];
         });
     }
 //    NSLog(@"====================================================================================================");
@@ -232,9 +254,24 @@ static CGFloat gLastYOffset = 0; // XXX
 //    NSLog(@"event: %@",event);
 }
 
-//- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
-//{
-////    NSLog(@"touches ended: %@",touches);
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    //NSLog(@"touches ended: %@",touches);
+    NSString *string = nil;
+    if ( touches.count == 2 )
+        string = @"double";
+    else if ( touches.count == 3 )
+        string = @"triple";
+    else if ( touches.count == 4 )
+        string = @"quadruple";
+    else if ( touches.count == 5 )
+        string = @"quintuple";
+    else if ( touches.count > 1 )
+        string = [NSString stringWithFormat:@"n-%u",(unsigned)touches.count];
+    
+    if ( string )
+        NSLog(@"appears to be a %@ %u tap",string,(unsigned)((UITouch *)touches.anyObject).tapCount);
+}
 ////    NSLog(@"event: %@",event);
 ////    NSLog(@"====================================================================================================");
 ////    NSLog(@"====================================================================================================");
@@ -256,31 +293,53 @@ static CGFloat gLastYOffset = 0; // XXX
     NSLog(@"%@: %0.2f,%0.2f",action, point.x, point.y);
     NSString *soundName = nil;
     
-    if ( [action isEqualToString:@"action1"] )
+    if ( [action isEqualToString:@"action-1"] )
     {
-        SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION];
-        [self.bouncer.node runAction:moveAction];
+        [self _walkNode:self.bouncer.node to:point];
         soundName = [self _randomGrunt:YES];
     }
-    if ( [action isEqualToString:@"action2"] )
+    else if ( [action isEqualToString:@"action-2"] )
     {
         [self _runEarthquakeAtPoint:point];
     }
-//    if ( [action isEqualToString:@"action3"] )
+//    if ( [action isEqualToString:@"action-3"] )
 //    {
 //        SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION / 3];
-//        [self.playerNode runAction:moveAction];
+//        [self.bouncer.node runAction:moveAction];
 //        soundName = [self _randomScream:YES];
 //    }
-//    else if ( [action isEqualToString:@"action4"] )
-//    {
-//        //NSLog(@"charge!");
-//        SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION / 5];
-//        [self.playerNode runAction:moveAction];
-//        soundName = [self _randomScream:YES];
-//    }
+    else if ( [action isEqualToString:@"action-4"] )
+    {
+        //NSLog(@"charge!");
+        SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION / 5];
+        [self.bouncer.node runAction:moveAction];
+        soundName = [self _randomScream:YES];
+    }
+    else if ( [action isEqualToString:@"triple-action-1"] )
+    {
+        [self _walkNode:self.celeb.node to:self.bouncer.node.position];
+    }
     
     [self _playSoundNamed:soundName];
+}
+
+- (void)_walkNode:(SKNode *)node to:(CGPoint)point
+{
+    SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION];
+    __block float stepped = 0, steps = 5;
+    SKAction *customAction = [SKAction customActionWithDuration:STANDARD_MOVE_DURATION actionBlock:^(SKNode *node, CGFloat elapsedTime) {
+        double perc = elapsedTime / STANDARD_MOVE_DURATION;
+        //NSLog(@"perc: %0.2f, %0.2f / %0.0f * %0.0f",perc, STANDARD_MOVE_DURATION,steps,stepped);
+        if ( stepped / steps >= perc )
+        {
+            node.xScale = -node.xScale;
+            stepped++;
+        }
+    }];
+    
+    //SKAction *walkAction = [SKAction animateWithTextures:@[ self.bouncer.node.texture ] timePerFrame:0.1];
+    SKAction *group = [SKAction group:@[ moveAction, customAction]];
+    [node runAction:group];
 }
 
 - (NSArray *)_texturesForAnimation:(NSString *)animationName
@@ -424,30 +483,50 @@ NSInteger   gMaxMaleScream = -1,
         return; // XXX am i doing it wrong?
     //NSLog(@"%@ is in contact with %@",contact.bodyA.node.name,contact.bodyB.node.name);
     
+    Entity *entityA = (Entity *)contact.bodyA.node.userData[@"entity"];
+    Entity *entityB = (Entity *)contact.bodyB.node.userData[@"entity"];
+    if ( entityA.isDead ^ entityB.isDead )
+    {
+        NSLog(@"ignoring ^dead contact between %@ and %@",entityA,entityB);
+        return;
+    }
+    if ( entityA.isAirborne ^ entityB.isAirborne )
+    {
+        NSLog(@"ignoring ^airborne contact between %@ and %@",entityA,entityB);
+        return;
+    }
+    if ( ! CGRectContainsPoint(self.frame, contact.contactPoint) )
+    {
+        NSLog(@"XXX ignoring off-screen contact between %@ and %@",entityA,entityB);
+        NSLog(@"a: %@: %0.2f,%0.2f",entityA,entityA.node.position.x,entityA.node.position.y);
+        NSLog(@"b: %@: %0.2f,%0.2f",entityB,entityB.node.position.x,entityB.node.position.y);
+        return;
+    }
+    
     SKPhysicsBody *pedPhysics = nil;
     SKPhysicsBody *bouncerPhysics = nil;
     SKPhysicsBody *celebPhysics = nil;
     SKPhysicsBody *groundEffectPhysics = nil;
-    if ( [contact.bodyA.node.name isEqualToString:@"bouncer"] )
+    if ( [contact.bodyA.node.name hasPrefix:@"bouncer-"] )
         bouncerPhysics = contact.bodyA;
-    else if ([contact.bodyB.node.name isEqualToString:@"bouncer"] )
+    else if ([contact.bodyB.node.name hasPrefix:@"bouncer-"] )
         bouncerPhysics = contact.bodyB;
     if ( [contact.bodyA.node.name isEqualToString:@"celeb"] )
         celebPhysics = contact.bodyA;
     else if ( [contact.bodyB.node.name isEqualToString:@"celeb"] )
         celebPhysics = contact.bodyB;
-    if ( [contact.bodyA.node.name isEqualToString:@"pedestrian"] )
+    if ( [contact.bodyA.node.name hasPrefix:@"pedestrian-"] )
         pedPhysics = contact.bodyA;
-    else if ( [contact.bodyB.node.name isEqualToString:@"pedestrian"] )
+    else if ( [contact.bodyB.node.name hasPrefix:@"pedestrian-"] )
         pedPhysics = contact.bodyB;
     if ( [contact.bodyA.node.name hasPrefix:@"ground-effect-"] )
         groundEffectPhysics = contact.bodyA;
     else if ( [contact.bodyB.node.name hasPrefix:@"ground-effect-"] )
         groundEffectPhysics = contact.bodyB;
-    
+
     if ( bouncerPhysics && pedPhysics )
     {
-        //NSLog(@"bouncer->ped %0.2f,%0.2f",contact.contactNormal.dx,contact.contactNormal.dy);
+        NSLog(@"bouncer->ped %0.2f,%0.2f @ %0.2f,%0.2f",contact.contactNormal.dx,contact.contactNormal.dy,contact.contactPoint.x,contact.contactPoint.y);
         //[pedPhysics applyImpulse:contact.contactNormal];
         
         if ( self.bouncer.isAirborne )
@@ -482,6 +561,8 @@ NSInteger   gMaxMaleScream = -1,
             [pedPhysics.node removeFromParent];
         }];
         [self runAction:scream];
+        
+        ((Entity *)pedPhysics.node.userData[@"entity"]).isDead = YES;
         [self _handleKill];
         
     }
@@ -504,6 +585,7 @@ NSInteger   gMaxMaleScream = -1,
         }];
     }];
     
+    ((Entity *)node.userData[@"entity"]).isDead = YES;
     [self _handleKill];
 }
 
@@ -557,17 +639,20 @@ NSInteger   gMaxMaleScream = -1,
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(COMBO_TIMEOUT * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 if ( [[NSDate date] timeIntervalSinceDate:self.lastKillDate] > COMBO_TIMEOUT )
                 {
-                    NSLog(@"removing combo node");
-                    self.currentCombo = 0;
-                    
-                    SKAction *fade = [SKAction fadeOutWithDuration:1.0];
-                    [@[ self.infoPanelNode, self.labelNode] enumerateObjectsUsingBlock:^(SKNode *obj, NSUInteger idx, BOOL *stop) {
-                        [obj runAction:fade completion:^{
-                            [self.infoPanelNode removeFromParent];
-                            [self.labelNode removeFromParent];
-                            self.infoPanelNode = nil;
+                    if ( self.currentCombo > 0 )
+                    {
+                        NSLog(@"removing combo node");
+                        self.currentCombo = 0;
+                        
+                        SKAction *fade = [SKAction fadeOutWithDuration:1.0];
+                        [@[ self.infoPanelNode, self.labelNode] enumerateObjectsUsingBlock:^(SKNode *obj, NSUInteger idx, BOOL *stop) {
+                            [obj runAction:fade completion:^{
+                                [self.infoPanelNode removeFromParent];
+                                [self.labelNode removeFromParent];
+                                self.infoPanelNode = nil;
+                            }];
                         }];
-                    }];
+                    }
                 }
             });
         }
@@ -587,7 +672,7 @@ NSInteger   gMaxMaleScream = -1,
 
 - (void)_runEarthquakeAtPoint:(CGPoint)point
 {
-    CGPoint airPoint = CGPointMake(point.x, point.y + JUMP_HEIGHT);
+    CGPoint airPoint = CGPointMake(point.x, ( point.y > self.bouncer.node.position.y ? point.y : self.bouncer.node.position.y ) + JUMP_HEIGHT);
     SKAction *flyAction = [SKAction moveTo:airPoint duration:STANDARD_MOVE_DURATION / 3];
     self.bouncer.isAirborne = YES;
     [self.bouncer.node runAction:flyAction completion:^{
@@ -597,7 +682,6 @@ NSInteger   gMaxMaleScream = -1,
         SKAction *landAction = [SKAction moveTo:point duration:landTime];
         //NSTimeInterval activateTime = landTime / 2;
         //dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(activateTime * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
-        // XXX this is a hack
         
         SKSpriteNode *earthquake;
         NSArray *earthquakeTextures = [self _texturesForAnimation:@"earthquake" endFrame:4];
@@ -614,15 +698,16 @@ NSInteger   gMaxMaleScream = -1,
             }];
         }
         
+        // XXX this is a hack
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
             //NSLog(@"eagle is active");
             self.bouncer.isAirborne = NO;
         });
         //NSLog(@"landing");
-        [self _playSoundNamed:[self _randomScream:YES]];
+        [self _playSoundNamed:[self _randomGrunt:YES]];
         [self.bouncer.node runAction:landAction completion:^{
             //                [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
-            //                    if ( ! [childNode.name isEqualToString:@"bouncer"]
+            //                    if ( ! [childNode.name hasPrefix:@"bouncer-"]
             //                            && [self.bouncer.node intersectsNode:childNode] )
             //                            NSLog(@"I hit %@",childNode.name);
             //                }];
@@ -693,7 +778,7 @@ NSInteger   gMaxMaleScream = -1,
                 remnant.xScale = 0.75;
                 [self.parentNode addChild:remnant];
                 [remnant runAction:moveAndAnimateRemnant completion:^{
-                    NSLog(@"remnant done...");
+                    //NSLog(@"remnant done...");
                     [remnant removeFromParent];
                 }];
             }];

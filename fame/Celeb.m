@@ -14,7 +14,7 @@
 
 - (id)init
 {
-    if ( self = [super _initWithTextureName:@"celeb" scale:2.0] )
+    if ( self = [super _initWithTextureName:@"celeb-2" scale:2.0] )
     {
     }
     

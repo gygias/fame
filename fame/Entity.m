@@ -21,6 +21,11 @@
 
 @implementation Entity (Private)
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"%@-%@",[super description],self.node.name];
+}
+
 - (id)_initWithTextureName:(NSString *)name
 {
     return [self _initWithTextureName:name scale:1.0];
@@ -43,6 +48,9 @@
     physics.contactTestBitMask = [self _collisionTestMask];
     physics.collisionBitMask = 0;
     self.node.physicsBody = physics;
+    
+    self.node.userData = [NSMutableDictionary new];
+    [self.node.userData setObject:self forKey:@"entity"];
     
     return self;
 }

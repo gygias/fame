@@ -14,7 +14,7 @@
 
 - (id)init
 {
-    if ( self = [super _initWithTextureName:@"bouncer" scale:2.0] )
+    if ( self = [super _initWithTextureName:@"bouncer-1" scale:2.0] )
     {
     }
     

@@ -14,7 +14,7 @@
 
 - (id)init
 {
-    if ( self = [super _initWithTextureName:@"pedestrian" scale:1.0] )
+    if ( self = [super _initWithTextureName:@"pedestrian-1" scale:1.0] )
     {
     }
     

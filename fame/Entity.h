@@ -14,6 +14,8 @@
 
 @property SKSpriteNode *node;
 @property BOOL isAirborne;
+@property BOOL isDead;
+@property BOOL isFrightened;
 
 - (void)introduceWithFrame:(CGRect)frame;
 
