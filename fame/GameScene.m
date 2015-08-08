@@ -565,7 +565,7 @@ NSInteger   gMaxMaleScream = -1,
     }
     else if ( pedPhysics && groundEffectPhysics )
     {
-        NSLog(@"%@ hit ground effect at %0.2f,%0.2f: %@",pedPhysics.node.name,contact.contactPoint.x,contact.contactPoint.y,groundEffectPhysics.node.name);
+        //NSLog(@"%@ hit ground effect at %0.2f,%0.2f: %@",pedPhysics.node.name,contact.contactPoint.x,contact.contactPoint.y,groundEffectPhysics.node.name);
         //[self _genericKillNode:pedPhysics.node];
         
         CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
