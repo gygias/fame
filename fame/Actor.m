@@ -19,7 +19,7 @@
 
 - (uint8_t)_collisionTestMask
 {
-    return ColliderBouncer | ColliderCeleb | ColliderAI | ColliderProjectile | ColliderWall;
+    return 0xFF;
 }
 
 @end
