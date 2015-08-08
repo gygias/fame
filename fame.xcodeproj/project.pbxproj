@@ -35,6 +35,14 @@
 		639945391B75861D00A62D1B /* GroundEffect.m in Sources */ = {isa = PBXBuildFile; fileRef = 639945381B75861D00A62D1B /* GroundEffect.m */; };
 		6399453C1B75863300A62D1B /* Earthquake.m in Sources */ = {isa = PBXBuildFile; fileRef = 6399453B1B75863300A62D1B /* Earthquake.m */; };
 		639945411B7593F100A62D1B /* textures.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 639945401B7593F100A62D1B /* textures.txt */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		639945491B75F94A00A62D1B /* cash-register-ding.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945421B75F94A00A62D1B /* cash-register-ding.wav */; };
+		6399454A1B75F94A00A62D1B /* slot-machine-cash-out.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945431B75F94A00A62D1B /* slot-machine-cash-out.wav */; };
+		6399454B1B75F94A00A62D1B /* slot-machine-spin-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945441B75F94A00A62D1B /* slot-machine-spin-1.wav */; };
+		6399454C1B75F94A00A62D1B /* slot-machine-spin-2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945451B75F94A00A62D1B /* slot-machine-spin-2.wav */; };
+		6399454D1B75F94A00A62D1B /* slot-machine-spin-3.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945461B75F94A00A62D1B /* slot-machine-spin-3.wav */; };
+		6399454E1B75F94A00A62D1B /* slot-machine-spin-4.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945471B75F94A00A62D1B /* slot-machine-spin-4.wav */; };
+		6399454F1B75F94A00A62D1B /* slot-machine-win-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945481B75F94A00A62D1B /* slot-machine-win-1.wav */; };
+		639945511B75F9CF00A62D1B /* slot-machine-cash-out-2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945501B75F9CF00A62D1B /* slot-machine-cash-out-2.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +112,14 @@
 		6399453A1B75863300A62D1B /* Earthquake.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Earthquake.h; sourceTree = "<group>"; };
 		6399453B1B75863300A62D1B /* Earthquake.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Earthquake.m; sourceTree = "<group>"; };
 		639945401B7593F100A62D1B /* textures.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = textures.txt; path = ../../../../private/tmp/textures.txt; sourceTree = "<group>"; };
+		639945421B75F94A00A62D1B /* cash-register-ding.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "cash-register-ding.wav"; path = "Sound/cash-register-ding.wav"; sourceTree = "<group>"; };
+		639945431B75F94A00A62D1B /* slot-machine-cash-out.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-cash-out.wav"; path = "Sound/slot-machine-cash-out.wav"; sourceTree = "<group>"; };
+		639945441B75F94A00A62D1B /* slot-machine-spin-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-spin-1.wav"; path = "Sound/slot-machine-spin-1.wav"; sourceTree = "<group>"; };
+		639945451B75F94A00A62D1B /* slot-machine-spin-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-spin-2.wav"; path = "Sound/slot-machine-spin-2.wav"; sourceTree = "<group>"; };
+		639945461B75F94A00A62D1B /* slot-machine-spin-3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-spin-3.wav"; path = "Sound/slot-machine-spin-3.wav"; sourceTree = "<group>"; };
+		639945471B75F94A00A62D1B /* slot-machine-spin-4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-spin-4.wav"; path = "Sound/slot-machine-spin-4.wav"; sourceTree = "<group>"; };
+		639945481B75F94A00A62D1B /* slot-machine-win-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-win-1.wav"; path = "Sound/slot-machine-win-1.wav"; sourceTree = "<group>"; };
+		639945501B75F9CF00A62D1B /* slot-machine-cash-out-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-cash-out-2.wav"; path = "Sound/slot-machine-cash-out-2.wav"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +222,14 @@
 		6399451C1B753EEE00A62D1B /* Sound */ = {
 			isa = PBXGroup;
 			children = (
+				639945501B75F9CF00A62D1B /* slot-machine-cash-out-2.wav */,
+				639945421B75F94A00A62D1B /* cash-register-ding.wav */,
+				639945431B75F94A00A62D1B /* slot-machine-cash-out.wav */,
+				639945441B75F94A00A62D1B /* slot-machine-spin-1.wav */,
+				639945451B75F94A00A62D1B /* slot-machine-spin-2.wav */,
+				639945461B75F94A00A62D1B /* slot-machine-spin-3.wav */,
+				639945471B75F94A00A62D1B /* slot-machine-spin-4.wav */,
+				639945481B75F94A00A62D1B /* slot-machine-win-1.wav */,
 				639945351B754AE500A62D1B /* boom_01.wav */,
 				639945311B75449500A62D1B /* male_scream_01.wav */,
 				639945321B75449500A62D1B /* male_scream_02.wav */,
@@ -273,6 +297,7 @@
 				TargetAttributes = {
 					637D56141B7456200013B155 = {
 						CreatedOnToolsVersion = 6.4;
+						DevelopmentTeam = B7CLPV6KGB;
 					};
 					637D56321B7456200013B155 = {
 						CreatedOnToolsVersion = 6.4;
@@ -304,19 +329,27 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6399454A1B75F94A00A62D1B /* slot-machine-cash-out.wav in Resources */,
 				6399452D1B753F0300A62D1B /* male_grunt_compilation.wav in Resources */,
+				6399454C1B75F94A00A62D1B /* slot-machine-spin-2.wav in Resources */,
 				639945331B75449500A62D1B /* male_scream_01.wav in Resources */,
+				639945491B75F94A00A62D1B /* cash-register-ding.wav in Resources */,
 				639945281B753F0300A62D1B /* female_scream_01.wav in Resources */,
+				6399454D1B75F94A00A62D1B /* slot-machine-spin-3.wav in Resources */,
+				639945511B75F9CF00A62D1B /* slot-machine-cash-out-2.wav in Resources */,
 				637D562E1B7456200013B155 /* LaunchScreen.xib in Resources */,
 				6399452B1B753F0300A62D1B /* male_grunt_02.wav in Resources */,
 				637D562B1B7456200013B155 /* Images.xcassets in Resources */,
+				6399454B1B75F94A00A62D1B /* slot-machine-spin-1.wav in Resources */,
 				639945341B75449500A62D1B /* male_scream_02.wav in Resources */,
 				639945361B754AE500A62D1B /* boom_01.wav in Resources */,
 				639945301B753F0300A62D1B /* woman_scream_long_01.wav in Resources */,
 				6399452A1B753F0300A62D1B /* male_grunt_01.wav in Resources */,
 				639945291B753F0300A62D1B /* female_scream_02.wav in Resources */,
 				637D56231B7456200013B155 /* GameScene.sks in Resources */,
+				6399454E1B75F94A00A62D1B /* slot-machine-spin-4.wav in Resources */,
 				639945271B753F0300A62D1B /* child_scream_01.wav in Resources */,
+				6399454F1B75F94A00A62D1B /* slot-machine-win-1.wav in Resources */,
 				637D56291B7456200013B155 /* Main.storyboard in Resources */,
 				6399452C1B753F0300A62D1B /* male_grunt_03.wav in Resources */,
 			);
@@ -440,7 +473,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -478,7 +511,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -490,9 +523,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = fame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -500,9 +536,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = fame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};

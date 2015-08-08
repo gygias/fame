@@ -64,7 +64,7 @@
 
 - (void)_addFriendliesToNode:(SKNode *)node
 {
-    NSArray *startEntities = @[ [Celeb class], [Bouncer class] ];
+    NSArray *startEntities = @[ [Pedestrian class], [Bouncer class], [Celeb class] ];
     CGFloat xOffset = 0;
     for ( Class class in startEntities )
     {
@@ -72,7 +72,7 @@
         SKSpriteNode *sprite = actor.node;
         sprite.position = CGPointMake(CGRectGetMidX(self.frame) + xOffset,
                                       CGRectGetMidY(self.frame) - 200);
-        xOffset = -(sprite.size.width * 1.1);
+        xOffset -= (sprite.size.width * 1.5);
         
         [node addChild:sprite];
         
@@ -81,16 +81,22 @@
             self.bouncer = (Bouncer *)actor;
         else
             self.celeb = (Celeb *)actor;
-        
+ 
+#define ENABLE_WALK
+#ifdef ENABLE_WALK
         CGFloat stepTime = isBouncer ? 0.5 : 0.7;
         dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
         dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, stepTime * NSEC_PER_SEC, stepTime * NSEC_PER_SEC);
         dispatch_source_set_event_handler(timer, ^{
+            //SKAction *flipAction = [SKAction scaleXTo:-(sprite.xScale) duration:0];
+            if ( ! actor.isMidAction )
             sprite.xScale = -(sprite.xScale);
+            //[sprite runAction:flipAction];
         });
         dispatch_resume(timer);
         
         sprite.userData[@"stepTimer"] = timer;
+#endif
     }
 }
 
@@ -339,7 +345,10 @@ static CGFloat gLastYOffset = 0; // XXX
     
     //SKAction *walkAction = [SKAction animateWithTextures:@[ self.bouncer.node.texture ] timePerFrame:0.1];
     SKAction *group = [SKAction group:@[ moveAction, customAction]];
-    [node runAction:group];
+    [node runAction:group completion:^{
+        if ( node.xScale < 0 )
+            node.xScale = -(node.xScale);
+    }];
 }
 
 - (NSArray *)_texturesForAnimation:(NSString *)animationName
@@ -396,6 +405,18 @@ static CGFloat gLastYOffset = 0; // XXX
     }
 }
 
+NSInteger   gMaxSlotSpin = -1;
+- (NSString *)_randomSlotSpin
+{
+    NSString *base = @"";
+    NSString *type = @"slot-machine-spin";
+    NSInteger *idx = &gMaxSlotSpin;
+    if ( *idx == -1 )
+        [self _loadMaxSoundFileIdxWithBase:base type:type delimiter:@"-" numberFormat:@"%d" storage:idx];
+    
+    return *idx > 0 ? [NSString stringWithFormat:@"%@%@-%u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
+}
+
 NSInteger   gMaxBoom = -1;
 - (NSString *)_randomBoom
 {
@@ -421,11 +442,18 @@ NSInteger   gMaxMaleGrunt = -1,
     return *idx > 0 ? [NSString stringWithFormat:@"%@%@_%02u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
 }
 
+// XXX GROSS
 - (void)_loadMaxSoundFileIdxWithBase:(NSString *)base type:(NSString *)type storage:(NSInteger *)storage
+{
+    [self _loadMaxSoundFileIdxWithBase:base type:type delimiter:@"_" numberFormat:@"%02u" storage:storage];
+}
+
+- (void)_loadMaxSoundFileIdxWithBase:(NSString *)base type:(NSString *)type delimiter:(NSString *)delimiter numberFormat:(NSString *)numberFormat storage:(NSInteger *)storage
 {
     NSInteger testIdx = 1;
     NSString *fileName = nil;
-    while ( ( fileName = [NSString stringWithFormat:@"%@%@_%02u",base,type,(unsigned)testIdx] ) &&
+    NSString *formatString = [NSString stringWithFormat:@"%@%@%@%@",base,type,delimiter,numberFormat];
+    while ( ( fileName = [NSString stringWithFormat:formatString,(unsigned)testIdx] ) &&
         [[NSBundle mainBundle] pathForResource:fileName ofType:@"wav"] )
         testIdx++;
     *storage = testIdx - 1;
@@ -487,15 +515,23 @@ NSInteger   gMaxMaleScream = -1,
     
     Entity *entityA = (Entity *)contact.bodyA.node.userData[@"entity"];
     Entity *entityB = (Entity *)contact.bodyB.node.userData[@"entity"];
-    if ( entityA.isDead ^ entityB.isDead )
+    if ( [entityA isKindOfClass:[Actor class]] &&
+        [entityB isKindOfClass:[Actor class]] )
     {
-        NSLog(@"ignoring ^dead contact between %@ and %@",entityA,entityB);
-        return;
-    }
-    if ( entityA.isAirborne ^ entityB.isAirborne )
-    {
-        NSLog(@"ignoring ^airborne contact between %@ and %@",entityA,entityB);
-        return;
+        if ( entityA.isDead ^ entityB.isDead )
+        {
+#ifdef MYDEBUG
+            NSLog(@"ignoring ^dead contact between %@ and %@",entityA,entityB);
+#endif
+            return;
+        }
+        if ( entityA.isAirborne ^ entityB.isAirborne )
+        {
+#ifdef MYDEBUG
+            NSLog(@"ignoring ^airborne contact between %@ and %@",entityA,entityB);
+#endif
+            return;
+        }
     }
     if ( ! CGRectContainsPoint(self.frame, contact.contactPoint) )
     {
@@ -528,10 +564,9 @@ NSInteger   gMaxMaleScream = -1,
         groundEffectPhysics = contact.bodyA;
     else if ( [contact.bodyB.node.name hasPrefix:@"ground-effect-"] )
         groundEffectPhysics = contact.bodyB;
-
+    
     if ( bouncerPhysics && pedPhysics )
     {
-        NSLog(@"bouncer->ped %0.2f,%0.2f @ %0.2f,%0.2f",contact.contactNormal.dx,contact.contactNormal.dy,contact.contactPoint.x,contact.contactPoint.y);
         //[pedPhysics applyImpulse:contact.contactNormal];
         
         if ( self.bouncer.isAirborne )
@@ -539,7 +574,14 @@ NSInteger   gMaxMaleScream = -1,
             //NSLog(@"ignoring airborne player collision");
             return;
         }
-        [self _genericKillNode:pedPhysics.node];
+        //NSLog(@"%@->%@ %0.2f,%0.2f @ %0.2f,%0.2f",entityA.node.name,entityB.node.name,contact.contactNormal.dx,contact.contactNormal.dy,contact.contactPoint.x,contact.contactPoint.y);
+        CGVector normal = contact.contactNormal;
+        if ( [entityB.node.name isEqualToString:@"bouncer-1"] )
+        {
+            normal.dx = -(normal.dx);
+            normal.dy = -(normal.dy);
+        }
+        [self _genericKillNode:pedPhysics.node normal:normal];
     }
     else if ( celebPhysics && pedPhysics )
     {
@@ -574,11 +616,11 @@ NSInteger   gMaxMaleScream = -1,
     //else NSLog(@"some collisions between %@ and %@",contact.bodyA.node.name,contact.bodyB.node.name);
 }
 
-- (void)_genericKillNode:(SKNode *)node
+- (void)_genericKillNode:(SKNode *)node normal:(CGVector)normal
 {
     NSTimeInterval flightTime = 1;
-    CGFloat randomX = ( arc4random() % 1000 );
-    SKAction *flyAway = [SKAction moveTo:CGPointMake(randomX,FLYAWAY_Y) duration:flightTime];
+    CGFloat notSoRandomX = node.position.x + normal.dx * self.frame.size.width;
+    SKAction *flyAway = [SKAction moveTo:CGPointMake(notSoRandomX,FLYAWAY_Y) duration:flightTime];
     SKAction *spin = [SKAction rotateByAngle:4*M_PI duration:flightTime];
     SKAction *shrink = [SKAction scaleBy:0.25 duration:flightTime];
     SKAction *flyAwaySpinAndShrink = [SKAction group:@[ flyAway, spin, shrink ]];
@@ -594,8 +636,10 @@ NSInteger   gMaxMaleScream = -1,
     [self _handleKill];
 }
 
-#define COMBO_TIMEOUT 4.0
+#define COMBO_TIMEOUT 3.0
 #define COMBO_THRESHOLD 10
+#define COMBO_FLASH_THRESHOLD 10
+#define COMBO_FLASH_MAX 100
 #define INFO_PANEL_X_OFFSET 20.0
 #define INFO_PANEL_Y_OFFSET 40.0
 #define INFO_PANEL_CONTENT_X_OFFSET 2.0
@@ -635,11 +679,49 @@ NSInteger   gMaxMaleScream = -1,
                 labelNode.zPosition = INFO_PANEL_CONTENT_Z;
                 labelNode.fontSize = INFO_PANEL_STANDARD_FONT_SIZE;
                 labelNode.fontColor = [UIColor whiteColor];
+                labelNode.userData = [NSMutableDictionary dictionary];
                 [self.parentNode addChild:labelNode];
                 self.labelNode = labelNode;
+                
+                [self _playSoundNamed:[self _randomSlotSpin]];
             }
             
             self.labelNode.text = [NSString stringWithFormat:@"combo!! %u",(unsigned)self.currentCombo];
+            if ( ( self.currentCombo % COMBO_FLASH_THRESHOLD ) == 0 )
+            {
+                CGFloat currentFlashInterval = COMBO_FLASH_MAX / (float)self.currentCombo / 20;
+                dispatch_source_t flashTimer = self.labelNode.userData[@"flashTimer"];
+                if ( flashTimer )
+                    dispatch_source_cancel(flashTimer);
+                
+                flashTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
+                dispatch_source_set_timer(flashTimer, DISPATCH_TIME_NOW, currentFlashInterval * NSEC_PER_SEC, currentFlashInterval / 2 * NSEC_PER_SEC);
+                dispatch_source_set_event_handler(flashTimer, ^{
+                    int colorIdx = ((NSNumber *)self.labelNode.userData[@"flashColorIdx"]).intValue;
+                    UIColor *nextColor = nil;
+                    switch(colorIdx)
+                    {
+                        case 0:
+                            nextColor = [UIColor purpleColor];
+                            break;
+                        case 1:
+                            nextColor = [UIColor blackColor];
+                            break;
+                        case 2:
+                            nextColor = [UIColor whiteColor];
+                            break;
+                        default:
+                            NSLog(@"XXX flashColorIdx");
+                            colorIdx = 0;
+                            nextColor = [UIColor whiteColor];
+                            break;
+                    }
+                    self.labelNode.fontColor = nextColor;
+                    self.labelNode.userData[@"flashColorIdx"] = @(( colorIdx + 1 ) % 3);
+                });
+                dispatch_resume(flashTimer);
+                self.labelNode.userData[@"flashTimer"] = flashTimer;
+            }
             
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(COMBO_TIMEOUT * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 if ( [[NSDate date] timeIntervalSinceDate:self.lastKillDate] > COMBO_TIMEOUT )
@@ -649,14 +731,19 @@ NSInteger   gMaxMaleScream = -1,
                         NSLog(@"removing combo node");
                         self.currentCombo = 0;
                         
-                        SKAction *fade = [SKAction fadeOutWithDuration:1.0];
+                        NSTimeInterval duration = 1.0;
+                        SKAction *fade = [SKAction fadeOutWithDuration:duration];
+                        SKAction *center = [SKAction moveTo:CGPointMake(CGRectGetMidX(self.frame),CGRectGetMidY(self.frame)) duration:duration];
+                        SKAction *fadeAndCenter = [SKAction group:@[fade,center]];
                         [@[ self.infoPanelNode, self.labelNode] enumerateObjectsUsingBlock:^(SKNode *obj, NSUInteger idx, BOOL *stop) {
-                            [obj runAction:fade completion:^{
+                            [obj runAction:fadeAndCenter completion:^{
                                 [self.infoPanelNode removeFromParent];
                                 [self.labelNode removeFromParent];
                                 self.infoPanelNode = nil;
                             }];
                         }];
+                        
+                        [self _playSoundNamed:@"slot-machine-cash-out-2.wav"];
                     }
                 }
             });
@@ -677,6 +764,10 @@ NSInteger   gMaxMaleScream = -1,
 
 - (void)_runEarthquakeAtPoint:(CGPoint)point
 {
+    self.bouncer.isMidAction = YES;
+    if ( self.bouncer.node.xScale < 0 )
+        self.bouncer.node.xScale = -(self.bouncer.node.xScale);
+    
     CGPoint airPoint = CGPointMake(point.x, ( point.y > self.bouncer.node.position.y ? point.y : self.bouncer.node.position.y ) + JUMP_HEIGHT);
     SKAction *flyAction = [SKAction moveTo:airPoint duration:STANDARD_MOVE_DURATION / 3];
     self.bouncer.isAirborne = YES;
@@ -763,6 +854,8 @@ NSInteger   gMaxMaleScream = -1,
             [collisionNode runAction:moveCollision completion:^{
                 [collisionNode removeFromParent];
             }];
+            
+            self.bouncer.isMidAction = NO;
             
             //SKPhysicsJoint *fixToGround = [SKPhysicsJointFixed jointWithBodyA:<#(SKPhysicsBody *)#> bodyB:<#(SKPhysicsBody *)#> anchor:<#(CGPoint)#>];
             
