@@ -11,4 +11,6 @@
 
 @interface GameViewController : UIViewController
 
+@property NSArray *allTextures; // only for preloading
+
 @end

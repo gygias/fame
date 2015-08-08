@@ -37,7 +37,7 @@
     [self addChild:parentNode];
     
     [self _addWorldToNode:parentNode];
-    [self _addEntitiesToNode:parentNode];
+    [self _addFriendliesToNode:parentNode];
     
     self.physicsWorld.contactDelegate = self;
     
@@ -62,7 +62,7 @@
     [self.view addGestureRecognizer:swipe];
 }
 
-- (void)_addEntitiesToNode:(SKNode *)node
+- (void)_addFriendliesToNode:(SKNode *)node
 {
     NSArray *startEntities = @[ [Celeb class], [Bouncer class] ];
     CGFloat xOffset = 0;
@@ -389,8 +389,10 @@ static CGFloat gLastYOffset = 0; // XXX
 {
     if ( soundName )
     {
-        SKAction *soundEffect = [SKAction playSoundFileNamed:soundName waitForCompletion:NO];
-        [self runAction:soundEffect];
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            SKAction *soundEffect = [SKAction playSoundFileNamed:soundName waitForCompletion:NO];
+            [self runAction:soundEffect];
+        });
     }
 }
 
@@ -497,9 +499,12 @@ NSInteger   gMaxMaleScream = -1,
     }
     if ( ! CGRectContainsPoint(self.frame, contact.contactPoint) )
     {
-        NSLog(@"XXX ignoring off-screen contact between %@ and %@",entityA,entityB);
-        NSLog(@"a: %@: %0.2f,%0.2f",entityA,entityA.node.position.x,entityA.node.position.y);
-        NSLog(@"b: %@: %0.2f,%0.2f",entityB,entityB.node.position.x,entityB.node.position.y);
+        // http://stackoverflow.com/questions/19162853/horizontally-mirror-a-skspritenode-texture
+        // "This broke physics collision detection in iOS 7.1. Very surprising that it would just break."
+        // seems to be, disabling "stepping" by xScale = -xScale fixes insta-post-earthquake craziness
+        //NSLog(@"XXX ignoring off-screen contact between %@ and %@",entityA,entityB);
+        //NSLog(@"a: %@: %0.2f,%0.2f",entityA,entityA.node.position.x,entityA.node.position.y);
+        //NSLog(@"b: %@: %0.2f,%0.2f",entityB,entityB.node.position.x,entityB.node.position.y);
         return;
     }
     
