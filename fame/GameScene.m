@@ -10,6 +10,12 @@
 
 #import "Fame.h"
 
+#ifdef MYDEBUG //TARGET_IPHONE_SIMULATOR
+#define DEBUG_MASKS
+#else
+#undef DEBUG_MASKS
+#endif
+
 @interface GameScene (RefactorMe)
 - (void)_runEarthquakeAtPoint:(CGPoint)point;
 @end
@@ -71,9 +77,9 @@
         [node addChild:sprite];
         
         if ( [actor isKindOfClass:[Bouncer class]] )
-            self.bouncer = actor;
+            self.bouncer = (Bouncer *)actor;
         else if ( [actor isKindOfClass:[Celeb class]] )
-            self.celeb = actor;
+            self.celeb = (Celeb *)actor;
     }
 }
 
@@ -572,6 +578,8 @@ NSInteger   gMaxMaleScream = -1,
             NSTimeInterval remnantDuration = 2.0;
             CGFloat groundEffectFPS = 0.2;
             NSUInteger animationRepetitions = remnantDuration / groundEffectFPS;
+            
+#ifdef DEBUG_MASKS
             SKSpriteNode *collisionNode = [SKSpriteNode spriteNodeWithImageNamed:@"debugmask"];
             //CGPoint geCenter = CGPointMake(landedEndLoc.x, landedEndLoc.y - remnant.texture.size.height / 4 / 2);
             //NSLog(@"landed %0.1f,%0.1f, geCenter %0.1f,%0.1f",landedEndLoc.x,landedEndLoc.y,geCenter.x,geCenter.y);
@@ -593,6 +601,7 @@ NSInteger   gMaxMaleScream = -1,
             [collisionNode runAction:moveCollision completion:^{
                 [collisionNode removeFromParent];
             }];
+#endif
             
             //SKPhysicsJoint *fixToGround = [SKPhysicsJointFixed jointWithBodyA:<#(SKPhysicsBody *)#> bodyB:<#(SKPhysicsBody *)#> anchor:<#(CGPoint)#>];
             

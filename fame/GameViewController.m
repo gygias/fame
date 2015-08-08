@@ -45,6 +45,16 @@
     GameScene *scene = [GameScene unarchiveFromFile:@"GameScene"];
     scene.scaleMode = SKSceneScaleModeAspectFill;
     
+    NSLog(@"%@",[[NSBundle mainBundle] bundlePath]);
+    NSString *textureNamesPath = [[NSBundle mainBundle] pathForResource:@"textures" ofType:@"txt"];
+    NSArray *textureNames = [[NSString stringWithContentsOfFile:textureNamesPath encoding:NSUTF8StringEncoding error:NULL] componentsSeparatedByString:@"\n"];
+    [textureNames enumerateObjectsUsingBlock:^(NSString *textureName, NSUInteger idx, BOOL *stop) {
+        SKTexture *texture = [SKTexture textureWithImageNamed:textureName];
+        [texture preloadWithCompletionHandler:^{
+            NSLog(@"preloaded %@",textureName);
+        }];
+    }];
+    
     // Present the scene.
     [skView presentScene:scene];
 }

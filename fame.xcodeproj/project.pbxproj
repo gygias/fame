@@ -34,6 +34,7 @@
 		639945361B754AE500A62D1B /* boom_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945351B754AE500A62D1B /* boom_01.wav */; };
 		639945391B75861D00A62D1B /* GroundEffect.m in Sources */ = {isa = PBXBuildFile; fileRef = 639945381B75861D00A62D1B /* GroundEffect.m */; };
 		6399453C1B75863300A62D1B /* Earthquake.m in Sources */ = {isa = PBXBuildFile; fileRef = 6399453B1B75863300A62D1B /* Earthquake.m */; };
+		639945411B7593F100A62D1B /* textures.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = 639945401B7593F100A62D1B /* textures.txt */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,19 @@
 			remoteInfo = fame;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6399453F1B75935900A62D1B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				639945411B7593F100A62D1B /* textures.txt in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		637D56151B7456200013B155 /* fame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fame.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +103,7 @@
 		639945381B75861D00A62D1B /* GroundEffect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GroundEffect.m; sourceTree = "<group>"; };
 		6399453A1B75863300A62D1B /* Earthquake.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Earthquake.h; sourceTree = "<group>"; };
 		6399453B1B75863300A62D1B /* Earthquake.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Earthquake.m; sourceTree = "<group>"; };
+		639945401B7593F100A62D1B /* textures.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = textures.txt; path = ../../../../private/tmp/textures.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +127,7 @@
 		637D560C1B7456200013B155 = {
 			isa = PBXGroup;
 			children = (
+				639945401B7593F100A62D1B /* textures.txt */,
 				637D56171B7456200013B155 /* fame */,
 				6399451C1B753EEE00A62D1B /* Sound */,
 				637D56361B7456200013B155 /* fameTests */,
@@ -216,6 +232,8 @@
 				637D56111B7456200013B155 /* Sources */,
 				637D56121B7456200013B155 /* Frameworks */,
 				637D56131B7456200013B155 /* Resources */,
+				6399453E1B758EB900A62D1B /* ShellScript */,
+				6399453F1B75935900A62D1B /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -312,6 +330,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6399453E1B758EB900A62D1B /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "echo XCOPYING to /tmp/textures.txt\nfind \"$SRCROOT\"/fame/Images.xcassets -type f -exec basename {} \\; | /usr/bin/grep -E png$ > /tmp/textures.txt\n#cat \"$DERIVED_FILE_DIR\"/textures.txt\n#find \"$DERIVED_FILE_DIR\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		637D56111B7456200013B155 /* Sources */ = {
