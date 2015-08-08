@@ -10,6 +10,10 @@
 
 #import "Fame.h"
 
+@interface GameScene (RefactorMe)
+- (void)_runEarthquakeAtPoint:(CGPoint)point;
+@end
+
 @implementation GameScene
 
 - (void)didMoveToView:(SKView *)view {
@@ -254,113 +258,7 @@ static CGFloat gLastYOffset = 0; // XXX
     }
     if ( [action isEqualToString:@"action2"] )
     {
-        CGPoint airPoint = CGPointMake(point.x, point.y + JUMP_HEIGHT);
-        SKAction *flyAction = [SKAction moveTo:airPoint duration:STANDARD_MOVE_DURATION / 3];
-        self.bouncer.isAirborne = YES;
-        [self.bouncer.node runAction:flyAction completion:^{
-            SKPhysicsBody *origPhysics = self.bouncer.node.physicsBody;
-            self.bouncer.node.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:EARTHQUAKE_RADIUS];
-            NSTimeInterval landTime = STANDARD_MOVE_DURATION / 3;
-            SKAction *landAction = [SKAction moveTo:point duration:landTime];
-            //NSTimeInterval activateTime = landTime / 2;
-            //dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(activateTime * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
-            // XXX this is a hack
-            
-            NSArray *earthquakeTextures = [self _texturesForAnimation:@"earthquake" endFrame:4];
-            if ( earthquakeTextures )
-            {
-                SKAction *animateEarthquake = [SKAction animateWithTextures:earthquakeTextures timePerFrame:0.05];
-                SKSpriteNode *earthquake = [SKSpriteNode spriteNodeWithTexture:earthquakeTextures[0]];
-                earthquake.position = CGPointMake(point.x, point.y + 80);
-                earthquake.zPosition = EFFECT_Z;
-                earthquake.xScale = 0.75;
-                [self.parentNode addChild:earthquake];
-                [earthquake runAction:animateEarthquake completion:^{
-                    [earthquake removeFromParent];
-                }];
-            }
-            
-            dispatch_async(dispatch_get_global_queue(0, 0), ^{
-                //NSLog(@"eagle is active");
-                self.bouncer.isAirborne = NO;
-            });
-            //NSLog(@"landing");
-            [self _playSoundNamed:[self _randomScream:YES]];
-            [self.bouncer.node runAction:landAction completion:^{
-//                [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
-//                    if ( ! [childNode.name isEqualToString:@"bouncer"]
-//                            && [self.bouncer.node intersectsNode:childNode] )
-//                            NSLog(@"I hit %@",childNode.name);
-//                }];
-                //NSLog(@"eagle has landed");
-                self.bouncer.node.physicsBody = origPhysics;
-                [self _playSoundNamed:[self _randomBoom]];
-                
-                NSUInteger remainingFrames = 6;
-                CGFloat timePerFrame = 0.1;
-                NSTimeInterval landedDuration = remainingFrames * timePerFrame;
-                NSArray *landedTextures = [self _texturesForAnimation:@"earthquake" startFrame:5];
-                SKAction *animateLanded = [SKAction animateWithTextures:landedTextures timePerFrame:timePerFrame];
-                CGFloat foregroundSpeed = self.foregroundXMovement / self.foregroundXMovementTime;
-                SKAction *moveLanded = [SKAction moveByX:foregroundSpeed * landedDuration y:0 duration:landedDuration];
-                SKAction *moveAndAnimateLanded = [SKAction group:@[ animateLanded, moveLanded ]];
-                SKSpriteNode *landed = [SKSpriteNode spriteNodeWithTexture:landedTextures[0]];
-                landed.position = CGPointMake(point.x, point.y + 80);
-                landed.zPosition = EFFECT_Z;
-                landed.xScale = 0.75;
-                [self.parentNode addChild:landed];
-                
-                //SKPhysicsJoint *fixToGround = [SKPhysicsJointFixed jointWithBodyA:<#(SKPhysicsBody *)#> bodyB:<#(SKPhysicsBody *)#> anchor:<#(CGPoint)#>];
-                
-                [landed runAction:moveAndAnimateLanded completion:^{
-                    CGPoint landedEndLoc = landed.position;
-                    [landed removeFromParent];
-                    
-                    NSTimeInterval remnantDuration = 2.0;
-                    CGFloat groundEffectFPS = 0.2;
-                    NSUInteger animationRepetitions = remnantDuration / groundEffectFPS;
-                    NSArray *remnantTextures = [self _texturesForAnimation:@"earthquake" startFrame:9];
-                    SKAction *animateRemnant = [SKAction animateWithTextures:remnantTextures timePerFrame:groundEffectFPS];
-                    SKAction *repeatRemnant = [SKAction repeatAction:animateRemnant count:animationRepetitions / remnantTextures.count];
-                    SKAction *moveRemnant = [SKAction moveByX:foregroundSpeed * remnantDuration y:0 duration:remnantDuration];
-                    SKAction *fadeRemnant = [SKAction fadeOutWithDuration:remnantDuration];
-                    SKAction *moveAndAnimateRemnant = [SKAction group:@[ repeatRemnant, moveRemnant, fadeRemnant ]];
-                    
-                    SKSpriteNode *remnant = [SKSpriteNode spriteNodeWithTexture:remnantTextures[0]];
-                    remnant.position = landedEndLoc;
-                    remnant.zPosition = EFFECT_Z;
-                    remnant.xScale = 0.75;
-                    
-                    SKSpriteNode *collisionNode = [SKSpriteNode spriteNodeWithImageNamed:@"debugmask"];
-                    //CGPoint geCenter = CGPointMake(landedEndLoc.x, landedEndLoc.y - remnant.texture.size.height / 4 / 2);
-                    //NSLog(@"landed %0.1f,%0.1f, geCenter %0.1f,%0.1f",landedEndLoc.x,landedEndLoc.y,geCenter.x,geCenter.y);
-                    collisionNode.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:50.0];
-                    collisionNode.name = @"ground-effect-earthquake";
-                    collisionNode.physicsBody.dynamic = YES;
-                    collisionNode.physicsBody.affectedByGravity = NO;
-                    collisionNode.physicsBody.collisionBitMask = self.bouncer.node.physicsBody.collisionBitMask;//0;
-                    collisionNode.physicsBody.contactTestBitMask = self.bouncer.node.physicsBody.contactTestBitMask;//ColliderAI | ColliderCeleb | ColliderBouncer;
-                    collisionNode.physicsBody.categoryBitMask = self.bouncer.node.physicsBody.categoryBitMask;//ColliderGroundEffect;
-                    collisionNode.position = landedEndLoc;
-                    collisionNode.zPosition = EFFECT_Z;
-                    collisionNode.xScale = EARTHQUAKE_GROUND_EFFECT_RADIUS / collisionNode.texture.size.width;
-                    collisionNode.yScale = EARTHQUAKE_GROUND_EFFECT_RADIUS / collisionNode.texture.size.height;
-                    collisionNode.position = CGPointMake(landedEndLoc.x, landedEndLoc.y - remnant.texture.size.height / 3.5);
-                    
-                    [self.parentNode addChild:collisionNode];
-                    [self.parentNode addChild:remnant];
-                    
-                    [collisionNode runAction:moveRemnant completion:^{
-                        [collisionNode removeFromParent];
-                    }];
-                    [remnant runAction:moveAndAnimateRemnant completion:^{
-                        NSLog(@"remnant done...");
-                        [remnant removeFromParent];
-                    }];
-                }];
-            }];
-            
-        }];
+        [self _runEarthquakeAtPoint:point];
     }
 //    if ( [action isEqualToString:@"action3"] )
 //    {
@@ -608,3 +506,121 @@ NSInteger   gMaxMaleScream = -1,
 }
 
 @end
+
+@implementation GameScene (RefactorMe)
+
+- (void)_runEarthquakeAtPoint:(CGPoint)point
+{
+    CGPoint airPoint = CGPointMake(point.x, point.y + JUMP_HEIGHT);
+    SKAction *flyAction = [SKAction moveTo:airPoint duration:STANDARD_MOVE_DURATION / 3];
+    self.bouncer.isAirborne = YES;
+    [self.bouncer.node runAction:flyAction completion:^{
+        SKPhysicsBody *origPhysics = self.bouncer.node.physicsBody;
+        self.bouncer.node.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:EARTHQUAKE_RADIUS];
+        NSTimeInterval landTime = STANDARD_MOVE_DURATION / 3;
+        SKAction *landAction = [SKAction moveTo:point duration:landTime];
+        //NSTimeInterval activateTime = landTime / 2;
+        //dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(activateTime * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
+        // XXX this is a hack
+        
+        SKSpriteNode *earthquake;
+        NSArray *earthquakeTextures = [self _texturesForAnimation:@"earthquake" endFrame:4];
+        if ( earthquakeTextures )
+        {
+            SKAction *animateEarthquake = [SKAction animateWithTextures:earthquakeTextures timePerFrame:0.05];
+            earthquake = [SKSpriteNode spriteNodeWithTexture:earthquakeTextures[0]];
+            earthquake.position = CGPointMake(point.x, point.y + 80);
+            earthquake.zPosition = EFFECT_Z;
+            earthquake.xScale = 0.75;
+            [self.parentNode addChild:earthquake];
+            [earthquake runAction:animateEarthquake completion:^{
+                [earthquake removeFromParent];
+            }];
+        }
+        
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            //NSLog(@"eagle is active");
+            self.bouncer.isAirborne = NO;
+        });
+        //NSLog(@"landing");
+        [self _playSoundNamed:[self _randomScream:YES]];
+        [self.bouncer.node runAction:landAction completion:^{
+            //                [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
+            //                    if ( ! [childNode.name isEqualToString:@"bouncer"]
+            //                            && [self.bouncer.node intersectsNode:childNode] )
+            //                            NSLog(@"I hit %@",childNode.name);
+            //                }];
+            //NSLog(@"eagle has landed");
+            CGPoint landingEndLoc = earthquake.position;
+            self.bouncer.node.physicsBody = origPhysics;
+            [self _playSoundNamed:[self _randomBoom]];
+            
+            NSUInteger remainingFrames = 6;
+            CGFloat timePerFrame = 0.1;
+            NSTimeInterval landedDuration = remainingFrames * timePerFrame;
+            NSArray *landedTextures = [self _texturesForAnimation:@"earthquake" startFrame:5];
+            SKAction *animateLanded = [SKAction animateWithTextures:landedTextures timePerFrame:timePerFrame];
+            CGFloat foregroundSpeed = self.foregroundXMovement / self.foregroundXMovementTime;
+            SKAction *moveLanded = [SKAction moveByX:foregroundSpeed * landedDuration y:0 duration:landedDuration];
+            SKAction *moveAndAnimateLanded = [SKAction group:@[ animateLanded, moveLanded ]];
+            SKSpriteNode *landed = [SKSpriteNode spriteNodeWithTexture:landedTextures[0]];
+            landed.position = CGPointMake(point.x, point.y + 80);
+            landed.zPosition = EFFECT_Z;
+            landed.xScale = 0.75;
+            [self.parentNode addChild:landed];
+            
+            NSTimeInterval remnantDuration = 2.0;
+            CGFloat groundEffectFPS = 0.2;
+            NSUInteger animationRepetitions = remnantDuration / groundEffectFPS;
+            SKSpriteNode *collisionNode = [SKSpriteNode spriteNodeWithImageNamed:@"debugmask"];
+            //CGPoint geCenter = CGPointMake(landedEndLoc.x, landedEndLoc.y - remnant.texture.size.height / 4 / 2);
+            //NSLog(@"landed %0.1f,%0.1f, geCenter %0.1f,%0.1f",landedEndLoc.x,landedEndLoc.y,geCenter.x,geCenter.y);
+            collisionNode.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:50.0];
+            collisionNode.name = @"ground-effect-earthquake";
+            collisionNode.physicsBody.dynamic = YES;
+            collisionNode.physicsBody.affectedByGravity = NO;
+            collisionNode.physicsBody.collisionBitMask = self.bouncer.node.physicsBody.collisionBitMask;//0;
+            collisionNode.physicsBody.contactTestBitMask = self.bouncer.node.physicsBody.contactTestBitMask;//ColliderAI | ColliderCeleb | ColliderBouncer;
+            collisionNode.physicsBody.categoryBitMask = self.bouncer.node.physicsBody.categoryBitMask;//ColliderGroundEffect;
+            collisionNode.position = landingEndLoc;
+            collisionNode.zPosition = EFFECT_Z;
+            collisionNode.xScale = EARTHQUAKE_GROUND_EFFECT_RADIUS / collisionNode.texture.size.width;
+            collisionNode.yScale = EARTHQUAKE_GROUND_EFFECT_RADIUS / collisionNode.texture.size.height;
+            collisionNode.position = CGPointMake(landingEndLoc.x, landingEndLoc.y - landed.texture.size.height / 3.5);
+            SKAction *moveCollision = [SKAction moveByX:(foregroundSpeed * landedDuration + foregroundSpeed * remnantDuration) y:0 duration:landedDuration + remnantDuration];
+            [self.parentNode addChild:collisionNode];
+            
+            [collisionNode runAction:moveCollision completion:^{
+                [collisionNode removeFromParent];
+            }];
+            
+            //SKPhysicsJoint *fixToGround = [SKPhysicsJointFixed jointWithBodyA:<#(SKPhysicsBody *)#> bodyB:<#(SKPhysicsBody *)#> anchor:<#(CGPoint)#>];
+            
+            [landed runAction:moveAndAnimateLanded completion:^{
+                CGPoint landedEndLoc = landed.position;
+                [landed removeFromParent];
+                
+                NSArray *remnantTextures = [self _texturesForAnimation:@"earthquake" startFrame:9];
+                SKAction *animateRemnant = [SKAction animateWithTextures:remnantTextures timePerFrame:groundEffectFPS];
+                SKAction *repeatRemnant = [SKAction repeatAction:animateRemnant count:animationRepetitions / remnantTextures.count];
+                SKAction *moveRemnant = [SKAction moveByX:foregroundSpeed * remnantDuration y:0 duration:remnantDuration];
+                SKAction *fadeRemnant = [SKAction fadeOutWithDuration:remnantDuration];
+                SKAction *moveAndAnimateRemnant = [SKAction group:@[ repeatRemnant, moveRemnant, fadeRemnant ]];
+                
+                SKSpriteNode *remnant = [SKSpriteNode spriteNodeWithTexture:remnantTextures[0]];
+                remnant.position = landedEndLoc;
+                remnant.zPosition = EFFECT_Z;
+                remnant.xScale = 0.75;
+                [self.parentNode addChild:remnant];
+                [remnant runAction:moveAndAnimateRemnant completion:^{
+                    NSLog(@"remnant done...");
+                    [remnant removeFromParent];
+                }];
+            }];
+        }];
+        
+    }];
+}
+
+@end
+
