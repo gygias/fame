@@ -34,6 +34,7 @@
 //    [self addChild:myLabel];
     
     SKNode *parentNode = [SKNode new];
+    parentNode.name = @"root";
     [self addChild:parentNode];
     
     [self _addWorldToNode:parentNode];
@@ -90,7 +91,7 @@
         dispatch_source_set_event_handler(timer, ^{
             //SKAction *flipAction = [SKAction scaleXTo:-(sprite.xScale) duration:0];
             if ( ! actor.isMidAction )
-            sprite.xScale = -(sprite.xScale);
+                sprite.xScale = -(sprite.xScale);
             //[sprite runAction:flipAction];
         });
         dispatch_resume(timer);
@@ -129,11 +130,78 @@
                                          @"zPosition" : backgroundZ,
                                          @"setKey" : @"backgroundNode" }
                                       ];
+    [self _addControlPanel:node];
     for ( NSDictionary *textureDict in textureMap )
         [self _addForegroundTextureToNode:node info:textureDict];
 }
 
 static CGFloat gLastYOffset = 0; // XXX
+
+- (void)_addControlPanel:(SKNode *)node
+{
+    SKTexture *backgroundTexture = [SKTexture textureWithImageNamed:@"control-panel-1"];
+    backgroundTexture.filteringMode = SKTextureFilteringNearest;
+    
+    CGFloat scale = 1.0;
+    
+    SKSpriteNode *backgroundSprite = [SKSpriteNode spriteNodeWithTexture:backgroundTexture];
+    backgroundSprite.zPosition = CONTROL_PANEL_Z;
+    CGFloat magicalMysteryNumber = 647; // XXX
+    CGPoint fuckingBottomLeft = CGPointMake(magicalMysteryNumber, backgroundTexture.size.height / 2);
+    backgroundSprite.xScale = 1.0 * scale;
+    backgroundSprite.yScale = 1.0 * scale;
+    backgroundSprite.position = fuckingBottomLeft;
+    
+    [node addChild:backgroundSprite];
+    gLastYOffset += backgroundSprite.size.height;
+    gControlPanelHeight = backgroundSprite.size.height;
+    
+    SKTexture *frameTexture = [SKTexture textureWithImageNamed:@"button-frame-1"];
+    frameTexture.filteringMode = SKTextureFilteringNearest;
+    SKTexture *buttonBackgroundTexture = [SKTexture textureWithImageNamed:@"button-background-1"];
+    buttonBackgroundTexture.filteringMode = SKTextureFilteringNearest;
+    
+    CGFloat xOffset = 0;
+    NSArray *buttonNames = @[ @"move-button-1", @"earthquake-button-1" ];
+    
+    int idx = 1;
+    for ( ; idx <= buttonNames.count ; idx++ )
+    {
+        NSString *buttonName = buttonNames[idx - 1];
+        
+        SKSpriteNode *buttonBackgroundSprite = [SKSpriteNode spriteNodeWithTexture:buttonBackgroundTexture];
+        buttonBackgroundSprite.zPosition = CONTROL_PANEL_BACKGROUND_Z;
+        buttonBackgroundSprite.position = CGPointMake(fuckingBottomLeft.x + xOffset - magicalMysteryNumber/2, fuckingBottomLeft.y + 1);
+        buttonBackgroundSprite.scale = 0.45 * scale;
+        buttonBackgroundSprite.userData = [NSMutableDictionary dictionary];
+        [node addChild:buttonBackgroundSprite];
+        
+        SKTexture *buttonContentTexture = [SKTexture textureWithImageNamed:buttonName];
+        buttonContentTexture.filteringMode = SKTextureFilteringNearest;
+        SKSpriteNode *buttonContentNode = [SKSpriteNode spriteNodeWithTexture:buttonContentTexture];
+        buttonContentNode.zPosition = CONTROL_PANEL_CONTENT_Z;
+        buttonContentNode.position = CGPointMake(fuckingBottomLeft.x + xOffset - magicalMysteryNumber/2, fuckingBottomLeft.y + 1);
+        buttonContentNode.scale = 0.45 * scale;
+        [node addChild:buttonContentNode];
+        
+        SKSpriteNode *buttonFrameSprite = [SKSpriteNode spriteNodeWithTexture:frameTexture];
+        buttonFrameSprite.zPosition = CONTROL_PANEL_FRAME_Z;
+        buttonFrameSprite.position = CGPointMake(fuckingBottomLeft.x + xOffset - magicalMysteryNumber/2, fuckingBottomLeft.y + 1);
+        buttonFrameSprite.scale = 0.45 * scale;
+        buttonFrameSprite.userData = [NSMutableDictionary dictionary];
+        [node addChild:buttonFrameSprite];
+        
+        xOffset += buttonFrameSprite.size.width * 1.05 * scale;
+        
+        [self setValue:buttonFrameSprite forKey:[NSString stringWithFormat:@"button%d",idx]];
+        
+        //[buttonFrameSprite runAction:rotateForever];
+        //[buttonContentNode runAction:rotateForever];
+    }
+    
+    //[backgroundSprite runAction:rotateForever];
+}
+
 - (void)_addForegroundTextureToNode:(SKNode *)node info:(NSDictionary *)textureDict
 {
     SKTexture *texture = [SKTexture textureWithImageNamed:textureDict[@"name"]];
@@ -169,7 +237,7 @@ static CGFloat gLastYOffset = 0; // XXX
         [node addChild:sprite];
     }
     self.foregroundXMovement = i * foregroundXMovement;
-    gLastYOffset += spriteHeight * 2;
+    gLastYOffset += spriteHeight * foregroundScale;
 }
 
 // this is actually necessary
@@ -326,7 +394,110 @@ static CGFloat gLastYOffset = 0; // XXX
         [self _walkNode:self.celeb.node to:self.bouncer.node.position];
     }
     
+    [self _drawCooldownClock];
+    
     [self _playSoundNamed:soundName];
+}
+
+- (void)_drawCooldownClock
+{
+    NSTimeInterval cooldownDuration = 1;
+    int idx = 1;
+    for ( ; idx <= 4; idx++ )
+    {
+        SKSpriteNode *buttonNode = [self valueForKey:[NSString stringWithFormat:@"button%d",idx]];
+        if ( ! buttonNode )
+            break;
+        SKAction *customAction = [SKAction customActionWithDuration:cooldownDuration actionBlock:^(SKNode *_node, CGFloat elapsedTime) {
+            SKSpriteNode *node = (SKSpriteNode *)_node;
+            double percentage = elapsedTime / cooldownDuration;
+            if ( percentage <= 0 || percentage > 1 )
+                return;
+            
+            double cooldownInDegress = percentage * 360.0;
+            double theta = ( cooldownInDegress + 90 );
+            if ( theta > 360 )
+                theta -= 360;
+            double thetaRadians = theta * ( M_PI / 180 );
+            CGPoint unitPoint = CGPointMake(cos(thetaRadians), sin(thetaRadians));
+            
+            CGPoint midPoint = CGPointMake(node.position.x + ( node.size.width / 2 ), node.position.y + ( node.size.height / 2 ));
+            CGPoint unitPointScaled = CGPointMake(midPoint.x + ( unitPoint.x * ( node.size.width / 2 ) ), midPoint.y - ( unitPoint.y * ( node.size.height / 2 )));
+            CGFloat slope = ( unitPointScaled.y - midPoint.y ) / ( unitPointScaled.x - midPoint.x );
+            CGPoint endPoint = {0};
+            
+            UIBezierPath *path = [UIBezierPath bezierPath];
+            [path moveToPoint:CGPointMake(node.position.x, node.position.y + node.size.width)];
+            [path addLineToPoint:CGPointMake(node.position.x + ( node.size.width / 2 ), node.position.y + node.size.width)];
+            [path addLineToPoint:CGPointMake(midPoint.x, midPoint.y)];
+            
+            // y = mx + b
+            // y intercept  b = y - mx
+            //              b =
+            //              x = ( y - b ) / m
+            CGFloat b = midPoint.y - slope * midPoint.x;
+            double rotatedByDegrees = cooldownInDegress;
+            CGFloat x = 0, y = 0;
+            if ( rotatedByDegrees > 315 || rotatedByDegrees <= 45 ) // solve for x along the top
+            {
+                x = ( ( node.position.y + node.size.height ) - b ) / slope;
+                endPoint = CGPointMake(x,node.position.y + node.size.height);
+            }
+            else if ( rotatedByDegrees > 45 && rotatedByDegrees <= 135 ) // solve for y along the right
+            {
+                y = slope * ( node.position.x + node.size.width ) + b;
+                endPoint = CGPointMake( node.position.x + node.size.width, y );
+            }
+            else if ( rotatedByDegrees > 135 && rotatedByDegrees <= 225 ) // solve for x along the bottom
+            {
+                x = ( ( node.position.y ) - b ) / slope;
+                endPoint = CGPointMake( x, node.position.y );
+            }
+            else // solve for y along the left
+            {
+                y = slope * ( node.position.x ) + b;
+                endPoint = CGPointMake( node.position.x, y );
+            }
+            
+            if ( isnan(endPoint.x) || isnan(endPoint.y) )
+            {
+                NSLog(@"cooldown clock nan bug happened");
+                return;
+            }
+            
+            [path addLineToPoint:CGPointMake(endPoint.x, endPoint.y)]; // the mystery point
+            if ( rotatedByDegrees <= 45 ) // TOP RIGHT
+                [path addLineToPoint:CGPointMake(node.position.x + node.size.width, node.position.y + node.size.width)];
+            if ( rotatedByDegrees <= 135 ) // BOTTOM RIGHT
+                [path addLineToPoint:CGPointMake(node.position.x + node.size.width, node.position.y)];
+            if ( rotatedByDegrees <= 225 ) // BOTTOM LEFT
+                [path addLineToPoint:CGPointMake(node.position.x, node.position.y)];
+            if ( rotatedByDegrees <= 315 ) // TOP LEFT
+                [path addLineToPoint:CGPointMake(node.position.x, node.position.y + node.size.width)];
+            
+            SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath];
+            shape.zPosition = CONTROL_PANEL_CD_Z;
+            shape.position = CGPointMake(shape.position.x - /*path.bounds.*/self.button1.size.width / 2, shape.position.y - /*path.bounds.*/self.button1.size.height / 2);
+            //shape.xScale = 1/0.45 * shape.xScale;
+            //shape.yScale = -(1/0.45 * shape.xScale);
+            //shape.position = CGPointMake(shape.position.x-450, shape.position.y + 20);
+            shape.fillColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.5];
+            shape.strokeColor = [UIColor clearColor];
+            
+            SKNode *lastCC = buttonNode.userData[@"cooldownClock"];
+            if ( lastCC )
+                [self.parentNode removeChildrenInArray:@[lastCC]];
+            
+            [self.parentNode addChild:shape];
+            buttonNode.userData[@"cooldownClock"] = shape;
+        }];
+        
+        [buttonNode runAction:customAction completion:^{
+            SKNode *lastCC = buttonNode.userData[@"cooldownClock"];
+            if ( lastCC )
+                [self.parentNode removeChildrenInArray:@[lastCC]];
+        }];
+    }
 }
 
 - (void)_walkNode:(SKNode *)node to:(CGPoint)point
@@ -770,8 +941,12 @@ NSInteger   gMaxMaleScream = -1,
     
     CGPoint airPoint = CGPointMake(point.x, ( point.y > self.bouncer.node.position.y ? point.y : self.bouncer.node.position.y ) + JUMP_HEIGHT);
     SKAction *flyAction = [SKAction moveTo:airPoint duration:STANDARD_MOVE_DURATION / 3];
+    SKAction *spinAction = [SKAction rotateByAngle:2*M_PI duration:STANDARD_MOVE_DURATION / 3];
+    SKAction *flyAndSpin = [SKAction group:@[ flyAction, spinAction ]];
     self.bouncer.isAirborne = YES;
-    [self.bouncer.node runAction:flyAction completion:^{
+    SKTexture *defaultTexture = self.bouncer.node.texture;
+    self.bouncer.node.texture = [SKTexture textureWithImageNamed:@"bouncer-jump-1"];
+    [self.bouncer.node runAction:flyAndSpin completion:^{
         SKPhysicsBody *origPhysics = self.bouncer.node.physicsBody;
         self.bouncer.node.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:EARTHQUAKE_RADIUS];
         NSTimeInterval landTime = STANDARD_MOVE_DURATION / 3;
@@ -801,7 +976,9 @@ NSInteger   gMaxMaleScream = -1,
         });
         //NSLog(@"landing");
         [self _playSoundNamed:[self _randomGrunt:YES]];
+        self.bouncer.node.texture = [SKTexture textureWithImageNamed:@"bouncer-jump-2"];
         [self.bouncer.node runAction:landAction completion:^{
+            self.bouncer.node.texture = defaultTexture;
             //                [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
             //                    if ( ! [childNode.name hasPrefix:@"bouncer-"]
             //                            && [self.bouncer.node intersectsNode:childNode] )

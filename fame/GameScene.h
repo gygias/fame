@@ -35,4 +35,11 @@
 @property SKSpriteNode *infoPanelNode;
 @property SKLabelNode *labelNode;
 
+// control panel
+@property SKSpriteNode *controlPanel;
+@property SKSpriteNode *button1;
+@property SKSpriteNode *button2;
+@property SKSpriteNode *button3;
+@property SKSpriteNode *button4;
+
 @end
