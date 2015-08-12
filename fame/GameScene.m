@@ -8,13 +8,16 @@
 
 #import "GameScene.h"
 
-#import "Fame.h"
-
 #ifdef MYDEBUG //TARGET_IPHONE_SIMULATOR
 #define DEBUG_MASKS
 #else
 #undef DEBUG_MASKS
 #endif
+
+#define BOTTOM_SIDEWALK_LOWER backgroundSprite.size.height
+#define BOTTOM_SIDEWALK_UPPER ( BOTTOM_SIDEWALK_LOWER + 40.0 )
+#define TOP_SIDEWALK_LOWER ( BOTTOM_SIDEWALK_UPPER + 297 )
+#define TOP_SIDEWALK_UPPER ( TOP_SIDEWALK_LOWER + 60.0 )
 
 @interface GameScene (RefactorMe)
 - (void)_runEarthquakeAtPoint:(CGPoint)point;
@@ -36,6 +39,9 @@
     SKNode *parentNode = [SKNode new];
     parentNode.name = @"root";
     [self addChild:parentNode];
+    
+    self.gameScreenMap = [GameScreenMap new];
+    self.gameScreenMap.screenRect = self.frame;
     
     [self _addWorldToNode:parentNode];
     [self _addFriendliesToNode:parentNode];
@@ -69,19 +75,18 @@
     CGFloat xOffset = 0;
     for ( Class class in startEntities )
     {
-        Actor *actor = [class new];
-        SKSpriteNode *sprite = actor.node;
-        sprite.position = CGPointMake(CGRectGetMidX(self.frame) + xOffset,
+        EntityNode *entityNode = [class new];
+        entityNode.position = CGPointMake(CGRectGetMidX(self.frame) + xOffset,
                                       CGRectGetMidY(self.frame) - 200);
-        xOffset -= (sprite.size.width * 1.5);
+        xOffset -= (entityNode.size.width * 1.5);
         
-        [node addChild:sprite];
+        [node addChild:entityNode];
         
-        BOOL isBouncer = [actor isKindOfClass:[Bouncer class]];
+        BOOL isBouncer = [entityNode isKindOfClass:[Bouncer class]];
         if ( isBouncer )
-            self.bouncer = (Bouncer *)actor;
+            self.bouncer = (Bouncer *)entityNode;
         else
-            self.celeb = (Celeb *)actor;
+            self.celeb = (Celeb *)entityNode;
  
 #define ENABLE_WALK
 #ifdef ENABLE_WALK
@@ -90,13 +95,13 @@
         dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, stepTime * NSEC_PER_SEC, stepTime * NSEC_PER_SEC);
         dispatch_source_set_event_handler(timer, ^{
             //SKAction *flipAction = [SKAction scaleXTo:-(sprite.xScale) duration:0];
-            if ( ! actor.isMidAction )
-                sprite.xScale = -(sprite.xScale);
+            if ( ! entityNode.isMidAction )
+                entityNode.xScale = -(entityNode.xScale);
             //[sprite runAction:flipAction];
         });
         dispatch_resume(timer);
         
-        sprite.userData[@"stepTimer"] = timer;
+        entityNode.userData[@"stepTimer"] = timer;
 #endif
     }
 }
@@ -146,15 +151,23 @@ static CGFloat gLastYOffset = 0; // XXX
     
     SKSpriteNode *backgroundSprite = [SKSpriteNode spriteNodeWithTexture:backgroundTexture];
     backgroundSprite.zPosition = CONTROL_PANEL_Z;
-    CGFloat magicalMysteryNumber = 647; // XXX
+    NSLog(@"%0.2f,%0.2f - %0.2f,%0.2f",self.frame.origin.x,self.frame.origin.y,self.frame.size.width,self.frame.size.height);
+    CGFloat magicalMysteryNumber = 647/2; // XXX
     CGPoint fuckingBottomLeft = CGPointMake(magicalMysteryNumber, backgroundTexture.size.height / 2);
-    backgroundSprite.xScale = 1.0 * scale;
+    backgroundSprite.xScale = 5.0 * scale;
     backgroundSprite.yScale = 1.0 * scale;
     backgroundSprite.position = fuckingBottomLeft;
     
     [node addChild:backgroundSprite];
     gLastYOffset += backgroundSprite.size.height;
-    gControlPanelHeight = backgroundSprite.size.height;
+    self.gameScreenMap.bottomSidewalkLower = backgroundSprite.size.height;
+    self.gameScreenMap.bottomSidewalkUpper = BOTTOM_SIDEWALK_UPPER;
+    self.gameScreenMap.streetLower = BOTTOM_SIDEWALK_UPPER;
+    self.gameScreenMap.streetUpper = TOP_SIDEWALK_LOWER;
+    self.gameScreenMap.topSidewalkLower = TOP_SIDEWALK_LOWER;
+    self.gameScreenMap.topSidewalkUpper = TOP_SIDEWALK_UPPER;
+    self.gameScreenMap.streetLeft = self.frame.origin.x;
+    self.gameScreenMap.streetRight = self.frame.origin.x + self.frame.size.width;
     
     SKTexture *frameTexture = [SKTexture textureWithImageNamed:@"button-frame-1"];
     frameTexture.filteringMode = SKTextureFilteringNearest;
@@ -171,7 +184,7 @@ static CGFloat gLastYOffset = 0; // XXX
         
         SKSpriteNode *buttonBackgroundSprite = [SKSpriteNode spriteNodeWithTexture:buttonBackgroundTexture];
         buttonBackgroundSprite.zPosition = CONTROL_PANEL_BACKGROUND_Z;
-        buttonBackgroundSprite.position = CGPointMake(fuckingBottomLeft.x + xOffset - magicalMysteryNumber/2, fuckingBottomLeft.y + 1);
+        buttonBackgroundSprite.position = CGPointMake(fuckingBottomLeft.x + xOffset, fuckingBottomLeft.y + 1);
         buttonBackgroundSprite.scale = 0.45 * scale;
         buttonBackgroundSprite.userData = [NSMutableDictionary dictionary];
         [node addChild:buttonBackgroundSprite];
@@ -180,7 +193,7 @@ static CGFloat gLastYOffset = 0; // XXX
         buttonContentTexture.filteringMode = SKTextureFilteringNearest;
         SKSpriteNode *buttonContentNode = [SKSpriteNode spriteNodeWithTexture:buttonContentTexture];
         buttonContentNode.zPosition = CONTROL_PANEL_CONTENT_Z;
-        buttonContentNode.position = CGPointMake(fuckingBottomLeft.x + xOffset - magicalMysteryNumber/2, fuckingBottomLeft.y + 1);
+        buttonContentNode.position = CGPointMake(fuckingBottomLeft.x + xOffset, fuckingBottomLeft.y + 1);
         buttonContentNode.scale = 0.45 * scale;
         [node addChild:buttonContentNode];
         
@@ -363,13 +376,20 @@ static CGFloat gLastYOffset = 0; // XXX
 
 - (void)_playerAction:(NSString *)action targetPoint:(CGPoint)point
 {
-    point = [self _snapLocationToSidewalk:point];
+    if ( self.bouncer.isMidAction
+        && ! self.bouncer.currentActionIsInterruptible )
+    {
+        NSLog(@"ignoring %@ because player is mid non-interruptible action",action);
+        return;
+    }
+    
+    point = [self _snapLocationOfNode:self.bouncer toSidewalk:point];
     NSLog(@"%@: %0.2f,%0.2f",action, point.x, point.y);
     NSString *soundName = nil;
     
     if ( [action isEqualToString:@"action-1"] )
     {
-        [self _walkNode:self.bouncer.node to:point];
+        [self _walkNode:self.bouncer to:point];
         soundName = [self _randomGrunt:YES];
     }
     else if ( [action isEqualToString:@"action-2"] )
@@ -386,12 +406,12 @@ static CGFloat gLastYOffset = 0; // XXX
     {
         //NSLog(@"charge!");
         SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION / 5];
-        [self.bouncer.node runAction:moveAction];
+        [self.bouncer runAction:moveAction];
         soundName = [self _randomScream:YES];
     }
     else if ( [action isEqualToString:@"triple-action-1"] )
     {
-        [self _walkNode:self.celeb.node to:self.bouncer.node.position];
+        [self _walkNode:self.celeb to:self.bouncer.position];
     }
     
     [self _drawCooldownClock];
@@ -477,7 +497,8 @@ static CGFloat gLastYOffset = 0; // XXX
             
             SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath];
             shape.zPosition = CONTROL_PANEL_CD_Z;
-            shape.position = CGPointMake(shape.position.x - /*path.bounds.*/self.button1.size.width / 2, shape.position.y - /*path.bounds.*/self.button1.size.height / 2);
+            CGFloat magicalMysteryNumber = 647/2; // XXX
+            shape.position = CGPointMake(magicalMysteryNumber/2 - /*path.bounds.*/self.button1.size.width / 2, shape.position.y - /*path.bounds.*/self.button1.size.height / 2);
             //shape.xScale = 1/0.45 * shape.xScale;
             //shape.yScale = -(1/0.45 * shape.xScale);
             //shape.position = CGPointMake(shape.position.x-450, shape.position.y + 20);
@@ -513,12 +534,22 @@ static CGFloat gLastYOffset = 0; // XXX
             stepped++;
         }
     }];
+
+    __block BOOL isBouncer = NO;
+    if ( [node.name hasPrefix:@"bouncer-"] )
+    {
+        isBouncer = YES;
+        self.bouncer.isMidAction = YES;
+        self.bouncer.currentActionIsInterruptible = YES;
+    }
     
     //SKAction *walkAction = [SKAction animateWithTextures:@[ self.bouncer.node.texture ] timePerFrame:0.1];
     SKAction *group = [SKAction group:@[ moveAction, customAction]];
     [node runAction:group completion:^{
         if ( node.xScale < 0 )
             node.xScale = -(node.xScale);
+        self.bouncer.isMidAction = NO;
+        self.bouncer.currentActionIsInterruptible = NO;
     }];
 }
 
@@ -643,14 +674,14 @@ NSInteger   gMaxMaleScream = -1,
     return *idx > 0 ? [NSString stringWithFormat:@"%@%@_%02u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
 }
 
-- (CGPoint)_snapLocationToSidewalk:(CGPoint)point
+- (CGPoint)_snapLocationOfNode:(EntityNode *)node toSidewalk:(CGPoint)point
 {
     CGPoint snappedPoint = point;
-    
-    if ( snappedPoint.y > TOP_SIDEWALK_UPPER )
-        snappedPoint.y = TOP_SIDEWALK_UPPER;
-    else if ( snappedPoint.y < BOTTOM_SIDEWALK_LOWER )
-        snappedPoint.y = BOTTOM_SIDEWALK_LOWER;
+    CGFloat halfTextureHeight = node.texture.size.height / 2;
+    if ( snappedPoint.y > ( self.gameScreenMap.topSidewalkUpper + halfTextureHeight ) )
+        snappedPoint.y = ( self.gameScreenMap.topSidewalkUpper + halfTextureHeight );
+    else if ( snappedPoint.y < ( self.gameScreenMap.bottomSidewalkLower + halfTextureHeight ) )
+        snappedPoint.y = ( self.gameScreenMap.bottomSidewalkLower + halfTextureHeight );
     
     return snappedPoint;
 }
@@ -667,15 +698,15 @@ NSInteger   gMaxMaleScream = -1,
     static NSArray *gAITypes;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        gAITypes = @[ [Pedestrian class] ];
+        gAITypes = @[ [Pedestrian class], [Skater class], [Taxi class] ];
     });
     
     NSUInteger idx = arc4random() % gAITypes.count;
     Class aiClass = gAITypes[idx];
     //NSLog(@"let's add a %@",aiClass);
-    Actor *ai = [aiClass new];
-    [self.parentNode addChild:ai.node];
-    [ai introduceWithFrame:self.frame];
+    EntityNode *ai = [aiClass new];
+    [self.parentNode addChild:ai];
+    [ai introduceWithFrame:self.frame screenMap:self.gameScreenMap];
 }
 
 - (void)didBeginContact:(SKPhysicsContact *)contact
@@ -684,26 +715,26 @@ NSInteger   gMaxMaleScream = -1,
         return; // XXX am i doing it wrong?
     //NSLog(@"%@ is in contact with %@",contact.bodyA.node.name,contact.bodyB.node.name);
     
-    Entity *entityA = (Entity *)contact.bodyA.node.userData[@"entity"];
-    Entity *entityB = (Entity *)contact.bodyB.node.userData[@"entity"];
-    if ( [entityA isKindOfClass:[Actor class]] &&
-        [entityB isKindOfClass:[Actor class]] )
+    SKSpriteNode *entityA = (EntityNode *)contact.bodyA.node;
+    SKSpriteNode *entityB = (EntityNode *)contact.bodyB.node;
+    if ( [entityA isKindOfClass:[EntityNode class]] && [entityB isKindOfClass:[EntityNode class]] )
     {
-        if ( entityA.isDead ^ entityB.isDead )
+        if ( ((EntityNode *)entityA).isDead ^((EntityNode *)entityB).isDead )
         {
-#ifdef MYDEBUG
+    #ifdef MYDEBUG
             NSLog(@"ignoring ^dead contact between %@ and %@",entityA,entityB);
-#endif
+    #endif
             return;
         }
-        if ( entityA.isAirborne ^ entityB.isAirborne )
+        if ( ((EntityNode *)entityA).isAirborne ^ ((EntityNode *)entityB).isAirborne )
         {
-#ifdef MYDEBUG
+    #ifdef MYDEBUG
             NSLog(@"ignoring ^airborne contact between %@ and %@",entityA,entityB);
-#endif
+    #endif
             return;
         }
     }
+    
     if ( ! CGRectContainsPoint(self.frame, contact.contactPoint) )
     {
         // http://stackoverflow.com/questions/19162853/horizontally-mirror-a-skspritenode-texture
@@ -715,10 +746,15 @@ NSInteger   gMaxMaleScream = -1,
         return;
     }
     
-    SKPhysicsBody *pedPhysics = nil;
+    SKPhysicsBody *genericAIPhysics = nil;
     SKPhysicsBody *bouncerPhysics = nil;
     SKPhysicsBody *celebPhysics = nil;
     SKPhysicsBody *groundEffectPhysics = nil;
+    
+    NSArray *genericAIPrefixes = @[ @"pedestrian-", @"skater-" ];
+    
+    //NSLog(@"%@ <-!-> %@",contact.bodyA.node.name,contact.bodyB.node.name);
+    
     if ( [contact.bodyA.node.name hasPrefix:@"bouncer-"] )
         bouncerPhysics = contact.bodyA;
     else if ([contact.bodyB.node.name hasPrefix:@"bouncer-"] )
@@ -727,16 +763,16 @@ NSInteger   gMaxMaleScream = -1,
         celebPhysics = contact.bodyA;
     else if ( [contact.bodyB.node.name isEqualToString:@"celeb"] )
         celebPhysics = contact.bodyB;
-    if ( [contact.bodyA.node.name hasPrefix:@"pedestrian-"] )
-        pedPhysics = contact.bodyA;
-    else if ( [contact.bodyB.node.name hasPrefix:@"pedestrian-"] )
-        pedPhysics = contact.bodyB;
+    if ( [genericAIPrefixes containsPrefixOfString:contact.bodyA.node.name] )
+        genericAIPhysics = contact.bodyA;
+    else if ( [genericAIPrefixes containsPrefixOfString:contact.bodyB.node.name] )
+        genericAIPhysics = contact.bodyB;
     if ( [contact.bodyA.node.name hasPrefix:@"ground-effect-"] )
         groundEffectPhysics = contact.bodyA;
     else if ( [contact.bodyB.node.name hasPrefix:@"ground-effect-"] )
         groundEffectPhysics = contact.bodyB;
     
-    if ( bouncerPhysics && pedPhysics )
+    if ( bouncerPhysics && genericAIPhysics )
     {
         //[pedPhysics applyImpulse:contact.contactNormal];
         
@@ -747,14 +783,14 @@ NSInteger   gMaxMaleScream = -1,
         }
         //NSLog(@"%@->%@ %0.2f,%0.2f @ %0.2f,%0.2f",entityA.node.name,entityB.node.name,contact.contactNormal.dx,contact.contactNormal.dy,contact.contactPoint.x,contact.contactPoint.y);
         CGVector normal = contact.contactNormal;
-        if ( [entityB.node.name isEqualToString:@"bouncer-1"] )
+        if ( [entityB.name isEqualToString:@"bouncer-1"] )
         {
             normal.dx = -(normal.dx);
             normal.dy = -(normal.dy);
         }
-        [self _genericKillNode:pedPhysics.node normal:normal];
+        [self _genericKillNode:genericAIPhysics.node normal:normal];
     }
-    else if ( celebPhysics && pedPhysics )
+    else if ( celebPhysics && genericAIPhysics )
     {
         //NSLog(@"ped->celeb spin %0.2f, %0.2f",contact.contactNormal.dx,contact.contactNormal.dy);
         CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
@@ -764,7 +800,7 @@ NSInteger   gMaxMaleScream = -1,
         SKAction *scream = [SKAction playSoundFileNamed:sound waitForCompletion:NO];
         [self runAction:scream];
     }
-    else if ( pedPhysics && groundEffectPhysics )
+    else if ( genericAIPhysics && groundEffectPhysics )
     {
         //NSLog(@"%@ hit ground effect at %0.2f,%0.2f: %@",pedPhysics.node.name,contact.contactPoint.x,contact.contactPoint.y,groundEffectPhysics.node.name);
         //[self _genericKillNode:pedPhysics.node];
@@ -772,19 +808,26 @@ NSInteger   gMaxMaleScream = -1,
         CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
         SKAction *action = [SKAction rotateByAngle:angle duration:1];
         SKAction *fade = [SKAction fadeOutWithDuration:1];
-        [pedPhysics.node removeAllActions];
+        [genericAIPhysics.node removeAllActions];
         SKAction *scream = [SKAction playSoundFileNamed:@"child_scream_01.wav" waitForCompletion:NO];
         SKAction *group = [SKAction group:@[ action, fade ]];
-        [pedPhysics.node runAction:group completion:^{
-            [pedPhysics.node removeFromParent];
+        [genericAIPhysics.node runAction:group completion:^{
+            [genericAIPhysics.node removeFromParent];
         }];
         [self runAction:scream];
         
-        ((Entity *)pedPhysics.node.userData[@"entity"]).isDead = YES;
+        ((EntityNode *)genericAIPhysics.node).isDead = YES;
         [self _handleKill];
         
     }
     //else NSLog(@"some collisions between %@ and %@",contact.bodyA.node.name,contact.bodyB.node.name);
+}
+
+- (void)didEndContact:(SKPhysicsContact *)contact
+{
+    if ( contact.bodyA == contact.bodyB )
+        return; // XXX am i doing it wrong?
+    //NSLog(@"%@ is no longer in contact with %@",contact.bodyA.node.name,contact.bodyB.node.name);
 }
 
 - (void)_genericKillNode:(SKNode *)node normal:(CGVector)normal
@@ -803,7 +846,7 @@ NSInteger   gMaxMaleScream = -1,
         }];
     }];
     
-    ((Entity *)node.userData[@"entity"]).isDead = YES;
+    ((EntityNode *)node).isDead = YES;
     [self _handleKill];
 }
 
@@ -922,13 +965,6 @@ NSInteger   gMaxMaleScream = -1,
     }
 }
 
-- (void)didEndContact:(SKPhysicsContact *)contact
-{
-    if ( contact.bodyA == contact.bodyB )
-        return; // XXX am i doing it wrong?
-    //NSLog(@"%@ is no longer in contact with %@",contact.bodyA.node.name,contact.bodyB.node.name);
-}
-
 @end
 
 @implementation GameScene (RefactorMe)
@@ -936,19 +972,23 @@ NSInteger   gMaxMaleScream = -1,
 - (void)_runEarthquakeAtPoint:(CGPoint)point
 {
     self.bouncer.isMidAction = YES;
-    if ( self.bouncer.node.xScale < 0 )
-        self.bouncer.node.xScale = -(self.bouncer.node.xScale);
+    self.bouncer.currentActionIsInterruptible = NO;
     
-    CGPoint airPoint = CGPointMake(point.x, ( point.y > self.bouncer.node.position.y ? point.y : self.bouncer.node.position.y ) + JUMP_HEIGHT);
-    SKAction *flyAction = [SKAction moveTo:airPoint duration:STANDARD_MOVE_DURATION / 3];
-    SKAction *spinAction = [SKAction rotateByAngle:2*M_PI duration:STANDARD_MOVE_DURATION / 3];
+    if ( self.bouncer.xScale < 0 )
+        self.bouncer.xScale = -(self.bouncer.xScale);
+    
+    CGPoint airPoint = CGPointMake(point.x, ( point.y > self.bouncer.position.y ? point.y : self.bouncer.position.y ) + JUMP_HEIGHT);
+    SKAction *flyAction = [SKAction moveTo:airPoint duration:STANDARD_MOVE_DURATION / 1];
+    BOOL rightToLeft = self.bouncer.position.x > point.x;
+    CGFloat angle = 2 * M_PI * ( rightToLeft ? 1.0 : -1.0 );
+    SKAction *spinAction = [SKAction rotateByAngle:angle duration:STANDARD_MOVE_DURATION / 1];
     SKAction *flyAndSpin = [SKAction group:@[ flyAction, spinAction ]];
     self.bouncer.isAirborne = YES;
-    SKTexture *defaultTexture = self.bouncer.node.texture;
-    self.bouncer.node.texture = [SKTexture textureWithImageNamed:@"bouncer-jump-1"];
-    [self.bouncer.node runAction:flyAndSpin completion:^{
-        SKPhysicsBody *origPhysics = self.bouncer.node.physicsBody;
-        self.bouncer.node.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:EARTHQUAKE_RADIUS];
+    SKTexture *defaultTexture = self.bouncer.texture;
+    self.bouncer.texture = [SKTexture textureWithImageNamed:@"bouncer-jump-1"];
+    [self.bouncer runAction:flyAndSpin completion:^{
+        SKPhysicsBody *origPhysics = self.bouncer.physicsBody;
+        self.bouncer.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:EARTHQUAKE_RADIUS];
         NSTimeInterval landTime = STANDARD_MOVE_DURATION / 3;
         SKAction *landAction = [SKAction moveTo:point duration:landTime];
         //NSTimeInterval activateTime = landTime / 2;
@@ -976,9 +1016,9 @@ NSInteger   gMaxMaleScream = -1,
         });
         //NSLog(@"landing");
         [self _playSoundNamed:[self _randomGrunt:YES]];
-        self.bouncer.node.texture = [SKTexture textureWithImageNamed:@"bouncer-jump-2"];
-        [self.bouncer.node runAction:landAction completion:^{
-            self.bouncer.node.texture = defaultTexture;
+        self.bouncer.texture = [SKTexture textureWithImageNamed:@"bouncer-jump-2"];
+        [self.bouncer runAction:landAction completion:^{
+            self.bouncer.texture = defaultTexture;
             //                [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
             //                    if ( ! [childNode.name hasPrefix:@"bouncer-"]
             //                            && [self.bouncer.node intersectsNode:childNode] )
@@ -986,7 +1026,7 @@ NSInteger   gMaxMaleScream = -1,
             //                }];
             //NSLog(@"eagle has landed");
             CGPoint landingEndLoc = earthquake.position;
-            self.bouncer.node.physicsBody = origPhysics;
+            self.bouncer.physicsBody = origPhysics;
             [self _playSoundNamed:[self _randomBoom]];
             
             NSUInteger remainingFrames = 6;
@@ -1014,9 +1054,9 @@ NSInteger   gMaxMaleScream = -1,
             collisionNode.name = @"ground-effect-earthquake";
             collisionNode.physicsBody.dynamic = YES;
             collisionNode.physicsBody.affectedByGravity = NO;
-            collisionNode.physicsBody.collisionBitMask = self.bouncer.node.physicsBody.collisionBitMask;//0;
-            collisionNode.physicsBody.contactTestBitMask = self.bouncer.node.physicsBody.contactTestBitMask;//ColliderAI | ColliderCeleb | ColliderBouncer;
-            collisionNode.physicsBody.categoryBitMask = self.bouncer.node.physicsBody.categoryBitMask;//ColliderGroundEffect;
+            collisionNode.physicsBody.collisionBitMask = self.bouncer.physicsBody.collisionBitMask;//0;
+            collisionNode.physicsBody.contactTestBitMask = self.bouncer.physicsBody.contactTestBitMask;//ColliderAI | ColliderCeleb | ColliderBouncer;
+            collisionNode.physicsBody.categoryBitMask = self.bouncer.physicsBody.categoryBitMask;//ColliderGroundEffect;
             collisionNode.position = landingEndLoc;
             collisionNode.zPosition = EFFECT_Z;
             collisionNode.xScale = EARTHQUAKE_GROUND_EFFECT_RADIUS / collisionNode.texture.size.width;
@@ -1033,6 +1073,15 @@ NSInteger   gMaxMaleScream = -1,
             }];
             
             self.bouncer.isMidAction = NO;
+            
+            [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *obj, NSUInteger idx, BOOL *stop) {
+                if ( [obj isKindOfClass:[EntityNode class]] )
+                {
+                    EntityNode *entity = (EntityNode *)obj;
+                    if ( ! entity.isFriendly && ! entity.isDead ) // XXX race with collision?
+                        entity.isFrightened = YES;
+                }
+            }];
             
             //SKPhysicsJoint *fixToGround = [SKPhysicsJointFixed jointWithBodyA:<#(SKPhysicsBody *)#> bodyB:<#(SKPhysicsBody *)#> anchor:<#(CGPoint)#>];
             

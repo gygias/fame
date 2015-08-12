@@ -8,9 +8,13 @@
 
 #import <SpriteKit/SpriteKit.h>
 
+#import "Fame.h"
+
 @class Bouncer, Celeb;
 
 @interface GameScene : SKScene <SKPhysicsContactDelegate>
+
+@property GameScreenMap *gameScreenMap;
 
 @property SKNode *parentNode;
 @property SKNode *streetNode;

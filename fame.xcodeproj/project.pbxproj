@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		635F10F31B7AFBE700653715 /* GameScreenMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 635F10F21B7AFBE700653715 /* GameScreenMap.m */; };
 		637D561B1B7456200013B155 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D561A1B7456200013B155 /* main.m */; };
 		637D561E1B7456200013B155 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D561D1B7456200013B155 /* AppDelegate.m */; };
 		637D56211B7456200013B155 /* GameScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D56201B7456200013B155 /* GameScene.m */; };
@@ -16,11 +17,13 @@
 		637D562B1B7456200013B155 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 637D562A1B7456200013B155 /* Images.xcassets */; };
 		637D562E1B7456200013B155 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 637D562C1B7456200013B155 /* LaunchScreen.xib */; };
 		637D563A1B7456200013B155 /* fameTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D56391B7456200013B155 /* fameTests.m */; };
-		637D56491B747A410013B155 /* Entity.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D56481B747A410013B155 /* Entity.m */; };
-		637D564C1B747A5A0013B155 /* Actor.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D564B1B747A5A0013B155 /* Actor.m */; };
 		637D564F1B747A640013B155 /* Celeb.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D564E1B747A640013B155 /* Celeb.m */; };
 		637D56521B747B000013B155 /* Bouncer.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D56511B747B000013B155 /* Bouncer.m */; };
 		637D56561B7481BC0013B155 /* Pedestrian.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D56551B7481BC0013B155 /* Pedestrian.m */; };
+		6383CBF21B7BDBA8002073A2 /* Skater.m in Sources */ = {isa = PBXBuildFile; fileRef = 6383CBF11B7BDBA8002073A2 /* Skater.m */; };
+		6383CBF51B7BE569002073A2 /* Utility.m in Sources */ = {isa = PBXBuildFile; fileRef = 6383CBF41B7BE569002073A2 /* Utility.m */; };
+		6383CBF81B7BE6E9002073A2 /* EntityNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 6383CBF71B7BE6E9002073A2 /* EntityNode.m */; };
+		6383CBFB1B7BFBB9002073A2 /* Taxi.m in Sources */ = {isa = PBXBuildFile; fileRef = 6383CBFA1B7BFBB9002073A2 /* Taxi.m */; };
 		639945271B753F0300A62D1B /* child_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451D1B753F0300A62D1B /* child_scream_01.wav */; };
 		639945281B753F0300A62D1B /* female_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451E1B753F0300A62D1B /* female_scream_01.wav */; };
 		639945291B753F0300A62D1B /* female_scream_02.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451F1B753F0300A62D1B /* female_scream_02.wav */; };
@@ -69,6 +72,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		635F10F11B7AFBE700653715 /* GameScreenMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameScreenMap.h; sourceTree = "<group>"; };
+		635F10F21B7AFBE700653715 /* GameScreenMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameScreenMap.m; sourceTree = "<group>"; };
 		637D56151B7456200013B155 /* fame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		637D56191B7456200013B155 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		637D561A1B7456200013B155 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -85,10 +90,6 @@
 		637D56331B7456200013B155 /* fameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = fameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		637D56381B7456200013B155 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		637D56391B7456200013B155 /* fameTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = fameTests.m; sourceTree = "<group>"; };
-		637D56471B747A410013B155 /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
-		637D56481B747A410013B155 /* Entity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Entity.m; sourceTree = "<group>"; };
-		637D564A1B747A5A0013B155 /* Actor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Actor.h; sourceTree = "<group>"; };
-		637D564B1B747A5A0013B155 /* Actor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Actor.m; sourceTree = "<group>"; };
 		637D564D1B747A640013B155 /* Celeb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Celeb.h; sourceTree = "<group>"; };
 		637D564E1B747A640013B155 /* Celeb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Celeb.m; sourceTree = "<group>"; };
 		637D56501B747B000013B155 /* Bouncer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bouncer.h; sourceTree = "<group>"; };
@@ -96,6 +97,14 @@
 		637D56531B747BEF0013B155 /* Fame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Fame.h; sourceTree = "<group>"; };
 		637D56541B7481BC0013B155 /* Pedestrian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Pedestrian.h; sourceTree = "<group>"; };
 		637D56551B7481BC0013B155 /* Pedestrian.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Pedestrian.m; sourceTree = "<group>"; };
+		6383CBF01B7BDBA8002073A2 /* Skater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skater.h; sourceTree = "<group>"; };
+		6383CBF11B7BDBA8002073A2 /* Skater.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Skater.m; sourceTree = "<group>"; };
+		6383CBF31B7BE569002073A2 /* Utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utility.h; sourceTree = "<group>"; };
+		6383CBF41B7BE569002073A2 /* Utility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utility.m; sourceTree = "<group>"; };
+		6383CBF61B7BE6E9002073A2 /* EntityNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntityNode.h; sourceTree = "<group>"; };
+		6383CBF71B7BE6E9002073A2 /* EntityNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EntityNode.m; sourceTree = "<group>"; };
+		6383CBF91B7BFBB9002073A2 /* Taxi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Taxi.h; sourceTree = "<group>"; };
+		6383CBFA1B7BFBB9002073A2 /* Taxi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Taxi.m; sourceTree = "<group>"; };
 		6399451D1B753F0300A62D1B /* child_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = child_scream_01.wav; path = Sound/child_scream_01.wav; sourceTree = "<group>"; };
 		6399451E1B753F0300A62D1B /* female_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_01.wav; path = Sound/female_scream_01.wav; sourceTree = "<group>"; };
 		6399451F1B753F0300A62D1B /* female_scream_02.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_02.wav; path = Sound/female_scream_02.wav; sourceTree = "<group>"; };
@@ -174,10 +183,6 @@
 				637D562A1B7456200013B155 /* Images.xcassets */,
 				637D562C1B7456200013B155 /* LaunchScreen.xib */,
 				637D56181B7456200013B155 /* Supporting Files */,
-				637D56471B747A410013B155 /* Entity.h */,
-				637D56481B747A410013B155 /* Entity.m */,
-				637D564A1B747A5A0013B155 /* Actor.h */,
-				637D564B1B747A5A0013B155 /* Actor.m */,
 				637D564D1B747A640013B155 /* Celeb.h */,
 				637D564E1B747A640013B155 /* Celeb.m */,
 				637D56501B747B000013B155 /* Bouncer.h */,
@@ -189,6 +194,16 @@
 				639945381B75861D00A62D1B /* GroundEffect.m */,
 				6399453A1B75863300A62D1B /* Earthquake.h */,
 				6399453B1B75863300A62D1B /* Earthquake.m */,
+				635F10F11B7AFBE700653715 /* GameScreenMap.h */,
+				635F10F21B7AFBE700653715 /* GameScreenMap.m */,
+				6383CBF01B7BDBA8002073A2 /* Skater.h */,
+				6383CBF11B7BDBA8002073A2 /* Skater.m */,
+				6383CBF31B7BE569002073A2 /* Utility.h */,
+				6383CBF41B7BE569002073A2 /* Utility.m */,
+				6383CBF61B7BE6E9002073A2 /* EntityNode.h */,
+				6383CBF71B7BE6E9002073A2 /* EntityNode.m */,
+				6383CBF91B7BFBB9002073A2 /* Taxi.h */,
+				6383CBFA1B7BFBB9002073A2 /* Taxi.m */,
 			);
 			path = fame;
 			sourceTree = "<group>";
@@ -385,16 +400,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				637D56491B747A410013B155 /* Entity.m in Sources */,
 				637D564F1B747A640013B155 /* Celeb.m in Sources */,
 				637D56521B747B000013B155 /* Bouncer.m in Sources */,
 				637D56261B7456200013B155 /* GameViewController.m in Sources */,
+				6383CBF51B7BE569002073A2 /* Utility.m in Sources */,
 				637D561E1B7456200013B155 /* AppDelegate.m in Sources */,
 				639945391B75861D00A62D1B /* GroundEffect.m in Sources */,
+				6383CBF81B7BE6E9002073A2 /* EntityNode.m in Sources */,
 				637D56561B7481BC0013B155 /* Pedestrian.m in Sources */,
-				637D564C1B747A5A0013B155 /* Actor.m in Sources */,
 				637D56211B7456200013B155 /* GameScene.m in Sources */,
+				6383CBFB1B7BFBB9002073A2 /* Taxi.m in Sources */,
+				6383CBF21B7BDBA8002073A2 /* Skater.m in Sources */,
 				6399453C1B75863300A62D1B /* Earthquake.m in Sources */,
+				635F10F31B7AFBE700653715 /* GameScreenMap.m in Sources */,
 				637D561B1B7456200013B155 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -10,36 +10,57 @@
 
 #import "Fame.h"
 
+extern CGFloat gControlPanelHeight;
+
 @implementation Pedestrian
 
 - (id)init
 {
-    if ( self = [super _initWithTextureName:@"pedestrian-1" scale:1.0] )
+    if ( ( self = [self initWithImageNamed:@"pedestrian-1"] ) )
     {
     }
-    
     return self;
 }
 
-- (void)introduceWithFrame:(CGRect)frame
+- (void)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
 {
-    CGFloat textureWidth = self.node.texture.size.width;
-    CGFloat textureHeight = self.node.texture.size.height;
+    CGFloat textureWidth = self.texture.size.width;
+    CGFloat textureHeight = self.texture.size.height;
     CGFloat stageRight = frame.origin.x + frame.size.width + textureWidth;
     CGFloat stageLeft = frame.origin.x - textureWidth;
-    BOOL rightToLeft = ( arc4random() % 2 ) == 0;
+    
+    self.rightToLeft = ( arc4random() % 2 ) == 0;
+    
+    if ( self.rightToLeft )
+        self.xScale = ( self.xScale * -1.0 );
+    
     BOOL upperOrLower = ( arc4random() % 2 ) == 0;
     double div = (double)(arc4random() % 100 + 1) / 100.0;
     CGFloat randomY = frame.origin.y +
-                            ( upperOrLower ? ( TOP_SIDEWALK_LOWER + div * TOP_SIDEWALK_HEIGHT + textureHeight / 2 ) :
-                                                ( BOTTOM_SIDEWALK_LOWER + div * BOTTOM_SIDEWALK_HEIGHT + textureHeight / 2 ) );
-    self.node.position = CGPointMake( rightToLeft ? stageRight : stageLeft,
+                            ( upperOrLower ? ( screenMap.topSidewalkLower + div * screenMap.topSidewalkHeight + textureHeight / 2 ) :
+                                                ( screenMap.bottomSidewalkLower + div * screenMap.bottomSidewalkHeight + textureHeight / 2 ) );
+    //NSLog(@"ped @ %0.2f ( %0.2f :: %0.2f-%0.2f & %0.2f - %0.2f )",randomY, gControlPanelHeight, BOTTOM_SIDEWALK_LOWER, BOTTOM_SIDEWALK_UPPER, TOP_SIDEWALK_LOWER, TOP_SIDEWALK_UPPER);
+    self.position = CGPointMake( self.rightToLeft ? stageRight : stageLeft,
                                         randomY );
     double speedScalar = (double)(arc4random() % 10);
     
-    SKAction *movement = [SKAction moveToX:rightToLeft ? stageLeft : stageRight duration:speedScalar];
-    [self.node runAction:movement completion:^{
-        [self.node removeFromParent];
+    SKAction *movement = [SKAction moveToX:self.rightToLeft ? stageLeft : stageRight duration:speedScalar];
+    
+    CGFloat stepTime = speedScalar / 15;
+    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
+    dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, stepTime * NSEC_PER_SEC, stepTime * NSEC_PER_SEC);
+    dispatch_source_set_event_handler(timer, ^{
+        //SKAction *flipAction = [SKAction scaleXTo:-(sprite.xScale) duration:0];
+        self.xScale = -(self.xScale);
+        //[sprite runAction:flipAction];
+    });
+    dispatch_resume(timer);
+    
+    self.userData[@"stepTimer"] = timer;
+    
+    [self runAction:movement completion:^{
+        [self removeFromParent];
+        [self.userData removeObjectForKey:@"stepTimer"];
     }];
 }
 

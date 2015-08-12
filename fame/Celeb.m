@@ -14,8 +14,10 @@
 
 - (id)init
 {
-    if ( self = [super _initWithTextureName:@"celeb-2" scale:2.0] )
+    if ( self = [super initWithImageNamed:@"celeb-2"] )
     {
+        [self setScale:2.0];
+        self.isFriendly = YES;
     }
     
     return self;

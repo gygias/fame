@@ -14,8 +14,10 @@
 
 - (id)init
 {
-    if ( self = [super _initWithTextureName:@"bouncer-1" scale:2.0] )
+    if ( self = [super initWithImageNamed:@"bouncer-1"] )
     {
+        [self setScale:2.0];
+        self.isFriendly = YES;
     }
     
     return self;

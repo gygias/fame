@@ -6,8 +6,8 @@
 //  Copyright (c) 2015 Combobulated Software. All rights reserved.
 //
 
-#import "Actor.h"
+#import "EntityNode.h"
 
-@interface Celeb : Actor
+@interface Celeb : EntityNode
 
 @end

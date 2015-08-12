@@ -6,9 +6,9 @@
 //  Copyright (c) 2015 Combobulated Software. All rights reserved.
 //
 
-#import "Entity.h"
+#import "EntityNode.h"
 
-@interface GroundEffect : Entity
+@interface GroundEffect : EntityNode
 
 @property BOOL debugMask;
 
