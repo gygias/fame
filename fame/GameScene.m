@@ -177,7 +177,7 @@ static CGFloat gLastYOffset = 0; // XXX
     buttonBackgroundTexture.filteringMode = SKTextureFilteringNearest;
     
     CGFloat xOffset = 0;
-    NSArray *buttonNames = @[ @"move-button-1", @"earthquake-button-1" ];
+    NSArray *buttonNames = @[ @"move-button-1", @"earthquake-button-1", @"move-button-1" ];
     
     int idx = 1;
     for ( ; idx <= buttonNames.count ; idx++ )
@@ -301,6 +301,8 @@ static CGFloat gLastYOffset = 0; // XXX
         CGPoint startPoint = [self convertPointFromView:recognizer.currentStartPoint];
         if ( ! CGRectContainsPoint(ScaledRect(self.bouncer.frame,2.0),startPoint ) )
             return;
+        
+        [_panRecognizer reset];
         
         CGPoint velocity = [recognizer velocityInView:self.view];
         CGFloat sumVelocity = ( velocity.x > 0) ? velocity.x : -(velocity.x);
@@ -464,6 +466,7 @@ static CGFloat gLastYOffset = 0; // XXX
         SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION / 5];
         [self.bouncer runAction:moveAction];
         soundName = [self _randomScream:YES];
+        self.bouncer.lastCharge = [NSDate date];
     }
     else if ( [action isEqualToString:@"triple-action-1"] )
     {
@@ -491,28 +494,25 @@ static CGFloat gLastYOffset = 0; // XXX
             cooldownDuration = MOVE_CD;
         else if ( idx == 2 )
             cooldownDuration = EARTHQUAKE_CD;
+        else if ( idx == 3 )
+            cooldownDuration = CHARGE_CD;
         
         SKAction *customAction = [SKAction customActionWithDuration:cooldownDuration actionBlock:^(SKNode *node, CGFloat elapsedTime) {
             double percentage;
             
             NSDate *lastActionDate;
-            NSTimeInterval thisActionCD;
             if ( idx == 1 )
-            {
                 lastActionDate = self.bouncer.lastMove;
-                thisActionCD = MOVE_CD;
-            }
             else if ( idx == 2 )
-            {
                 lastActionDate = self.bouncer.lastEarthquake;
-                thisActionCD = EARTHQUAKE_CD;
-            }
+            else if ( idx == 3 )
+                lastActionDate = self.bouncer.lastCharge;
             else
                 return;
             
             if ( lastActionDate )
             {
-                double subPerc = ( [[NSDate date] timeIntervalSinceDate:lastActionDate] / thisActionCD );
+                double subPerc = ( [[NSDate date] timeIntervalSinceDate:lastActionDate] / cooldownDuration );
                 if ( subPerc > 1 )
                     subPerc = 1;
                 percentage = subPerc;

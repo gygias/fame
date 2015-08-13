@@ -46,6 +46,8 @@
 #define EARTHQUAKE_GROUND_EFFECT_RADIUS 100.0
 #define EARTHQUAKE_CD 5.0
 
+#define CHARGE_CD 3.0
+
 typedef enum : uint8_t {
     ColliderEntity                  = 1,
     ColliderBouncer                 = 2,

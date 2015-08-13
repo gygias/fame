@@ -15,4 +15,6 @@
 
 @property (readonly) CGPoint currentStartPoint;
 
+- (void)reset;
+
 @end

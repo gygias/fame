@@ -27,4 +27,9 @@
     return _currentStartPoint;
 }
 
+- (void)reset
+{
+    _currentStartPoint = CGPointMake(NAN,NAN);
+}
+
 @end
