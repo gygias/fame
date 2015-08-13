@@ -221,14 +221,15 @@ static CGFloat gLastYOffset = 0; // XXX
     meter1Border.texture.filteringMode = SKTextureFilteringNearest;
     meter1Border.name = @"meter-1-border";
     meter1Border.zPosition = CONTROL_PANEL_BACKGROUND_Z;
-    meter1Border.xScale = 10.0; // XXX
+    meter1Border.xScale = METER_X_SCALE; // XXX
+    meter1Border.yScale = METER_Y_SCALE;
     meter1Border.position = CGPointMake(fuckingBottomLeft.x + xOffset + meter1Border.size.width, fuckingBottomLeft.y + 1);
     //meter1Border.yScale = ( backgroundSprite.size.height ) / ( ( meter1Border.texture.size.height - 1 ) / 2 );
     [node addChild:meter1Border];
     
     SKLabelNode *backLabelNode = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
     backLabelNode.name = @"meter-1-back-label";
-    backLabelNode.position = CGPointMake( fuckingBottomLeft.x + xOffset + meter1Border.size.width + 5, fuckingBottomLeft.y - 1 );
+    backLabelNode.position = CGPointMake( fuckingBottomLeft.x + xOffset + meter1Border.size.width + MAGICAL_MYSTERY_METER_LABEL_X_OFFSET, fuckingBottomLeft.y - 1 );
     backLabelNode.zPosition = CONTROL_PANEL_CONTENT_Z;
     backLabelNode.fontSize = METER_LABEL_FONT_SIZE;
     backLabelNode.fontColor = [UIColor whiteColor];
@@ -239,8 +240,9 @@ static CGFloat gLastYOffset = 0; // XXX
     SKSpriteNode *fillerNode = [SKSpriteNode spriteNodeWithImageNamed:@"meter-filler-1"];
     fillerNode.texture.filteringMode = SKTextureFilteringNearest;
     fillerNode.name = @"meter-1-filler";
-    fillerNode.xScale = 1.0;
-    fillerNode.position = CGPointMake( fuckingBottomLeft.x + xOffset + MAGICAL_MYSTERY_FILLER_OFFSET, fuckingBottomLeft.y + 1 );
+    fillerNode.xScale = METER_FILLER_MIN_SCALE;
+    fillerNode.yScale = METER_FILLER_Y_SCALE;
+    fillerNode.position = CGPointMake( fuckingBottomLeft.x + xOffset + meter1Border.size.width / 2 + MAGICAL_MYSTERY_FILLER_INSET + 1.5, fuckingBottomLeft.y + 1.5 );
     fillerNode.zPosition = CONTROL_PANEL_CD_Z;
     self.meter1FillerNode = fillerNode;
     [node addChild:fillerNode];
@@ -268,11 +270,11 @@ static CGFloat gLastYOffset = 0; // XXX
         netAnger = 0;
     
     NSInteger realAngerDelta = netAnger - origAnger;
-    NSLog(@"ad %ld orig %ld net %ld real %ld",angerDelta,origAnger,netAnger,realAngerDelta);
+    //NSLog(@"ad %ld orig %ld net %ld real %ld",angerDelta,origAnger,netAnger,realAngerDelta);
     
     self.bouncer.anger = netAnger;
     
-    NSLog(@"anger %ld + d%ld -> %lu",(long)origAnger,(long)angerDelta,(unsigned long)self.bouncer.anger);
+    //NSLog(@"anger %ld + d%ld -> %lu",(long)origAnger,(long)angerDelta,(unsigned long)self.bouncer.anger);
     
     __block int frame = 0;
     NSTimeInterval duration = 0.5;//, frameInterval = 10 / duration, nFrames = duration / frameInterval;
@@ -284,6 +286,9 @@ static CGFloat gLastYOffset = 0; // XXX
         {
             SKSpriteNode *fillerNode = (SKSpriteNode *)node;
             CGFloat xDelta = perc * (float)realAngerDelta;
+            CGFloat drawnDelta = origXScale + xDelta;
+            if ( drawnDelta < METER_FILLER_MIN_SCALE )
+                drawnDelta = METER_FILLER_MIN_SCALE;
             fillerNode.xScale = origXScale + xDelta;
             fillerNode.position = CGPointMake( origX + xDelta / 2, fillerNode.position.y );
             frame++;

@@ -58,15 +58,20 @@
 #define INFO_PANEL_CONTENT_Y_OFFSET 10.0
 #define INFO_PANEL_STANDARD_FONT_SIZE 20.0
 
-#define METER_LABEL_FONT_SIZE 8.0
-
 #define MAX_ANGER 100
 #define MOVE_ANGER 5
 #define EARTHQUAKE_ANGER (-50)
 #define CHARGE_ANGER 15
 
+#define METER_X_SCALE 15.0
+#define METER_FILLER_MIN_SCALE 1.0
+#define METER_Y_SCALE 1.5
+#define METER_FILLER_Y_SCALE 1.75
+#define METER_LABEL_FONT_SIZE (8.0 * METER_Y_SCALE)
+
 // XXX MYSTERY NUMBERS
-#define MAGICAL_MYSTERY_FILLER_OFFSET 51.5
+#define MAGICAL_MYSTERY_FILLER_INSET 17.0
+#define MAGICAL_MYSTERY_METER_LABEL_X_OFFSET 3.5
 typedef enum : uint8_t {
     ColliderEntity                  = 1,
     ColliderBouncer                 = 2,
