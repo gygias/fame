@@ -31,3 +31,9 @@
 - (NSString *)deathSoundName;
 
 @end
+
+@interface SKNode (CombobulatedExtensions)
+
+- (void)removeChildrenNamed:(NSString *)childName;
+
+@end

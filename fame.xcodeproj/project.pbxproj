@@ -24,6 +24,7 @@
 		6383CBF51B7BE569002073A2 /* Utility.m in Sources */ = {isa = PBXBuildFile; fileRef = 6383CBF41B7BE569002073A2 /* Utility.m */; };
 		6383CBF81B7BE6E9002073A2 /* EntityNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 6383CBF71B7BE6E9002073A2 /* EntityNode.m */; };
 		6383CBFB1B7BFBB9002073A2 /* Taxi.m in Sources */ = {isa = PBXBuildFile; fileRef = 6383CBFA1B7BFBB9002073A2 /* Taxi.m */; };
+		6383CBFD1B7C0DA3002073A2 /* whistle-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6383CBFC1B7C0DA3002073A2 /* whistle-1.wav */; };
 		639945271B753F0300A62D1B /* child_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451D1B753F0300A62D1B /* child_scream_01.wav */; };
 		639945281B753F0300A62D1B /* female_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451E1B753F0300A62D1B /* female_scream_01.wav */; };
 		639945291B753F0300A62D1B /* female_scream_02.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451F1B753F0300A62D1B /* female_scream_02.wav */; };
@@ -105,6 +106,7 @@
 		6383CBF71B7BE6E9002073A2 /* EntityNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EntityNode.m; sourceTree = "<group>"; };
 		6383CBF91B7BFBB9002073A2 /* Taxi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Taxi.h; sourceTree = "<group>"; };
 		6383CBFA1B7BFBB9002073A2 /* Taxi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Taxi.m; sourceTree = "<group>"; };
+		6383CBFC1B7C0DA3002073A2 /* whistle-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "whistle-1.wav"; path = "Sound/whistle-1.wav"; sourceTree = "<group>"; };
 		6399451D1B753F0300A62D1B /* child_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = child_scream_01.wav; path = Sound/child_scream_01.wav; sourceTree = "<group>"; };
 		6399451E1B753F0300A62D1B /* female_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_01.wav; path = Sound/female_scream_01.wav; sourceTree = "<group>"; };
 		6399451F1B753F0300A62D1B /* female_scream_02.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_02.wav; path = Sound/female_scream_02.wav; sourceTree = "<group>"; };
@@ -237,6 +239,7 @@
 		6399451C1B753EEE00A62D1B /* Sound */ = {
 			isa = PBXGroup;
 			children = (
+				6383CBFC1B7C0DA3002073A2 /* whistle-1.wav */,
 				639945501B75F9CF00A62D1B /* slot-machine-cash-out-2.wav */,
 				639945421B75F94A00A62D1B /* cash-register-ding.wav */,
 				639945431B75F94A00A62D1B /* slot-machine-cash-out.wav */,
@@ -351,6 +354,7 @@
 				639945491B75F94A00A62D1B /* cash-register-ding.wav in Resources */,
 				639945281B753F0300A62D1B /* female_scream_01.wav in Resources */,
 				6399454D1B75F94A00A62D1B /* slot-machine-spin-3.wav in Resources */,
+				6383CBFD1B7C0DA3002073A2 /* whistle-1.wav in Resources */,
 				639945511B75F9CF00A62D1B /* slot-machine-cash-out-2.wav in Resources */,
 				637D562E1B7456200013B155 /* LaunchScreen.xib in Resources */,
 				6399452B1B753F0300A62D1B /* male_grunt_02.wav in Resources */,

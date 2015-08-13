@@ -10,4 +10,7 @@
 
 @interface Bouncer : EntityNode
 
+@property NSDate *lastEarthquake;
+@property NSDate *lastMove;
+
 @end

@@ -40,9 +40,11 @@
 #define FLYAWAY_X 500
 #define FLYAWAY_POINT ( CGPointMake( FLYAWAY_X, FLYAWAY_Y ) )
 
+#define MOVE_CD 1.0
 #define JUMP_HEIGHT 150.0
 #define EARTHQUAKE_RADIUS 150.0
 #define EARTHQUAKE_GROUND_EFFECT_RADIUS 100.0
+#define EARTHQUAKE_CD 5.0
 
 typedef enum : uint8_t {
     ColliderEntity                  = 1,

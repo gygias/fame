@@ -84,3 +84,21 @@
 }
 
 @end
+
+@implementation SKNode (CombobulatedExtensions)
+
+- (void)removeChildrenNamed:(NSString *)childName
+{
+    __block NSMutableArray *matchingChildren = [NSMutableArray new];
+    [self.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
+        if ( [childNode.name isEqualToString:childName] )
+        {
+            [matchingChildren addObject:childNode];
+        }
+    }];
+    
+    [self removeChildrenInArray:matchingChildren];
+}
+
+@end
+

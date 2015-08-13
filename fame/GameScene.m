@@ -183,6 +183,7 @@ static CGFloat gLastYOffset = 0; // XXX
         NSString *buttonName = buttonNames[idx - 1];
         
         SKSpriteNode *buttonBackgroundSprite = [SKSpriteNode spriteNodeWithTexture:buttonBackgroundTexture];
+        buttonBackgroundSprite.name = @"background";
         buttonBackgroundSprite.zPosition = CONTROL_PANEL_BACKGROUND_Z;
         buttonBackgroundSprite.position = CGPointMake(fuckingBottomLeft.x + xOffset, fuckingBottomLeft.y + 1);
         buttonBackgroundSprite.scale = 0.45 * scale;
@@ -192,21 +193,23 @@ static CGFloat gLastYOffset = 0; // XXX
         SKTexture *buttonContentTexture = [SKTexture textureWithImageNamed:buttonName];
         buttonContentTexture.filteringMode = SKTextureFilteringNearest;
         SKSpriteNode *buttonContentNode = [SKSpriteNode spriteNodeWithTexture:buttonContentTexture];
+        buttonContentNode.name = @"content";
         buttonContentNode.zPosition = CONTROL_PANEL_CONTENT_Z;
-        buttonContentNode.position = CGPointMake(fuckingBottomLeft.x + xOffset, fuckingBottomLeft.y + 1);
-        buttonContentNode.scale = 0.45 * scale;
-        [node addChild:buttonContentNode];
+        buttonContentNode.position = CGPointMake(0,0);//CGPointMake(fuckingBottomLeft.x + xOffset, fuckingBottomLeft.y + 1);
+        //buttonContentNode.scale = 0.45 * scale;
+        [buttonBackgroundSprite addChild:buttonContentNode];
         
         SKSpriteNode *buttonFrameSprite = [SKSpriteNode spriteNodeWithTexture:frameTexture];
+        buttonFrameSprite.name = @"frame";
         buttonFrameSprite.zPosition = CONTROL_PANEL_FRAME_Z;
-        buttonFrameSprite.position = CGPointMake(fuckingBottomLeft.x + xOffset - magicalMysteryNumber/2, fuckingBottomLeft.y + 1);
-        buttonFrameSprite.scale = 0.45 * scale;
+        buttonFrameSprite.position = CGPointMake(0,0);//CGPointMake(fuckingBottomLeft.x + xOffset - magicalMysteryNumber/2, fuckingBottomLeft.y + 1);
+        //buttonFrameSprite.scale = 0.45 * scale;
         buttonFrameSprite.userData = [NSMutableDictionary dictionary];
-        [node addChild:buttonFrameSprite];
+        [buttonBackgroundSprite addChild:buttonFrameSprite];
         
-        xOffset += buttonFrameSprite.size.width * 1.05 * scale;
+        xOffset += buttonBackgroundSprite.size.width + 1;//buttonFrameSprite.size.width * 1.05 * scale;
         
-        [self setValue:buttonFrameSprite forKey:[NSString stringWithFormat:@"button%d",idx]];
+        [self setValue:buttonBackgroundSprite forKey:[NSString stringWithFormat:@"button%d",idx]];
         
         //[buttonFrameSprite runAction:rotateForever];
         //[buttonContentNode runAction:rotateForever];
@@ -373,6 +376,36 @@ static CGFloat gLastYOffset = 0; // XXX
 //    }
 //}
 
+- (void)_flashButton:(int)idx
+{
+    SKSpriteNode *theButton = [self valueForKey:[NSString stringWithFormat:@"button%d",idx]];
+    if ( ! theButton )
+        return;
+    SKSpriteNode *content = [theButton childNodeWithName:@"content"];
+    if ( ! content )
+        return;
+    SKSpriteNode *frame = [theButton childNodeWithName:@"frame"];
+    if ( ! frame )
+        return;
+    
+    UIColor *defaultColor = theButton.color;
+    CGFloat defaultBlendFactor = theButton.colorBlendFactor;
+    NSTimeInterval flashDuration = 0.25;
+    SKAction *flash1 = [SKAction colorizeWithColor:[[UIColor redColor] colorWithAlphaComponent:0.5] colorBlendFactor:0.5 duration:flashDuration];
+    SKAction *flash2 = [SKAction colorizeWithColor:defaultColor colorBlendFactor:defaultBlendFactor duration:flashDuration];
+    SKAction *flash = [SKAction sequence:@[ flash1, flash2 ]];
+    //SKAction *flashTwice = [SKAction repeatAction:flash count:2];
+    
+    NSTimeInterval growDuration = flashDuration;
+    CGFloat defaultX = theButton.xScale, defaultY = theButton.yScale;
+    CGFloat scaleTo = 1.1;
+    SKAction *grow = [SKAction scaleBy:scaleTo duration:growDuration];
+    SKAction *shrink = [SKAction scaleXTo:defaultX y:defaultY duration:growDuration];
+    SKAction *growAndShrink = [SKAction sequence:@[ grow, shrink ]];
+    
+    [theButton runAction:flash];
+    [theButton runAction:growAndShrink];
+}
 
 - (void)_playerAction:(NSString *)action targetPoint:(CGPoint)point
 {
@@ -389,11 +422,25 @@ static CGFloat gLastYOffset = 0; // XXX
     
     if ( [action isEqualToString:@"action-1"] )
     {
+        if ( self.bouncer.lastMove )
+        {
+            [self _flashButton:1];
+            return;
+        }
         [self _walkNode:self.bouncer to:point];
         soundName = [self _randomGrunt:YES];
+        self.bouncer.lastMove = [NSDate date];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MOVE_CD * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            self.bouncer.lastMove = nil;
+        });
     }
     else if ( [action isEqualToString:@"action-2"] )
     {
+        if ( self.bouncer.lastEarthquake )
+        {
+            [self _flashButton:2];
+            return;
+        }
         [self _runEarthquakeAtPoint:point];
     }
 //    if ( [action isEqualToString:@"action-3"] )
@@ -412,6 +459,7 @@ static CGFloat gLastYOffset = 0; // XXX
     else if ( [action isEqualToString:@"triple-action-1"] )
     {
         [self _walkNode:self.celeb to:self.bouncer.position];
+        [self _playSoundNamed:@"whistle-1.wav"];
     }
     
     [self _drawCooldownClock];
@@ -421,6 +469,7 @@ static CGFloat gLastYOffset = 0; // XXX
 
 - (void)_drawCooldownClock
 {
+    NSString *cooldownKey = @"cooldown";
     NSTimeInterval cooldownDuration = 1;
     int idx = 1;
     for ( ; idx <= 4; idx++ )
@@ -428,9 +477,40 @@ static CGFloat gLastYOffset = 0; // XXX
         SKSpriteNode *buttonNode = [self valueForKey:[NSString stringWithFormat:@"button%d",idx]];
         if ( ! buttonNode )
             break;
-        SKAction *customAction = [SKAction customActionWithDuration:cooldownDuration actionBlock:^(SKNode *_node, CGFloat elapsedTime) {
-            SKSpriteNode *node = (SKSpriteNode *)_node;
-            double percentage = elapsedTime / cooldownDuration;
+        
+        if ( idx == 1 )
+            cooldownDuration = MOVE_CD;
+        else if ( idx == 2 )
+            cooldownDuration = EARTHQUAKE_CD;
+        
+        SKAction *customAction = [SKAction customActionWithDuration:cooldownDuration actionBlock:^(SKNode *node, CGFloat elapsedTime) {
+            double percentage;
+            
+            NSDate *lastActionDate;
+            NSTimeInterval thisActionCD;
+            if ( idx == 1 )
+            {
+                lastActionDate = self.bouncer.lastMove;
+                thisActionCD = MOVE_CD;
+            }
+            else if ( idx == 2 )
+            {
+                lastActionDate = self.bouncer.lastEarthquake;
+                thisActionCD = EARTHQUAKE_CD;
+            }
+            else
+                return;
+            
+            if ( lastActionDate )
+            {
+                double subPerc = ( [[NSDate date] timeIntervalSinceDate:lastActionDate] / thisActionCD );
+                if ( subPerc > 1 )
+                    subPerc = 1;
+                percentage = subPerc;
+            }
+            else
+                percentage = 0;
+            
             if ( percentage <= 0 || percentage > 1 )
                 return;
             
@@ -441,14 +521,16 @@ static CGFloat gLastYOffset = 0; // XXX
             double thetaRadians = theta * ( M_PI / 180 );
             CGPoint unitPoint = CGPointMake(cos(thetaRadians), sin(thetaRadians));
             
-            CGPoint midPoint = CGPointMake(node.position.x + ( node.size.width / 2 ), node.position.y + ( node.size.height / 2 ));
-            CGPoint unitPointScaled = CGPointMake(midPoint.x + ( unitPoint.x * ( node.size.width / 2 ) ), midPoint.y - ( unitPoint.y * ( node.size.height / 2 )));
+            CGPoint midPoint = CGPointMake( buttonNode.size.width / 2, buttonNode.size.height / 2 );
+            CGPoint unitPointScaled = CGPointMake(midPoint.x + ( unitPoint.x * ( buttonNode.size.width / 2 ) ), midPoint.y - ( unitPoint.y * ( buttonNode.size.height / 2 )));
             CGFloat slope = ( unitPointScaled.y - midPoint.y ) / ( unitPointScaled.x - midPoint.x );
             CGPoint endPoint = {0};
             
+            //CGSize scaledSize = CGSizeMake(<#CGFloat width#>, <#CGFloat height#>)
+            
             UIBezierPath *path = [UIBezierPath bezierPath];
-            [path moveToPoint:CGPointMake(node.position.x, node.position.y + node.size.width)];
-            [path addLineToPoint:CGPointMake(node.position.x + ( node.size.width / 2 ), node.position.y + node.size.width)];
+            [path moveToPoint:CGPointMake(0, buttonNode.size.height)];
+            [path addLineToPoint:CGPointMake(buttonNode.size.width / 2, buttonNode.size.width)];
             [path addLineToPoint:CGPointMake(midPoint.x, midPoint.y)];
             
             // y = mx + b
@@ -460,63 +542,64 @@ static CGFloat gLastYOffset = 0; // XXX
             CGFloat x = 0, y = 0;
             if ( rotatedByDegrees > 315 || rotatedByDegrees <= 45 ) // solve for x along the top
             {
-                x = ( ( node.position.y + node.size.height ) - b ) / slope;
-                endPoint = CGPointMake(x,node.position.y + node.size.height);
+                x = ( ( buttonNode.size.height ) - b ) / slope;
+                endPoint = CGPointMake( x, buttonNode.size.height );
             }
             else if ( rotatedByDegrees > 45 && rotatedByDegrees <= 135 ) // solve for y along the right
             {
-                y = slope * ( node.position.x + node.size.width ) + b;
-                endPoint = CGPointMake( node.position.x + node.size.width, y );
+                y = slope * ( buttonNode.size.width ) + b;
+                endPoint = CGPointMake( buttonNode.size.width, y );
             }
             else if ( rotatedByDegrees > 135 && rotatedByDegrees <= 225 ) // solve for x along the bottom
             {
-                x = ( ( node.position.y ) - b ) / slope;
-                endPoint = CGPointMake( x, node.position.y );
+                x = ( -b ) / slope;
+                endPoint = CGPointMake( x, 0 );
             }
             else // solve for y along the left
             {
-                y = slope * ( node.position.x ) + b;
-                endPoint = CGPointMake( node.position.x, y );
+                y = slope + b;
+                endPoint = CGPointMake( 0, y );
             }
             
             if ( isnan(endPoint.x) || isnan(endPoint.y) )
             {
-                NSLog(@"cooldown clock nan bug happened");
+                // XXX NSLog(@"cooldown clock nan bug happened");
                 return;
             }
             
             [path addLineToPoint:CGPointMake(endPoint.x, endPoint.y)]; // the mystery point
             if ( rotatedByDegrees <= 45 ) // TOP RIGHT
-                [path addLineToPoint:CGPointMake(node.position.x + node.size.width, node.position.y + node.size.width)];
+                [path addLineToPoint:CGPointMake(buttonNode.size.width, buttonNode.size.height)];
             if ( rotatedByDegrees <= 135 ) // BOTTOM RIGHT
-                [path addLineToPoint:CGPointMake(node.position.x + node.size.width, node.position.y)];
+                [path addLineToPoint:CGPointMake(buttonNode.size.width, 0)];
             if ( rotatedByDegrees <= 225 ) // BOTTOM LEFT
-                [path addLineToPoint:CGPointMake(node.position.x, node.position.y)];
+                [path addLineToPoint:CGPointMake(0, 0)];
             if ( rotatedByDegrees <= 315 ) // TOP LEFT
-                [path addLineToPoint:CGPointMake(node.position.x, node.position.y + node.size.width)];
+                [path addLineToPoint:CGPointMake(0, buttonNode.size.height)];
             
             SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath];
+            shape.name = cooldownKey;
+            shape.scale = 2.0;
             shape.zPosition = CONTROL_PANEL_CD_Z;
-            CGFloat magicalMysteryNumber = 647/2; // XXX
-            shape.position = CGPointMake(magicalMysteryNumber/2 - /*path.bounds.*/self.button1.size.width / 2, shape.position.y - /*path.bounds.*/self.button1.size.height / 2);
+            //CGFloat magicalMysteryNumber = 647/2; // XXX
+            CGRect pathBounds = [path bounds];
+            shape.position = CGPointMake(-buttonNode.size.width,-buttonNode.size.height);//CGPointMake(magicalMysteryNumber/2 - /*path.bounds.*/self.button1.size.width / 2, shape.position.y - /*path.bounds.*/self.button1.size.height / 2);
             //shape.xScale = 1/0.45 * shape.xScale;
             //shape.yScale = -(1/0.45 * shape.xScale);
             //shape.position = CGPointMake(shape.position.x-450, shape.position.y + 20);
             shape.fillColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.5];
             shape.strokeColor = [UIColor clearColor];
             
-            SKNode *lastCC = buttonNode.userData[@"cooldownClock"];
+            SKNode *lastCC = [buttonNode childNodeWithName:cooldownKey];
             if ( lastCC )
-                [self.parentNode removeChildrenInArray:@[lastCC]];
+                [buttonNode removeChildrenInArray:@[lastCC]];
             
-            [self.parentNode addChild:shape];
-            buttonNode.userData[@"cooldownClock"] = shape;
+            [buttonNode addChild:shape];
+            
         }];
         
         [buttonNode runAction:customAction completion:^{
-            SKNode *lastCC = buttonNode.userData[@"cooldownClock"];
-            if ( lastCC )
-                [self.parentNode removeChildrenInArray:@[lastCC]];
+            [buttonNode removeChildrenNamed:cooldownKey];
         }];
     }
 }
@@ -976,6 +1059,11 @@ NSInteger   gMaxMaleScream = -1,
     
     if ( self.bouncer.xScale < 0 )
         self.bouncer.xScale = -(self.bouncer.xScale);
+    
+    self.bouncer.lastEarthquake = [NSDate date];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(EARTHQUAKE_CD * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        self.bouncer.lastEarthquake = nil;
+    });
     
     CGPoint airPoint = CGPointMake(point.x, ( point.y > self.bouncer.position.y ? point.y : self.bouncer.position.y ) + JUMP_HEIGHT);
     SKAction *flyAction = [SKAction moveTo:airPoint duration:STANDARD_MOVE_DURATION / 1];
