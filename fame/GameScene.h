@@ -10,9 +10,12 @@
 
 #import "Fame.h"
 
-@class Bouncer, Celeb;
+@class Bouncer, Celeb, MyPanGestureRecognizer;
 
 @interface GameScene : SKScene <SKPhysicsContactDelegate>
+{
+    MyPanGestureRecognizer *_panRecognizer;
+}
 
 @property GameScreenMap *gameScreenMap;
 

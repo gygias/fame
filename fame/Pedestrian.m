@@ -22,7 +22,7 @@ extern CGFloat gControlPanelHeight;
     return self;
 }
 
-- (void)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
+- (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
 {
     CGFloat textureWidth = self.texture.size.width;
     CGFloat textureHeight = self.texture.size.height;
@@ -62,6 +62,8 @@ extern CGFloat gControlPanelHeight;
         [self removeFromParent];
         [self.userData removeObjectForKey:@"stepTimer"];
     }];
+    
+    return YES;
 }
 
 @end

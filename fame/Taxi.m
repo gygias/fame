@@ -8,6 +8,8 @@
 
 #import "Taxi.h"
 
+#import "Fame.h"
+
 @implementation Taxi
 
 - (id)init
@@ -29,7 +31,7 @@
     return self;
 }
 
-- (void)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
+- (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
 {
     self.rightToLeft = ( arc4random() % 2 ) == 0;
     
@@ -48,13 +50,14 @@
     if ( [[screenMap valueForKey:keyString] boolValue] )
     {
         [self removeFromParent];
-        return;
+        return NO;
     }
     
     CGFloat y = ((double)lane / (double)nLanes) * screenMap.streetHeight + screenMap.streetLower + self.texture.size.height * 2;
     self.position = CGPointMake(startX,y);
     
-    SKAction *move = [SKAction moveToX:endX duration:self.rightToLeft ? 8 : 6];
+    NSTimeInterval moveDuration = self.rightToLeft ? 300 * FOREGROUND_SPEED : 250 * FOREGROUND_SPEED;
+    SKAction *move = [SKAction moveToX:endX duration:moveDuration];
     
     NSArray *textureNames = @[ @"taxi-1", @"taxi-2", @"taxi-3", @"taxi-4", @"taxi-5" ];
     NSMutableArray *textures = [NSMutableArray new];
@@ -63,15 +66,38 @@
         texture.filteringMode = SKTextureFilteringNearest;
         [textures addObject:texture];
     }];
-    SKAction *animate = [SKAction animateWithTextures:textures timePerFrame:0.5];
-    SKAction *animateForever = [SKAction repeatActionForever:animate];
-    SKAction *moveAndAnimate = [SKAction group:@[ move, animateForever ]];
+    NSTimeInterval animateDuration = 0.25;
+    SKAction *animate = [SKAction animateWithTextures:textures timePerFrame:animateDuration];
+    SKAction *animateRepeated = [SKAction repeatAction:animate count:moveDuration / animateDuration];
     
+    NSTimeInterval bounceDuration = 1;
+    __block int currentBounce = 0;
+    SKAction *bounce = [SKAction customActionWithDuration:moveDuration / bounceDuration actionBlock:^(SKNode *node, CGFloat elapsedTime) {
+        if ( elapsedTime > currentBounce )
+        {
+            Taxi *theTaxi = (Taxi *)node;
+            theTaxi.position = CGPointMake(theTaxi.position.x,theTaxi.position.y + ( theTaxi.isBouncedUp ? 1 : -1 ));
+            theTaxi.isBouncedUp = ! theTaxi.isBouncedUp;
+            currentBounce++;
+        }
+    }];
+    
+    SKAction *moveAndAnimate = [SKAction group:@[ move, animateRepeated, bounce ]];
+    
+    NSLog(@"%@ occupied",keyString);
     [screenMap setValue:[NSNumber numberWithBool:YES] forKey:keyString];
     [self runAction:moveAndAnimate completion:^{
+        NSLog(@"%@ no longer occupied",keyString); // XXX
         [screenMap setValue:[NSNumber numberWithBool:NO] forKey:keyString];
         [self removeFromParent];
     }];
+    
+    return YES;
+}
+
+- (NSArray *)introSoundNames
+{
+    return @[ @"clown-squeak.wav", @"clown-horn-three.wav" ];
 }
 
 @end

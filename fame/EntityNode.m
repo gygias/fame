@@ -35,13 +35,15 @@
     return self;
 }
 
-- (void)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
+- (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
 {
     self.position = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame));
     SKAction *fadeOut = [SKAction fadeOutWithDuration:1.0];
     SKAction *fadeIn = [SKAction fadeInWithDuration:1.0];
     SKAction *fadeInAndOut = [SKAction repeatActionForever:[SKAction sequence:@[ fadeOut, fadeIn ]]];
     [self runAction:fadeInAndOut];
+    
+    return YES;
 }
 
 - (uint8_t)_collisionMask
@@ -65,21 +67,22 @@
 }
 
 #warning this
-- (NSString *)introSoundName
+- (NSArray *)introSoundNames
 {
     return nil;
 }
-- (NSString *)frightenedSoundName
+- (NSArray *)frightenedSoundNames
 {
     return nil;
 }
-- (NSString *)deathSoundName
+- (NSArray *)deathSoundNames
 {
     return nil;
 }
 
 - (CGFloat)zPosition
 {
+    // XXX this isn't doing anything, zPosition must be internal
     return ( self.position.y - self.parent.frame.origin.y ) / self.parent.frame.size.height * ( ENTITY_Z_MAX - ENTITY_Z ) + ENTITY_Z;
 }
 

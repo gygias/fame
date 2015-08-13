@@ -8,6 +8,8 @@
 
 #import "GameScene.h"
 
+#import "MyPanGestureRecognizer.h"
+
 #ifdef MYDEBUG //TARGET_IPHONE_SIMULATOR
 #define DEBUG_MASKS
 #else
@@ -65,8 +67,8 @@
 //    
 //    [singleTap requireGestureRecognizerToFail:doubleTap];
     
-    UIPanGestureRecognizer *swipe = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
-    [self.view addGestureRecognizer:swipe];
+    _panRecognizer = [[MyPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
+    [self.view addGestureRecognizer:_panRecognizer];
 }
 
 - (void)_addFriendliesToNode:(SKNode *)node
@@ -292,10 +294,14 @@ static CGFloat gLastYOffset = 0; // XXX
     [self _playerAction:action targetPoint:location];
 }
 
-- (void)pan:(UIPanGestureRecognizer *)recognizer
+- (void)pan:(MyPanGestureRecognizer *)recognizer
 {
     if ( recognizer.state == UIGestureRecognizerStateEnded )
     {
+        CGPoint startPoint = [self convertPointFromView:recognizer.currentStartPoint];
+        if ( ! CGRectContainsPoint(ScaledRect(self.bouncer.frame,2.0),startPoint ) )
+            return;
+        
         CGPoint velocity = [recognizer velocityInView:self.view];
         CGFloat sumVelocity = ( velocity.x > 0) ? velocity.x : -(velocity.x);
         sumVelocity += ( velocity.y > 0 ) ? velocity.y : -(velocity.y);
@@ -303,6 +309,7 @@ static CGFloat gLastYOffset = 0; // XXX
             return;
         //NSLog(@"pan velocity: %0.2f,%0.2f",velocity.x,velocity.y);
         CGPoint location = [recognizer locationInView:self.view];
+        //NSLog(@"pan %@ -> %@",PointString(startPoint),PointString(location));
         location = [self convertPointFromView:location];
         [self _playerAction:@"action-4" targetPoint:location];
     }
@@ -331,6 +338,12 @@ static CGFloat gLastYOffset = 0; // XXX
         self.lastTapDate = nowAndLater;
         
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MULTI_TAP_THRESHOLD * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            CGPoint skStartPoint = [self convertPointFromView:_panRecognizer.currentStartPoint];
+            if ( CGPointEqualToPoint(self.firstTapLocation, skStartPoint) )
+            {
+                //NSLog(@"eating %@ being tracked by pan recognizer",PointString(self.firstTapLocation));
+                return;
+            }
             if ( nowAndLater == self.lastTapDate )
                 [self _handleNTaps:touch.tapCount nFingers:touches.count atLocation:self.firstTapLocation];
         });
@@ -381,12 +394,6 @@ static CGFloat gLastYOffset = 0; // XXX
     SKSpriteNode *theButton = [self valueForKey:[NSString stringWithFormat:@"button%d",idx]];
     if ( ! theButton )
         return;
-    SKSpriteNode *content = [theButton childNodeWithName:@"content"];
-    if ( ! content )
-        return;
-    SKSpriteNode *frame = [theButton childNodeWithName:@"frame"];
-    if ( ! frame )
-        return;
     
     UIColor *defaultColor = theButton.color;
     CGFloat defaultBlendFactor = theButton.colorBlendFactor;
@@ -405,6 +412,8 @@ static CGFloat gLastYOffset = 0; // XXX
     
     [theButton runAction:flash];
     [theButton runAction:growAndShrink];
+    
+    [self _playSoundNamed:@"no-beep.wav"];
 }
 
 - (void)_playerAction:(NSString *)action targetPoint:(CGPoint)point
@@ -579,15 +588,16 @@ static CGFloat gLastYOffset = 0; // XXX
             
             SKShapeNode *shape = [SKShapeNode shapeNodeWithPath:path.CGPath];
             shape.name = cooldownKey;
-            shape.scale = 2.0;
+            shape.xScale = 1 / buttonNode.xScale;
+            shape.yScale = 1 / buttonNode.yScale;
             shape.zPosition = CONTROL_PANEL_CD_Z;
             //CGFloat magicalMysteryNumber = 647/2; // XXX
-            CGRect pathBounds = [path bounds];
-            shape.position = CGPointMake(-buttonNode.size.width,-buttonNode.size.height);//CGPointMake(magicalMysteryNumber/2 - /*path.bounds.*/self.button1.size.width / 2, shape.position.y - /*path.bounds.*/self.button1.size.height / 2);
+            //CGRect pathBounds = [path bounds];
+            shape.position = CGPointMake(-buttonNode.size.width - 5,-buttonNode.size.height - 5); // XXX -5? //CGPointMake(magicalMysteryNumber/2 - /*path.bounds.*/self.button1.size.width / 2, shape.position.y - /*path.bounds.*/self.button1.size.height / 2);
             //shape.xScale = 1/0.45 * shape.xScale;
             //shape.yScale = -(1/0.45 * shape.xScale);
             //shape.position = CGPointMake(shape.position.x-450, shape.position.y + 20);
-            shape.fillColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.5];
+            shape.fillColor = [[UIColor darkGrayColor] colorWithAlphaComponent:0.75];
             shape.strokeColor = [UIColor clearColor];
             
             SKNode *lastCC = [buttonNode childNodeWithName:cooldownKey];
@@ -789,7 +799,10 @@ NSInteger   gMaxMaleScream = -1,
     //NSLog(@"let's add a %@",aiClass);
     EntityNode *ai = [aiClass new];
     [self.parentNode addChild:ai];
-    [ai introduceWithFrame:self.frame screenMap:self.gameScreenMap];
+    if ( [ai introduceWithFrame:self.frame screenMap:self.gameScreenMap] )
+    {
+        [self _playSoundNamed:ai.introSoundNames.randomObject];
+    }
 }
 
 - (void)didBeginContact:(SKPhysicsContact *)contact

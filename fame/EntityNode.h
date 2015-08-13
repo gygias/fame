@@ -25,10 +25,10 @@
 @property BOOL currentActionIsInterruptible;
 
 // overrides
-- (void)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap;
-- (NSString *)introSoundName;
-- (NSString *)frightenedSoundName;
-- (NSString *)deathSoundName;
+- (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap;
+- (NSArray *)introSoundNames;
+- (NSArray *)frightenedSoundNames;
+- (NSArray *)deathSoundNames;
 
 @end
 

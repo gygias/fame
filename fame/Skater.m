@@ -31,7 +31,7 @@
 
 #define SKATER_MAX_POINTS 3
 
-- (void)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
+- (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
 {
     UIBezierPath *path = [UIBezierPath bezierPath];
     
@@ -91,6 +91,8 @@
     }];
     
     _path = path;
+    
+    return YES;
 }
 
 @end

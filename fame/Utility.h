@@ -6,10 +6,18 @@
 //  Copyright (c) 2015 Combobulated Software. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface NSArray (CombobulatedExtensions)
 
 - (BOOL)containsPrefixOfString:(NSString *)string;
+- (id)randomObject;
 
 @end
+
+NSString * PointString(CGPoint point);
+NSString * RectString(CGRect rect);
+
+CGPoint CGRectGetMid(CGRect rect);
+
+CGRect ScaledRect(CGRect rect, CGFloat scale);

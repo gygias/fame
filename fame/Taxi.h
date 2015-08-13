@@ -10,4 +10,6 @@
 
 @interface Taxi : EntityNode
 
+@property BOOL isBouncedUp;
+
 @end
