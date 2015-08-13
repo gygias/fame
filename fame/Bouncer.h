@@ -13,5 +13,6 @@
 @property NSDate *lastEarthquake;
 @property NSDate *lastMove;
 @property NSDate *lastCharge;
+@property NSUInteger anger;
 
 @end

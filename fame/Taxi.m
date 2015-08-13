@@ -76,7 +76,7 @@
         if ( elapsedTime > currentBounce )
         {
             Taxi *theTaxi = (Taxi *)node;
-            theTaxi.position = CGPointMake(theTaxi.position.x,theTaxi.position.y + ( theTaxi.isBouncedUp ? 1 : -1 ));
+            theTaxi.position = CGPointMake(theTaxi.position.x,theTaxi.position.y + ( theTaxi.isBouncedUp ? self.yScale : -(self.yScale) ));
             theTaxi.isBouncedUp = ! theTaxi.isBouncedUp;
             currentBounce++;
         }

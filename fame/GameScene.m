@@ -209,7 +209,7 @@ static CGFloat gLastYOffset = 0; // XXX
         buttonFrameSprite.userData = [NSMutableDictionary dictionary];
         [buttonBackgroundSprite addChild:buttonFrameSprite];
         
-        xOffset += buttonBackgroundSprite.size.width + 1;//buttonFrameSprite.size.width * 1.05 * scale;
+        xOffset += ( idx == buttonNames.count ? 0 : buttonBackgroundSprite.size.width ) + 1;//buttonFrameSprite.size.width * 1.05 * scale;
         
         [self setValue:buttonBackgroundSprite forKey:[NSString stringWithFormat:@"button%d",idx]];
         
@@ -217,7 +217,80 @@ static CGFloat gLastYOffset = 0; // XXX
         //[buttonContentNode runAction:rotateForever];
     }
     
+    SKSpriteNode *meter1Border = [SKSpriteNode spriteNodeWithImageNamed:@"meter-border-1"];
+    meter1Border.texture.filteringMode = SKTextureFilteringNearest;
+    meter1Border.name = @"meter-1-border";
+    meter1Border.zPosition = CONTROL_PANEL_BACKGROUND_Z;
+    meter1Border.xScale = 10.0; // XXX
+    meter1Border.position = CGPointMake(fuckingBottomLeft.x + xOffset + meter1Border.size.width, fuckingBottomLeft.y + 1);
+    //meter1Border.yScale = ( backgroundSprite.size.height ) / ( ( meter1Border.texture.size.height - 1 ) / 2 );
+    [node addChild:meter1Border];
+    
+    SKLabelNode *backLabelNode = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
+    backLabelNode.name = @"meter-1-back-label";
+    backLabelNode.position = CGPointMake( fuckingBottomLeft.x + xOffset + meter1Border.size.width + 5, fuckingBottomLeft.y - 1 );
+    backLabelNode.zPosition = CONTROL_PANEL_CONTENT_Z;
+    backLabelNode.fontSize = METER_LABEL_FONT_SIZE;
+    backLabelNode.fontColor = [UIColor whiteColor];
+    backLabelNode.userData = [NSMutableDictionary dictionary];
+    backLabelNode.text = @"anger";
+    [node addChild:backLabelNode];
+    
+    SKSpriteNode *fillerNode = [SKSpriteNode spriteNodeWithImageNamed:@"meter-filler-1"];
+    fillerNode.texture.filteringMode = SKTextureFilteringNearest;
+    fillerNode.name = @"meter-1-filler";
+    fillerNode.xScale = 1.0;
+    fillerNode.position = CGPointMake( fuckingBottomLeft.x + xOffset + MAGICAL_MYSTERY_FILLER_OFFSET, fuckingBottomLeft.y + 1 );
+    fillerNode.zPosition = CONTROL_PANEL_CD_Z;
+    self.meter1FillerNode = fillerNode;
+    [node addChild:fillerNode];
+    
+    SKLabelNode *frontLabelNode = [backLabelNode copy];
+    frontLabelNode.name = @"meter-1-front-label";
+    //backLabelNode.position = backLabelNode.position;
+    frontLabelNode.zPosition = CONTROL_PANEL_CD_Z;
+    //backLabelNode.fontSize = backLabelNode.fontSize;
+    frontLabelNode.fontColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
+    //backLabelNode.userData = [NSMutableDictionary dictionary];
+    //backLabelNode.text = @"anger";
+    [node addChild:frontLabelNode];
+    
     //[backgroundSprite runAction:rotateForever];
+}
+
+- (void)_angerDelta:(NSInteger)angerDelta
+{
+    NSInteger origAnger = self.bouncer.anger;
+    NSInteger netAnger = origAnger + angerDelta;
+    if ( netAnger > MAX_ANGER )
+        netAnger = MAX_ANGER;
+    if ( netAnger < 0 )
+        netAnger = 0;
+    
+    NSInteger realAngerDelta = netAnger - origAnger;
+    NSLog(@"ad %ld orig %ld net %ld real %ld",angerDelta,origAnger,netAnger,realAngerDelta);
+    
+    self.bouncer.anger = netAnger;
+    
+    NSLog(@"anger %ld + d%ld -> %lu",(long)origAnger,(long)angerDelta,(unsigned long)self.bouncer.anger);
+    
+    __block int frame = 0;
+    NSTimeInterval duration = 0.5;//, frameInterval = 10 / duration, nFrames = duration / frameInterval;
+    CGFloat origXScale = self.meter1FillerNode.xScale;
+    CGFloat origX = self.meter1FillerNode.position.x;
+    SKAction *setAction = [SKAction customActionWithDuration:duration actionBlock:^(SKNode *node, CGFloat elapsedTime) {
+        double perc = elapsedTime / duration;
+        if ( frame < ( perc * 10 ) )
+        {
+            SKSpriteNode *fillerNode = (SKSpriteNode *)node;
+            CGFloat xDelta = perc * (float)realAngerDelta;
+            fillerNode.xScale = origXScale + xDelta;
+            fillerNode.position = CGPointMake( origX + xDelta / 2, fillerNode.position.y );
+            frame++;
+        }
+    }];
+    
+    [self.meter1FillerNode runAction:setAction];
 }
 
 - (void)_addForegroundTextureToNode:(SKNode *)node info:(NSDictionary *)textureDict
@@ -430,6 +503,7 @@ static CGFloat gLastYOffset = 0; // XXX
     point = [self _snapLocationOfNode:self.bouncer toSidewalk:point];
     NSLog(@"%@: %0.2f,%0.2f",action, point.x, point.y);
     NSString *soundName = nil;
+    NSInteger angerDelta = 0;
     
     if ( [action isEqualToString:@"action-1"] )
     {
@@ -444,6 +518,7 @@ static CGFloat gLastYOffset = 0; // XXX
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MOVE_CD * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             self.bouncer.lastMove = nil;
         });
+        angerDelta = MOVE_ANGER;
     }
     else if ( [action isEqualToString:@"action-2"] )
     {
@@ -453,6 +528,7 @@ static CGFloat gLastYOffset = 0; // XXX
             return;
         }
         [self _runEarthquakeAtPoint:point];
+        angerDelta = EARTHQUAKE_ANGER;
     }
 //    if ( [action isEqualToString:@"action-3"] )
 //    {
@@ -467,6 +543,7 @@ static CGFloat gLastYOffset = 0; // XXX
         [self.bouncer runAction:moveAction];
         soundName = [self _randomScream:YES];
         self.bouncer.lastCharge = [NSDate date];
+        angerDelta = CHARGE_ANGER;
     }
     else if ( [action isEqualToString:@"triple-action-1"] )
     {
@@ -474,8 +551,9 @@ static CGFloat gLastYOffset = 0; // XXX
         [self _playSoundNamed:@"whistle-1.wav"];
     }
     
+    if ( angerDelta )
+        [self _angerDelta:angerDelta];
     [self _drawCooldownClock];
-    
     [self _playSoundNamed:soundName];
 }
 
@@ -946,16 +1024,6 @@ NSInteger   gMaxMaleScream = -1,
     [self _handleKill];
 }
 
-#define COMBO_TIMEOUT 3.0
-#define COMBO_THRESHOLD 10
-#define COMBO_FLASH_THRESHOLD 10
-#define COMBO_FLASH_MAX 100
-#define INFO_PANEL_X_OFFSET 20.0
-#define INFO_PANEL_Y_OFFSET 40.0
-#define INFO_PANEL_CONTENT_X_OFFSET 2.0
-#define INFO_PANEL_CONTENT_Y_OFFSET 10.0
-#define INFO_PANEL_STANDARD_FONT_SIZE 20.0
-
 - (void)_handleKill
 {
     NSDate *lastKillDate = self.lastKillDate;
@@ -991,23 +1059,23 @@ NSInteger   gMaxMaleScream = -1,
                 labelNode.fontColor = [UIColor whiteColor];
                 labelNode.userData = [NSMutableDictionary dictionary];
                 [self.parentNode addChild:labelNode];
-                self.labelNode = labelNode;
+                self.infoPanelLabelNode = labelNode;
                 
                 [self _playSoundNamed:[self _randomSlotSpin]];
             }
             
-            self.labelNode.text = [NSString stringWithFormat:@"combo!! %u",(unsigned)self.currentCombo];
+            self.infoPanelLabelNode.text = [NSString stringWithFormat:@"combo!! %u",(unsigned)self.currentCombo];
             if ( ( self.currentCombo % COMBO_FLASH_THRESHOLD ) == 0 )
             {
                 CGFloat currentFlashInterval = COMBO_FLASH_MAX / (float)self.currentCombo / 20;
-                dispatch_source_t flashTimer = self.labelNode.userData[@"flashTimer"];
+                dispatch_source_t flashTimer = self.infoPanelLabelNode.userData[@"flashTimer"];
                 if ( flashTimer )
                     dispatch_source_cancel(flashTimer);
                 
                 flashTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
                 dispatch_source_set_timer(flashTimer, DISPATCH_TIME_NOW, currentFlashInterval * NSEC_PER_SEC, currentFlashInterval / 2 * NSEC_PER_SEC);
                 dispatch_source_set_event_handler(flashTimer, ^{
-                    int colorIdx = ((NSNumber *)self.labelNode.userData[@"flashColorIdx"]).intValue;
+                    int colorIdx = ((NSNumber *)self.infoPanelLabelNode.userData[@"flashColorIdx"]).intValue;
                     UIColor *nextColor = nil;
                     switch(colorIdx)
                     {
@@ -1026,11 +1094,11 @@ NSInteger   gMaxMaleScream = -1,
                             nextColor = [UIColor whiteColor];
                             break;
                     }
-                    self.labelNode.fontColor = nextColor;
-                    self.labelNode.userData[@"flashColorIdx"] = @(( colorIdx + 1 ) % 3);
+                    self.infoPanelLabelNode.fontColor = nextColor;
+                    self.infoPanelLabelNode.userData[@"flashColorIdx"] = @(( colorIdx + 1 ) % 3);
                 });
                 dispatch_resume(flashTimer);
-                self.labelNode.userData[@"flashTimer"] = flashTimer;
+                self.infoPanelLabelNode.userData[@"flashTimer"] = flashTimer;
             }
             
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(COMBO_TIMEOUT * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -1045,10 +1113,10 @@ NSInteger   gMaxMaleScream = -1,
                         SKAction *fade = [SKAction fadeOutWithDuration:duration];
                         SKAction *center = [SKAction moveTo:CGPointMake(CGRectGetMidX(self.frame),CGRectGetMidY(self.frame)) duration:duration];
                         SKAction *fadeAndCenter = [SKAction group:@[fade,center]];
-                        [@[ self.infoPanelNode, self.labelNode] enumerateObjectsUsingBlock:^(SKNode *obj, NSUInteger idx, BOOL *stop) {
+                        [@[ self.infoPanelNode, self.infoPanelLabelNode] enumerateObjectsUsingBlock:^(SKNode *obj, NSUInteger idx, BOOL *stop) {
                             [obj runAction:fadeAndCenter completion:^{
                                 [self.infoPanelNode removeFromParent];
-                                [self.labelNode removeFromParent];
+                                [self.infoPanelLabelNode removeFromParent];
                                 self.infoPanelNode = nil;
                             }];
                         }];

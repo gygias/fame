@@ -40,7 +40,7 @@
 
 // info panel
 @property SKSpriteNode *infoPanelNode;
-@property SKLabelNode *labelNode;
+@property SKLabelNode *infoPanelLabelNode;
 
 // control panel
 @property SKSpriteNode *controlPanel;
@@ -48,5 +48,7 @@
 @property SKSpriteNode *button2;
 @property SKSpriteNode *button3;
 @property SKSpriteNode *button4;
+
+@property SKSpriteNode *meter1FillerNode;
 
 @end

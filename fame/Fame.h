@@ -48,6 +48,25 @@
 
 #define CHARGE_CD 3.0
 
+#define COMBO_TIMEOUT 3.0
+#define COMBO_THRESHOLD 10
+#define COMBO_FLASH_THRESHOLD 10
+#define COMBO_FLASH_MAX 100
+#define INFO_PANEL_X_OFFSET 20.0
+#define INFO_PANEL_Y_OFFSET 40.0
+#define INFO_PANEL_CONTENT_X_OFFSET 2.0
+#define INFO_PANEL_CONTENT_Y_OFFSET 10.0
+#define INFO_PANEL_STANDARD_FONT_SIZE 20.0
+
+#define METER_LABEL_FONT_SIZE 8.0
+
+#define MAX_ANGER 100
+#define MOVE_ANGER 5
+#define EARTHQUAKE_ANGER (-50)
+#define CHARGE_ANGER 15
+
+// XXX MYSTERY NUMBERS
+#define MAGICAL_MYSTERY_FILLER_OFFSET 51.5
 typedef enum : uint8_t {
     ColliderEntity                  = 1,
     ColliderBouncer                 = 2,
