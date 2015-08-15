@@ -126,11 +126,12 @@
                                          @"yOffset" : @( 0 ),
                                          @"zPosition" : foregroundZ,
                                          @"setKey" : @"streetNode" },
-                                      @{ @"name" : @"street1",
+                                      @{ @"name" : @"street2",
                                          @"speed" : foregroundSpeed,
                                          @"yOffset" : @( 0 ),
                                          @"zPosition" : foregroundZ,
-                                         @"setKey" : @"cityNode" },
+                                         @"setKey" : @"cityNode",
+                                         @"nFrames" : @(10) },
                                       @{ @"name" : @"background1",
                                          @"speed" : backgroundSpeed,
                                          @"yOffset" : @( 300 ),
@@ -171,11 +172,6 @@ static CGFloat gLastYOffset = 0; // XXX
     self.gameScreenMap.streetLeft = self.frame.origin.x;
     self.gameScreenMap.streetRight = self.frame.origin.x + self.frame.size.width;
     
-    SKTexture *frameTexture = [SKTexture textureWithImageNamed:@"button-frame-1"];
-    frameTexture.filteringMode = SKTextureFilteringNearest;
-    SKTexture *buttonBackgroundTexture = [SKTexture textureWithImageNamed:@"button-background-1"];
-    buttonBackgroundTexture.filteringMode = SKTextureFilteringNearest;
-    
     CGFloat xOffset = 0;
     NSArray *buttonNames = @[ @"move-button-1", @"earthquake-button-1", @"move-button-1" ];
     
@@ -183,79 +179,18 @@ static CGFloat gLastYOffset = 0; // XXX
     for ( ; idx <= buttonNames.count ; idx++ )
     {
         NSString *buttonName = buttonNames[idx - 1];
-        
-        SKSpriteNode *buttonBackgroundSprite = [SKSpriteNode spriteNodeWithTexture:buttonBackgroundTexture];
-        buttonBackgroundSprite.name = @"background";
-        buttonBackgroundSprite.zPosition = CONTROL_PANEL_BACKGROUND_Z;
-        buttonBackgroundSprite.position = CGPointMake(fuckingBottomLeft.x + xOffset, fuckingBottomLeft.y + 1);
-        buttonBackgroundSprite.scale = 0.45 * scale;
-        buttonBackgroundSprite.userData = [NSMutableDictionary dictionary];
-        [node addChild:buttonBackgroundSprite];
-        
-        SKTexture *buttonContentTexture = [SKTexture textureWithImageNamed:buttonName];
-        buttonContentTexture.filteringMode = SKTextureFilteringNearest;
-        SKSpriteNode *buttonContentNode = [SKSpriteNode spriteNodeWithTexture:buttonContentTexture];
-        buttonContentNode.name = @"content";
-        buttonContentNode.zPosition = CONTROL_PANEL_CONTENT_Z;
-        buttonContentNode.position = CGPointMake(0,0);//CGPointMake(fuckingBottomLeft.x + xOffset, fuckingBottomLeft.y + 1);
-        //buttonContentNode.scale = 0.45 * scale;
-        [buttonBackgroundSprite addChild:buttonContentNode];
-        
-        SKSpriteNode *buttonFrameSprite = [SKSpriteNode spriteNodeWithTexture:frameTexture];
-        buttonFrameSprite.name = @"frame";
-        buttonFrameSprite.zPosition = CONTROL_PANEL_FRAME_Z;
-        buttonFrameSprite.position = CGPointMake(0,0);//CGPointMake(fuckingBottomLeft.x + xOffset - magicalMysteryNumber/2, fuckingBottomLeft.y + 1);
-        //buttonFrameSprite.scale = 0.45 * scale;
-        buttonFrameSprite.userData = [NSMutableDictionary dictionary];
-        [buttonBackgroundSprite addChild:buttonFrameSprite];
-        
-        xOffset += ( idx == buttonNames.count ? 0 : buttonBackgroundSprite.size.width ) + 1;//buttonFrameSprite.size.width * 1.05 * scale;
-        
-        [self setValue:buttonBackgroundSprite forKey:[NSString stringWithFormat:@"button%d",idx]];
+        Button *aButton = [Button buttonWithName:buttonName origin:fuckingBottomLeft xOffset:xOffset];
+        [node addChild:aButton];
+        xOffset += ( idx == buttonNames.count ? 0 : aButton.size.width ) + 1;//buttonFrameSprite.size.width * 1.05 * scale;
+        [self setValue:aButton forKey:[NSString stringWithFormat:@"button%d",idx]];
         
         //[buttonFrameSprite runAction:rotateForever];
         //[buttonContentNode runAction:rotateForever];
     }
     
-    SKSpriteNode *meter1Border = [SKSpriteNode spriteNodeWithImageNamed:@"meter-border-1"];
-    meter1Border.texture.filteringMode = SKTextureFilteringNearest;
-    meter1Border.name = @"meter-1-border";
-    meter1Border.zPosition = CONTROL_PANEL_BACKGROUND_Z;
-    meter1Border.xScale = METER_X_SCALE; // XXX
-    meter1Border.yScale = METER_Y_SCALE;
-    meter1Border.position = CGPointMake(fuckingBottomLeft.x + xOffset + meter1Border.size.width, fuckingBottomLeft.y + 1);
-    //meter1Border.yScale = ( backgroundSprite.size.height ) / ( ( meter1Border.texture.size.height - 1 ) / 2 );
-    [node addChild:meter1Border];
-    
-    SKLabelNode *backLabelNode = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
-    backLabelNode.name = @"meter-1-back-label";
-    backLabelNode.position = CGPointMake( fuckingBottomLeft.x + xOffset + meter1Border.size.width + MAGICAL_MYSTERY_METER_LABEL_X_OFFSET, fuckingBottomLeft.y - 1 );
-    backLabelNode.zPosition = CONTROL_PANEL_CONTENT_Z;
-    backLabelNode.fontSize = METER_LABEL_FONT_SIZE;
-    backLabelNode.fontColor = [UIColor whiteColor];
-    backLabelNode.userData = [NSMutableDictionary dictionary];
-    backLabelNode.text = @"anger";
-    [node addChild:backLabelNode];
-    
-    SKSpriteNode *fillerNode = [SKSpriteNode spriteNodeWithImageNamed:@"meter-filler-1"];
-    fillerNode.texture.filteringMode = SKTextureFilteringNearest;
-    fillerNode.name = @"meter-1-filler";
-    fillerNode.xScale = METER_FILLER_MIN_SCALE;
-    fillerNode.yScale = METER_FILLER_Y_SCALE;
-    fillerNode.position = CGPointMake( fuckingBottomLeft.x + xOffset + meter1Border.size.width / 2 + MAGICAL_MYSTERY_FILLER_INSET + 1.5, fuckingBottomLeft.y + 1.5 );
-    fillerNode.zPosition = CONTROL_PANEL_CD_Z;
-    self.meter1FillerNode = fillerNode;
-    [node addChild:fillerNode];
-    
-    SKLabelNode *frontLabelNode = [backLabelNode copy];
-    frontLabelNode.name = @"meter-1-front-label";
-    //backLabelNode.position = backLabelNode.position;
-    frontLabelNode.zPosition = CONTROL_PANEL_CD_Z;
-    //backLabelNode.fontSize = backLabelNode.fontSize;
-    frontLabelNode.fontColor = [[UIColor blackColor] colorWithAlphaComponent:0.5];
-    //backLabelNode.userData = [NSMutableDictionary dictionary];
-    //backLabelNode.text = @"anger";
-    [node addChild:frontLabelNode];
+    Meter *meter = [Meter meterWithLabel:@"anger" origin:fuckingBottomLeft xOffset:xOffset];
+    [node addChild:meter];
+    self.meter1 = meter;
     
     //[backgroundSprite runAction:rotateForever];
 }
@@ -278,8 +213,8 @@ static CGFloat gLastYOffset = 0; // XXX
     
     __block int frame = 0;
     NSTimeInterval duration = 0.5;//, frameInterval = 10 / duration, nFrames = duration / frameInterval;
-    CGFloat origXScale = self.meter1FillerNode.xScale;
-    CGFloat origX = self.meter1FillerNode.position.x;
+    CGFloat origXScale = self.meter1.fillerNode.xScale;
+    CGFloat origX = self.meter1.fillerNode.position.x;
     SKAction *setAction = [SKAction customActionWithDuration:duration actionBlock:^(SKNode *node, CGFloat elapsedTime) {
         double perc = elapsedTime / duration;
         if ( frame < ( perc * 10 ) )
@@ -295,12 +230,16 @@ static CGFloat gLastYOffset = 0; // XXX
         }
     }];
     
-    [self.meter1FillerNode runAction:setAction];
+    [self.meter1.fillerNode runAction:setAction];
 }
 
 - (void)_addForegroundTextureToNode:(SKNode *)node info:(NSDictionary *)textureDict
 {
-    SKTexture *texture = [SKTexture textureWithImageNamed:textureDict[@"name"]];
+    NSString *baseTexturePrefix = textureDict[@"name"];
+    NSNumber *nFrames = textureDict[@"nFrames"];
+    BOOL animatedLayer = ( nFrames.integerValue > 0 );
+    NSString *baseTextureName = animatedLayer ? [NSString stringWithFormat:@"%@-1",baseTexturePrefix] : baseTexturePrefix;
+    SKTexture *texture = [SKTexture textureWithImageNamed:baseTextureName];
     texture.filteringMode = SKTextureFilteringNearest; // antialiasing? yes
     
     double speedScalar = ((NSNumber *)textureDict[@"speed"]).doubleValue;
@@ -309,8 +248,27 @@ static CGFloat gLastYOffset = 0; // XXX
     CGFloat foregroundXMovement = (-texture.size.width * foregroundScale);
     self.foregroundXMovementTime = (speedScalar * texture.size.width * foregroundScale);
     SKAction *foregroundMovement = [SKAction moveByX:foregroundXMovement y:0 duration:self.foregroundXMovementTime];
+    
+    NSMutableArray *groupActions = [NSMutableArray arrayWithObject:foregroundMovement];
+    NSTimeInterval timeToPan = self.frame.size.width / -foregroundXMovement;
+    CGFloat animateCount = 6.0;
+    NSTimeInterval frameDuration = timeToPan / animateCount * 1.25;
+    if ( animatedLayer )
+    {
+        int idx = 0;
+        NSMutableArray *animateTextures = [NSMutableArray new];
+        for ( ; idx < nFrames.integerValue; idx++ )
+        {
+            SKTexture *aTexture = [SKTexture textureWithImageNamed:[NSString stringWithFormat:@"%@-%d",baseTexturePrefix,idx + 1]];
+            aTexture.filteringMode = SKTextureFilteringNearest;
+            [animateTextures addObject:aTexture];
+        }
+        NSLog(@"%@ will animate with %d textures",baseTextureName,idx);
+        [groupActions addObject:[SKAction repeatAction:[SKAction animateWithTextures:animateTextures timePerFrame:frameDuration resize:YES restore:NO] count:animateCount]];
+    }
     SKAction *resetTexture = [SKAction moveByX:(texture.size.width * foregroundScale) y:0 duration:0];
-    SKAction *repeatForever = [SKAction repeatActionForever:[SKAction sequence:@[ foregroundMovement, resetTexture ]]];
+    SKAction *moveAndAnimate = [SKAction group:groupActions];
+    SKAction *repeatForever = [SKAction repeatActionForever:[SKAction sequence:@[ moveAndAnimate, resetTexture ]]];
     
     CGFloat i;
     CGFloat spriteHeight = 0;

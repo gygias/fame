@@ -12,6 +12,8 @@
 #import "Pedestrian.h"
 #import "Skater.h"
 #import "Taxi.h"
+#import "Button.h"
+#import "Meter.h"
 
 #import "Utility.h"
 
@@ -66,7 +68,7 @@
 #define METER_X_SCALE 15.0
 #define METER_FILLER_MIN_SCALE 1.0
 #define METER_Y_SCALE 1.5
-#define METER_FILLER_Y_SCALE 1.75
+#define METER_FILLER_Y_SCALE 2.0
 #define METER_LABEL_FONT_SIZE (8.0 * METER_Y_SCALE)
 
 // XXX MYSTERY NUMBERS

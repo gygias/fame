@@ -49,6 +49,7 @@
 @property SKSpriteNode *button3;
 @property SKSpriteNode *button4;
 
-@property SKSpriteNode *meter1FillerNode;
+@property Meter *meter1;
+@property Meter *meter2;
 
 @end

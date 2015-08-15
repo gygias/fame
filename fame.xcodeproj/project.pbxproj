@@ -51,6 +51,8 @@
 		6399454E1B75F94A00A62D1B /* slot-machine-spin-4.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945471B75F94A00A62D1B /* slot-machine-spin-4.wav */; };
 		6399454F1B75F94A00A62D1B /* slot-machine-win-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945481B75F94A00A62D1B /* slot-machine-win-1.wav */; };
 		639945511B75F9CF00A62D1B /* slot-machine-cash-out-2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 639945501B75F9CF00A62D1B /* slot-machine-cash-out-2.wav */; };
+		63D34B0F1B7DAB1A00BF57B2 /* Button.m in Sources */ = {isa = PBXBuildFile; fileRef = 63D34B0E1B7DAB1A00BF57B2 /* Button.m */; };
+		63D34B121B7DAC9000BF57B2 /* Meter.m in Sources */ = {isa = PBXBuildFile; fileRef = 63D34B111B7DAC9000BF57B2 /* Meter.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -140,6 +142,10 @@
 		639945471B75F94A00A62D1B /* slot-machine-spin-4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-spin-4.wav"; path = "Sound/slot-machine-spin-4.wav"; sourceTree = "<group>"; };
 		639945481B75F94A00A62D1B /* slot-machine-win-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-win-1.wav"; path = "Sound/slot-machine-win-1.wav"; sourceTree = "<group>"; };
 		639945501B75F9CF00A62D1B /* slot-machine-cash-out-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "slot-machine-cash-out-2.wav"; path = "Sound/slot-machine-cash-out-2.wav"; sourceTree = "<group>"; };
+		63D34B0D1B7DAB1A00BF57B2 /* Button.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Button.h; sourceTree = "<group>"; };
+		63D34B0E1B7DAB1A00BF57B2 /* Button.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Button.m; sourceTree = "<group>"; };
+		63D34B101B7DAC9000BF57B2 /* Meter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Meter.h; sourceTree = "<group>"; };
+		63D34B111B7DAC9000BF57B2 /* Meter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Meter.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -217,6 +223,10 @@
 				6383CBFA1B7BFBB9002073A2 /* Taxi.m */,
 				6383CC041B7C5100002073A2 /* MyPanGestureRecognizer.h */,
 				6383CC051B7C5100002073A2 /* MyPanGestureRecognizer.m */,
+				63D34B0D1B7DAB1A00BF57B2 /* Button.h */,
+				63D34B0E1B7DAB1A00BF57B2 /* Button.m */,
+				63D34B101B7DAC9000BF57B2 /* Meter.h */,
+				63D34B111B7DAC9000BF57B2 /* Meter.m */,
 			);
 			path = fame;
 			sourceTree = "<group>";
@@ -432,10 +442,12 @@
 				6383CC061B7C5100002073A2 /* MyPanGestureRecognizer.m in Sources */,
 				637D56211B7456200013B155 /* GameScene.m in Sources */,
 				6383CBFB1B7BFBB9002073A2 /* Taxi.m in Sources */,
+				63D34B121B7DAC9000BF57B2 /* Meter.m in Sources */,
 				6383CBF21B7BDBA8002073A2 /* Skater.m in Sources */,
 				6399453C1B75863300A62D1B /* Earthquake.m in Sources */,
 				635F10F31B7AFBE700653715 /* GameScreenMap.m in Sources */,
 				637D561B1B7456200013B155 /* main.m in Sources */,
+				63D34B0F1B7DAB1A00BF57B2 /* Button.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
