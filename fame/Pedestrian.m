@@ -56,7 +56,7 @@ extern CGFloat gControlPanelHeight;
     });
     dispatch_resume(timer);
     
-    self.userData[@"stepTimer"] = timer;
+    self.actionDispatchSources = @[ timer ];
     
     [self runAction:movement completion:^{
         [self removeFromParent];

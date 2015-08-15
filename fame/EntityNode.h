@@ -23,6 +23,7 @@
 @property (nonatomic) BOOL isFrightened;
 @property BOOL isMidAction;
 @property BOOL currentActionIsInterruptible;
+@property NSArray *actionDispatchSources;
 
 // overrides
 - (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap;

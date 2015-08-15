@@ -103,7 +103,7 @@
         });
         dispatch_resume(timer);
         
-        entityNode.userData[@"stepTimer"] = timer;
+        entityNode.actionDispatchSources = @[ timer ];
 #endif
     }
 }
@@ -457,7 +457,8 @@ static CGFloat gLastYOffset = 0; // XXX
 - (void)_playerAction:(NSString *)action targetPoint:(CGPoint)point
 {
     if ( self.bouncer.isMidAction
-        && ! self.bouncer.currentActionIsInterruptible )
+        && ! self.bouncer.currentActionIsInterruptible
+        && ! [@[ @"double-action-1" ] containsObject:action] )
     {
         NSLog(@"ignoring %@ because player is mid non-interruptible action",action);
         return;
@@ -507,6 +508,10 @@ static CGFloat gLastYOffset = 0; // XXX
         soundName = [self _randomScream:YES];
         self.bouncer.lastCharge = [NSDate date];
         angerDelta = CHARGE_ANGER;
+    }
+    else if ( [action isEqualToString:@"double-action-1"] )
+    {
+        [self _togglePause:self.parentNode];
     }
     else if ( [action isEqualToString:@"triple-action-1"] )
     {
@@ -651,6 +656,31 @@ static CGFloat gLastYOffset = 0; // XXX
         
         [buttonNode runAction:customAction completion:^{
             [buttonNode removeChildrenNamed:cooldownKey];
+        }];
+    }
+}
+
+- (void)_togglePause:(SKNode *)node
+{
+    BOOL pausing = ! node.paused;
+    node.paused = ! node.paused;
+    
+    [self __togglePause:pausing node:node];
+    
+    [node.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
+        [self __togglePause:pausing node:childNode];
+    }];
+}
+
+- (void)__togglePause:(BOOL)pausing node:(SKNode *)node
+{
+    if ( [node isKindOfClass:[EntityNode class]] )
+    {
+        [((EntityNode *)node).actionDispatchSources enumerateObjectsUsingBlock:^(dispatch_source_t actionSource, NSUInteger idx, BOOL *stop) {
+            if ( pausing )
+                dispatch_suspend(actionSource);
+            else
+                dispatch_resume(actionSource);
         }];
     }
 }
@@ -823,6 +853,8 @@ NSInteger   gMaxMaleScream = -1,
 - (void)update:(CFTimeInterval)currentTime {
     /* Called before each frame is rendered */
     
+    if ( self.parentNode.paused )
+        return;
     if ( ( arc4random() % 10 ) == 0 )
         [self _addRandomAI];
 }
@@ -1117,7 +1149,9 @@ NSInteger   gMaxMaleScream = -1,
     SKAction *flyAndSpin = [SKAction group:@[ flyAction, spinAction ]];
     self.bouncer.isAirborne = YES;
     SKTexture *defaultTexture = self.bouncer.texture;
-    self.bouncer.texture = [SKTexture textureWithImageNamed:@"bouncer-jump-1"];
+    SKTexture *jumpTexture = [SKTexture textureWithImageNamed:@"bouncer-jump-1"];
+    jumpTexture.filteringMode = SKTextureFilteringNearest;
+    self.bouncer.texture = jumpTexture;
     [self.bouncer runAction:flyAndSpin completion:^{
         SKPhysicsBody *origPhysics = self.bouncer.physicsBody;
         self.bouncer.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:EARTHQUAKE_RADIUS];
