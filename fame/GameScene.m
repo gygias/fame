@@ -872,7 +872,7 @@ NSInteger   gMaxMaleScream = -1,
     //NSLog(@"let's add a %@",aiClass);
     EntityNode *ai = [aiClass new];
     [self.parentNode addChild:ai];
-    if ( [ai introduceWithFrame:self.frame screenMap:self.gameScreenMap] )
+    if ( [ai introduceWithScreenMap:self.gameScreenMap] )
     {
         [self _playSoundNamed:ai.introSoundNames.randomObject];
     }

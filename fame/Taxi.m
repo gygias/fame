@@ -31,7 +31,7 @@
     return self;
 }
 
-- (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
+- (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap
 {
     self.rightToLeft = ( arc4random() % 2 ) == 0;
     

@@ -26,7 +26,7 @@
 @property NSArray *actionDispatchSources;
 
 // overrides
-- (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap;
+- (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap;
 - (NSArray *)introSoundNames;
 - (NSArray *)frightenedSoundNames;
 - (NSArray *)deathSoundNames;

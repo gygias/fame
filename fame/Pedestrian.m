@@ -22,12 +22,12 @@ extern CGFloat gControlPanelHeight;
     return self;
 }
 
-- (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
+- (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap
 {
     CGFloat textureWidth = self.texture.size.width;
     CGFloat textureHeight = self.texture.size.height;
-    CGFloat stageRight = frame.origin.x + frame.size.width + textureWidth;
-    CGFloat stageLeft = frame.origin.x - textureWidth;
+    CGFloat stageRight = screenMap.screenRect.origin.x + screenMap.screenRect.size.width + textureWidth;
+    CGFloat stageLeft = screenMap.screenRect.origin.x - textureWidth;
     
     self.rightToLeft = ( arc4random() % 2 ) == 0;
     
@@ -36,7 +36,7 @@ extern CGFloat gControlPanelHeight;
     
     BOOL upperOrLower = ( arc4random() % 2 ) == 0;
     double div = (double)(arc4random() % 100 + 1) / 100.0;
-    CGFloat randomY = frame.origin.y +
+    CGFloat randomY = screenMap.screenRect.origin.y +
                             ( upperOrLower ? ( screenMap.topSidewalkLower + div * screenMap.topSidewalkHeight + textureHeight / 2 ) :
                                                 ( screenMap.bottomSidewalkLower + div * screenMap.bottomSidewalkHeight + textureHeight / 2 ) );
     //NSLog(@"ped @ %0.2f ( %0.2f :: %0.2f-%0.2f & %0.2f - %0.2f )",randomY, gControlPanelHeight, BOTTOM_SIDEWALK_LOWER, BOTTOM_SIDEWALK_UPPER, TOP_SIDEWALK_LOWER, TOP_SIDEWALK_UPPER);

@@ -35,9 +35,9 @@
     return self;
 }
 
-- (BOOL)introduceWithFrame:(CGRect)frame screenMap:(GameScreenMap *)screenMap
+- (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap
 {
-    self.position = CGPointMake(CGRectGetMidX(frame), CGRectGetMidY(frame));
+    self.position = CGPointMake(CGRectGetMidX(screenMap.screenRect), CGRectGetMidY(screenMap.screenRect));
     SKAction *fadeOut = [SKAction fadeOutWithDuration:1.0];
     SKAction *fadeIn = [SKAction fadeInWithDuration:1.0];
     SKAction *fadeInAndOut = [SKAction repeatActionForever:[SKAction sequence:@[ fadeOut, fadeIn ]]];
