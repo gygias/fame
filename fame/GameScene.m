@@ -201,6 +201,8 @@ static CGFloat gLastYOffset = 0; // XXX
     //[backgroundSprite runAction:rotateForever];
 }
 
+NSString *FlashMeterKey = @"flash-meter";
+
 - (void)_angerDelta:(NSInteger)angerDelta
 {
     NSInteger origAnger = self.bouncer.anger;
@@ -246,6 +248,21 @@ static CGFloat gLastYOffset = 0; // XXX
     }];
     
     [self.meter1.fillerNode runAction:setAction];
+    
+    if ( netAnger == MAX_ANGER )
+    {
+        NSTimeInterval fadeDuration = 0.5;
+        SKAction *fadeOut = [SKAction fadeOutWithDuration:fadeDuration];
+        SKAction *fadeIn = [SKAction fadeInWithDuration:fadeDuration];
+        SKAction *fadeInAndOut = [SKAction sequence:@[fadeOut,fadeIn]];
+        SKAction *fadeInAndOutForever = [SKAction repeatActionForever:fadeInAndOut];
+        [self.meter1.fillerNode runAction:fadeInAndOutForever withKey:FlashMeterKey];
+    }
+    else
+    {
+        [self.meter1.fillerNode removeActionForKey:FlashMeterKey];
+        self.meter1.fillerNode.alpha = 1.0;
+    }
 }
 
 - (void)_addForegroundTextureToNode:(SKNode *)node info:(NSDictionary *)textureDict
@@ -837,6 +854,8 @@ NSString *ActionWalkingKey = @"walking";
     }
 }
 
+NSString *KillScaleKey = @"kill-scale";
+
 - (void)didBeginContact:(SKPhysicsContact *)contact
 {
     if ( contact.bodyA == contact.bodyB )
@@ -922,6 +941,18 @@ NSString *ActionWalkingKey = @"walking";
             normal.dy = -(normal.dy);
         }
         [self _genericKillNode:genericAIPhysics.node normal:normal];
+        
+        //CGFloat scale = self.bouncer.xScale * 1.1;
+        if ( ! [self.bouncer actionForKey:KillScaleKey] )
+        {
+            CGFloat scale = 1.2;
+            CGFloat defaultX = self.bouncer.xScale, defaultY = self.bouncer.yScale;
+            NSTimeInterval scaleDuration = 0.05;
+            SKAction *scaleUp = [SKAction scaleXBy:scale y:scale duration:scaleDuration];
+            SKAction *scaleDown = [SKAction scaleXTo:defaultX y:defaultY duration:scaleDuration];
+            SKAction *group = [SKAction sequence:@[scaleUp,scaleDown]];
+            [self.bouncer runAction:group withKey:KillScaleKey];
+        }
     }
     else if ( celebPhysics && genericAIPhysics )
     {
