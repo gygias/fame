@@ -231,25 +231,34 @@ NSString *FlashMeterKey = @"flash-meter";
     NSTimeInterval duration = 0.5;//, frameInterval = 10 / duration, nFrames = duration / frameInterval;
     CGFloat origXScale = self.meter1.fillerNode.xScale;
     CGFloat origX = self.meter1.fillerNode.position.x;
+    //NSLog(@"going from %d anger to %d",startAnger,endAnger);
     SKAction *setAction = [SKAction customActionWithDuration:duration actionBlock:^(SKNode *node, CGFloat elapsedTime) {
         double perc = elapsedTime / duration;
         if ( frame < ( perc * 10 ) )
         {
             SKSpriteNode *fillerNode = (SKSpriteNode *)node;
-            //NSLog(@"perc %0.2f",perc);
-            CGFloat xDelta = perc * (float)realAngerDelta / METER_FILLER_MAX_SCALE;
-            CGFloat absoluteDelta = origXScale + xDelta;
+            //NSLog(@"perc %0.2f (%0.2fs / 0.5s)",perc,elapsedTime);
+            CGFloat xScaleDelta = perc * (float)realAngerDelta / METER_FILLER_MAX_SCALE;
+            CGFloat absoluteDelta = origXScale + xScaleDelta;
+            //NSLog(@"drawn %0.2f = origXS %0.2f + xSD %0.2f",absoluteDelta,origXScale,xScaleDelta);
             CGFloat drawnDelta = absoluteDelta;
-            if ( drawnDelta < METER_FILLER_MIN_SCALE )
-                drawnDelta = METER_FILLER_MIN_SCALE;
-            if ( drawnDelta > METER_FILLER_MAX_SCALE )
-                drawnDelta = METER_FILLER_MAX_SCALE;
+//            if ( drawnDelta < METER_FILLER_MIN_SCALE )
+//            {
+//                NSLog(@"min anger!");
+//                drawnDelta = METER_FILLER_MIN_SCALE;
+//            }
+//            if ( drawnDelta > METER_FILLER_MAX_SCALE )
+//            {
+//                NSLog(@"max anger!");
+//                drawnDelta = METER_FILLER_MAX_SCALE;
+//            }
             fillerNode.xScale = drawnDelta;
             // accidentally produces interesting grow-from-center effect
             // fillerNode.position = CGPointMake( ( origX + xDelta / 2 ) * (( absoluteDelta - drawnDelta ) / absoluteDelta), fillerNode.position.y );
-            CGFloat newX = origX + xDelta / 2;
+            CGFloat newX = origX + xScaleDelta/2;
             //NSLog(@"newX : %0.2f",newX);
-                fillerNode.position = CGPointMake( origX + xDelta / 2, fillerNode.position.y );
+            //NSLog(@"realA %d absoluteD %0.1f origX %0.1f xScaleDelta %0.1f newX %0.1f",realAngerDelta,absoluteDelta,origX,xScaleDelta,newX);
+                fillerNode.position = CGPointMake( newX, fillerNode.position.y );
             frame++;
             
             //NSLog(@"-> xScale = %0.1f + %0.1f",origXScale,xDelta);
@@ -553,10 +562,18 @@ NSString *FlashMeterKey = @"flash-meter";
     else if ( [action isEqualToString:@"action-4"] )
     {
         //NSLog(@"charge!");
+        if ( self.bouncer.lastCharge )
+        {
+            [self _flashButton:3];
+            return;
+        }
         SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION / 5];
         [self.bouncer runAction:moveAction];
         soundName = [Sound randomScream:YES];
         self.bouncer.lastCharge = [NSDate date];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(CHARGE_CD * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            self.bouncer.lastCharge = nil;
+        });
         angerDelta = CHARGE_ANGER;
     }
     else if ( [action isEqualToString:@"double-action-1"] )
@@ -832,6 +849,22 @@ NSString *ActionWalkingKey = @"walking";
         return;
     if ( ( arc4random() % 10 ) == 0 )
         [self _addRandomAI];
+    
+    if ( ! CGRectContainsPoint(self.frame, self.bouncer.position ) )
+    {
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+            int idx = 0;
+            for ( ; idx < 30; idx++ )
+            {
+                NSString *fartString = [NSString stringWithFormat:@"fart-%d.wav",( idx % 2 ) + 1];
+                [Sound playSoundNamed:fartString onNode:self.bouncer];
+                usleep(USEC_PER_SEC * 0.1);
+            }
+        });
+        
+        self.bouncer.position = CGPointMake(CGRectGetMidX(self.frame),
+                                            CGRectGetMidY(self.frame) - 200);
+    }
     
     [self.parentNode.children enumerateObjectsUsingBlock:^(SKSpriteNode *obj, NSUInteger idx, BOOL *stop) {
         if ( [obj isKindOfClass:[EntityNode class]] )
@@ -1179,6 +1212,7 @@ NSString *KillScaleKey = @"kill-scale";
         //NSLog(@"landing");
         [Sound playSoundNamed:[Sound randomGrunt:YES] onNode:self.bouncer];
         self.bouncer.texture = [SKTexture textureWithImageNamed:@"bouncer-jump-2"];
+        self.bouncer.texture.filteringMode = SKTextureFilteringNearest;
         [self.bouncer runAction:landAction completion:^{
             self.bouncer.texture = defaultTexture;
             //                [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
@@ -1275,7 +1309,8 @@ NSString *KillScaleKey = @"kill-scale";
 
 - (void)_runCataclysm
 {
-    
+    self.bouncer.isMidAction = YES;
+    self.bouncer.currentActionIsInterruptible = NO;
     self.bouncer.isAirborne = YES;
     self.bouncer.isManualZ = YES;
     [self.bouncer dispatchActionPause];
@@ -1383,6 +1418,7 @@ NSString *KillScaleKey = @"kill-scale";
         SKAction *fadeInAndFadeOutDead = [SKAction group:@[ fadeIn, fadeDead, fadeInCeleb ]];
         SKAction *sequence = [SKAction sequence:@[ playTeleport,fadeOut,moveBack,scaleBack,changeZ,fadeInAndFadeOutDead ]];
         [self.bouncer runAction:sequence withKey:@"return" completion:^{
+            self.bouncer.isMidAction = NO;
             self.bouncer.isAirborne = NO;
             self.bouncer.isManualZ = NO;
         }];
