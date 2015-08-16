@@ -19,11 +19,12 @@
 @property BOOL isFriendly;
 @property BOOL isAirborne;
 @property BOOL isDead;
-#warning do this
 @property (nonatomic) BOOL isFrightened;
 @property BOOL isMidAction;
 @property BOOL currentActionIsInterruptible;
 @property NSArray *actionDispatchSources;
+
+- (id)initWithImageNamed:(NSString *)name withPhysics:(BOOL)withPhysics;
 
 // overrides
 - (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap;

@@ -38,9 +38,8 @@
 @property NSUInteger currentCombo;
 @property NSUInteger comboMultiplier;
 
-// info panel
-@property SKSpriteNode *infoPanelNode;
-@property SKLabelNode *infoPanelLabelNode;
+// combo panel
+@property ComboBox *comboBoxNode;
 
 // control panel
 @property SKSpriteNode *controlPanel;

@@ -29,6 +29,8 @@
 		6383CC011B7C48A0002073A2 /* clown-squeak.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6383CC001B7C48A0002073A2 /* clown-squeak.wav */; };
 		6383CC031B7C490A002073A2 /* clown-horn-three.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6383CC021B7C490A002073A2 /* clown-horn-three.wav */; };
 		6383CC061B7C5100002073A2 /* MyPanGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6383CC051B7C5100002073A2 /* MyPanGestureRecognizer.m */; };
+		6395C9531B8010F0003D4EA6 /* ComboBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 6395C9521B8010F0003D4EA6 /* ComboBox.m */; };
+		6395C9561B8014AE003D4EA6 /* Sound.m in Sources */ = {isa = PBXBuildFile; fileRef = 6395C9551B8014AE003D4EA6 /* Sound.m */; };
 		639945271B753F0300A62D1B /* child_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451D1B753F0300A62D1B /* child_scream_01.wav */; };
 		639945281B753F0300A62D1B /* female_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451E1B753F0300A62D1B /* female_scream_01.wav */; };
 		639945291B753F0300A62D1B /* female_scream_02.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451F1B753F0300A62D1B /* female_scream_02.wav */; };
@@ -118,6 +120,10 @@
 		6383CC021B7C490A002073A2 /* clown-horn-three.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "clown-horn-three.wav"; path = "Sound/clown-horn-three.wav"; sourceTree = "<group>"; };
 		6383CC041B7C5100002073A2 /* MyPanGestureRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyPanGestureRecognizer.h; sourceTree = "<group>"; };
 		6383CC051B7C5100002073A2 /* MyPanGestureRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyPanGestureRecognizer.m; sourceTree = "<group>"; };
+		6395C9511B8010F0003D4EA6 /* ComboBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ComboBox.h; sourceTree = "<group>"; };
+		6395C9521B8010F0003D4EA6 /* ComboBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ComboBox.m; sourceTree = "<group>"; };
+		6395C9541B8014AE003D4EA6 /* Sound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sound.h; sourceTree = "<group>"; };
+		6395C9551B8014AE003D4EA6 /* Sound.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sound.m; sourceTree = "<group>"; };
 		6399451D1B753F0300A62D1B /* child_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = child_scream_01.wav; path = Sound/child_scream_01.wav; sourceTree = "<group>"; };
 		6399451E1B753F0300A62D1B /* female_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_01.wav; path = Sound/female_scream_01.wav; sourceTree = "<group>"; };
 		6399451F1B753F0300A62D1B /* female_scream_02.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_02.wav; path = Sound/female_scream_02.wav; sourceTree = "<group>"; };
@@ -227,6 +233,10 @@
 				63D34B0E1B7DAB1A00BF57B2 /* Button.m */,
 				63D34B101B7DAC9000BF57B2 /* Meter.h */,
 				63D34B111B7DAC9000BF57B2 /* Meter.m */,
+				6395C9511B8010F0003D4EA6 /* ComboBox.h */,
+				6395C9521B8010F0003D4EA6 /* ComboBox.m */,
+				6395C9541B8014AE003D4EA6 /* Sound.h */,
+				6395C9551B8014AE003D4EA6 /* Sound.m */,
 			);
 			path = fame;
 			sourceTree = "<group>";
@@ -437,6 +447,7 @@
 				6383CBF51B7BE569002073A2 /* Utility.m in Sources */,
 				637D561E1B7456200013B155 /* AppDelegate.m in Sources */,
 				639945391B75861D00A62D1B /* GroundEffect.m in Sources */,
+				6395C9531B8010F0003D4EA6 /* ComboBox.m in Sources */,
 				6383CBF81B7BE6E9002073A2 /* EntityNode.m in Sources */,
 				637D56561B7481BC0013B155 /* Pedestrian.m in Sources */,
 				6383CC061B7C5100002073A2 /* MyPanGestureRecognizer.m in Sources */,
@@ -448,6 +459,7 @@
 				635F10F31B7AFBE700653715 /* GameScreenMap.m in Sources */,
 				637D561B1B7456200013B155 /* main.m in Sources */,
 				63D34B0F1B7DAB1A00BF57B2 /* Button.m in Sources */,
+				6395C9561B8014AE003D4EA6 /* Sound.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

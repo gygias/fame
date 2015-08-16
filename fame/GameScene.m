@@ -42,6 +42,7 @@
     parentNode.name = @"root";
     [self addChild:parentNode];
     
+    [Sound setScene:self];
     self.gameScreenMap = [GameScreenMap new];
     self.gameScreenMap.screenRect = self.frame;
     
@@ -451,7 +452,7 @@ static CGFloat gLastYOffset = 0; // XXX
     [theButton runAction:flash];
     [theButton runAction:growAndShrink];
     
-    [self _playSoundNamed:@"no-beep.wav"];
+    [Sound playSoundNamed:@"no-beep.wav" onNode:theButton];
 }
 
 - (void)_playerAction:(NSString *)action targetPoint:(CGPoint)point
@@ -477,7 +478,7 @@ static CGFloat gLastYOffset = 0; // XXX
             return;
         }
         [self _walkNode:self.bouncer to:point];
-        soundName = [self _randomGrunt:YES];
+        soundName = [Sound randomGrunt:YES];
         self.bouncer.lastMove = [NSDate date];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MOVE_CD * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             self.bouncer.lastMove = nil;
@@ -505,7 +506,7 @@ static CGFloat gLastYOffset = 0; // XXX
         //NSLog(@"charge!");
         SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION / 5];
         [self.bouncer runAction:moveAction];
-        soundName = [self _randomScream:YES];
+        soundName = [Sound randomScream:YES];
         self.bouncer.lastCharge = [NSDate date];
         angerDelta = CHARGE_ANGER;
     }
@@ -516,13 +517,13 @@ static CGFloat gLastYOffset = 0; // XXX
     else if ( [action isEqualToString:@"triple-action-1"] )
     {
         [self _walkNode:self.celeb to:self.bouncer.position];
-        [self _playSoundNamed:@"whistle-1.wav"];
+        soundName = @"whistle-1.wav";
     }
     
     if ( angerDelta )
         [self _angerDelta:angerDelta];
     [self _drawCooldownClock];
-    [self _playSoundNamed:soundName];
+    [Sound playSoundNamed:soundName onNode:self.bouncer];
 }
 
 - (void)_drawCooldownClock
@@ -760,84 +761,6 @@ static CGFloat gLastYOffset = 0; // XXX
     return textures;
 }
 
-- (void)_playSoundNamed:(NSString *)soundName
-{
-    if ( soundName )
-    {
-        dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            SKAction *soundEffect = [SKAction playSoundFileNamed:soundName waitForCompletion:NO];
-            [self runAction:soundEffect];
-        });
-    }
-}
-
-NSInteger   gMaxSlotSpin = -1;
-- (NSString *)_randomSlotSpin
-{
-    NSString *base = @"";
-    NSString *type = @"slot-machine-spin";
-    NSInteger *idx = &gMaxSlotSpin;
-    if ( *idx == -1 )
-        [self _loadMaxSoundFileIdxWithBase:base type:type delimiter:@"-" numberFormat:@"%d" storage:idx];
-    
-    return *idx > 0 ? [NSString stringWithFormat:@"%@%@-%u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
-}
-
-NSInteger   gMaxBoom = -1;
-- (NSString *)_randomBoom
-{
-    NSString *base = @"";
-    NSString *type = @"boom";
-    NSInteger *idx = &gMaxBoom;
-    if ( *idx == -1 )
-        [self _loadMaxSoundFileIdxWithBase:base type:type storage:idx];
-    
-    return *idx > 0 ? [NSString stringWithFormat:@"%@%@_%02u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
-}
-
-NSInteger   gMaxMaleGrunt = -1,
-            gMaxFemaleGrunt = -1;
-- (NSString *)_randomGrunt:(BOOL)male
-{
-    NSString *base = male ? @"male_" : @"female_";
-    NSString *type = @"grunt";
-    NSInteger *idx = male ? &gMaxMaleGrunt : &gMaxFemaleGrunt;
-    if ( *idx == -1 )
-        [self _loadMaxSoundFileIdxWithBase:base type:type storage:idx];
-    
-    return *idx > 0 ? [NSString stringWithFormat:@"%@%@_%02u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
-}
-
-// XXX GROSS
-- (void)_loadMaxSoundFileIdxWithBase:(NSString *)base type:(NSString *)type storage:(NSInteger *)storage
-{
-    [self _loadMaxSoundFileIdxWithBase:base type:type delimiter:@"_" numberFormat:@"%02u" storage:storage];
-}
-
-- (void)_loadMaxSoundFileIdxWithBase:(NSString *)base type:(NSString *)type delimiter:(NSString *)delimiter numberFormat:(NSString *)numberFormat storage:(NSInteger *)storage
-{
-    NSInteger testIdx = 1;
-    NSString *fileName = nil;
-    NSString *formatString = [NSString stringWithFormat:@"%@%@%@%@",base,type,delimiter,numberFormat];
-    while ( ( fileName = [NSString stringWithFormat:formatString,(unsigned)testIdx] ) &&
-        [[NSBundle mainBundle] pathForResource:fileName ofType:@"wav"] )
-        testIdx++;
-    *storage = testIdx - 1;
-}
-
-NSInteger   gMaxMaleScream = -1,
-            gMaxFemaleScream = -1;
-- (NSString *)_randomScream:(BOOL)male
-{
-    NSString *base = male ? @"male_" : @"female_";
-    NSString *type = @"scream";
-    NSInteger *idx = male ? &gMaxMaleScream : &gMaxFemaleScream;
-    if ( *idx == -1 )
-        [self _loadMaxSoundFileIdxWithBase:base type:type storage:idx];
-    
-    return *idx > 0 ? [NSString stringWithFormat:@"%@%@_%02u.wav",base,type,(unsigned)( arc4random() % *idx + 1)] : nil;
-}
-
 - (CGPoint)_snapLocationOfNode:(EntityNode *)node toSidewalk:(CGPoint)point
 {
     CGPoint snappedPoint = point;
@@ -874,7 +797,7 @@ NSInteger   gMaxMaleScream = -1,
     [self.parentNode addChild:ai];
     if ( [ai introduceWithScreenMap:self.gameScreenMap] )
     {
-        [self _playSoundNamed:ai.introSoundNames.randomObject];
+        [Sound playSoundNamed:ai.introSoundNames.randomObject onNode:ai];
     }
 }
 
@@ -965,7 +888,7 @@ NSInteger   gMaxMaleScream = -1,
         CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
         SKAction *action = [SKAction rotateByAngle:angle duration:1];
         [celebPhysics.node runAction:action];
-        NSString *sound = [self _randomScream:NO];
+        NSString *sound = [Sound randomScream:NO];
         SKAction *scream = [SKAction playSoundFileNamed:sound waitForCompletion:NO];
         [self runAction:scream];
     }
@@ -1033,93 +956,21 @@ NSInteger   gMaxMaleScream = -1,
         //NSLog(@"combo: %u",self.currentCombo);
         if ( self.currentCombo >= COMBO_THRESHOLD )
         {
-            if ( ! self.infoPanelNode )
+            if ( ! self.comboBoxNode.parent )
             {
                 NSLog(@"presenting combo node");
-                SKSpriteNode *comboNode = [SKSpriteNode spriteNodeWithImageNamed:@"combo-background"];
-                comboNode.position = CGPointMake(CGRectGetMidX(self.frame),self.frame.size.height - INFO_PANEL_Y_OFFSET);
-                                    //CGPointMake( self.frame.origin.x - INFO_PANEL_X_OFFSET,
-                                     //           self.frame.origin.y + INFO_PANEL_Y_OFFSET );
-                comboNode.zPosition = INFO_PANEL_Z;
-                comboNode.xScale = 1.7;
-                comboNode.yScale = 1.7;
-                [self.parentNode addChild:comboNode];
-                self.infoPanelNode = comboNode;
+                ComboBox *comboBox = [ComboBox new];
+                comboBox.comboEndedHandler = ^(ComboBox *comboBox) {
+                    self.currentCombo = 0;
+                };
+                [comboBox introduceWithScreenMap:self.gameScreenMap];
+                [self.parentNode addChild:comboBox];
+                self.comboBoxNode = comboBox;
                 
-                SKLabelNode *labelNode = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
-                labelNode.position = CGPointMake( comboNode.position.x + INFO_PANEL_CONTENT_X_OFFSET,
-                                                 comboNode.position.y - INFO_PANEL_CONTENT_Y_OFFSET );
-                labelNode.zPosition = INFO_PANEL_CONTENT_Z;
-                labelNode.fontSize = INFO_PANEL_STANDARD_FONT_SIZE;
-                labelNode.fontColor = [UIColor whiteColor];
-                labelNode.userData = [NSMutableDictionary dictionary];
-                [self.parentNode addChild:labelNode];
-                self.infoPanelLabelNode = labelNode;
-                
-                [self _playSoundNamed:[self _randomSlotSpin]];
+                [Sound playSoundNamed:[Sound randomSlotSpin] onNode:self.comboBoxNode];
             }
             
-            self.infoPanelLabelNode.text = [NSString stringWithFormat:@"combo!! %u",(unsigned)self.currentCombo];
-            if ( ( self.currentCombo % COMBO_FLASH_THRESHOLD ) == 0 )
-            {
-                CGFloat currentFlashInterval = COMBO_FLASH_MAX / (float)self.currentCombo / 20;
-                dispatch_source_t flashTimer = self.infoPanelLabelNode.userData[@"flashTimer"];
-                if ( flashTimer )
-                    dispatch_source_cancel(flashTimer);
-                
-                flashTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
-                dispatch_source_set_timer(flashTimer, DISPATCH_TIME_NOW, currentFlashInterval * NSEC_PER_SEC, currentFlashInterval / 2 * NSEC_PER_SEC);
-                dispatch_source_set_event_handler(flashTimer, ^{
-                    int colorIdx = ((NSNumber *)self.infoPanelLabelNode.userData[@"flashColorIdx"]).intValue;
-                    UIColor *nextColor = nil;
-                    switch(colorIdx)
-                    {
-                        case 0:
-                            nextColor = [UIColor purpleColor];
-                            break;
-                        case 1:
-                            nextColor = [UIColor blackColor];
-                            break;
-                        case 2:
-                            nextColor = [UIColor whiteColor];
-                            break;
-                        default:
-                            NSLog(@"XXX flashColorIdx");
-                            colorIdx = 0;
-                            nextColor = [UIColor whiteColor];
-                            break;
-                    }
-                    self.infoPanelLabelNode.fontColor = nextColor;
-                    self.infoPanelLabelNode.userData[@"flashColorIdx"] = @(( colorIdx + 1 ) % 3);
-                });
-                dispatch_resume(flashTimer);
-                self.infoPanelLabelNode.userData[@"flashTimer"] = flashTimer;
-            }
-            
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(COMBO_TIMEOUT * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                if ( [[NSDate date] timeIntervalSinceDate:self.lastKillDate] > COMBO_TIMEOUT )
-                {
-                    if ( self.currentCombo > 0 )
-                    {
-                        NSLog(@"removing combo node");
-                        self.currentCombo = 0;
-                        
-                        NSTimeInterval duration = 1.0;
-                        SKAction *fade = [SKAction fadeOutWithDuration:duration];
-                        SKAction *center = [SKAction moveTo:CGPointMake(CGRectGetMidX(self.frame),CGRectGetMidY(self.frame)) duration:duration];
-                        SKAction *fadeAndCenter = [SKAction group:@[fade,center]];
-                        [@[ self.infoPanelNode, self.infoPanelLabelNode] enumerateObjectsUsingBlock:^(SKNode *obj, NSUInteger idx, BOOL *stop) {
-                            [obj runAction:fadeAndCenter completion:^{
-                                [self.infoPanelNode removeFromParent];
-                                [self.infoPanelLabelNode removeFromParent];
-                                self.infoPanelNode = nil;
-                            }];
-                        }];
-                        
-                        [self _playSoundNamed:@"slot-machine-cash-out-2.wav"];
-                    }
-                }
-            });
+            self.comboBoxNode.combo = self.currentCombo;
         }
     }
 }
@@ -1181,7 +1032,7 @@ NSInteger   gMaxMaleScream = -1,
             self.bouncer.isAirborne = NO;
         });
         //NSLog(@"landing");
-        [self _playSoundNamed:[self _randomGrunt:YES]];
+        [Sound playSoundNamed:[Sound randomGrunt:YES] onNode:self.bouncer];
         self.bouncer.texture = [SKTexture textureWithImageNamed:@"bouncer-jump-2"];
         [self.bouncer runAction:landAction completion:^{
             self.bouncer.texture = defaultTexture;
@@ -1193,7 +1044,7 @@ NSInteger   gMaxMaleScream = -1,
             //NSLog(@"eagle has landed");
             CGPoint landingEndLoc = earthquake.position;
             self.bouncer.physicsBody = origPhysics;
-            [self _playSoundNamed:[self _randomBoom]];
+            [Sound playSoundNamed:[Sound randomBoom] onNode:self.bouncer];
             
             NSUInteger remainingFrames = 6;
             CGFloat timePerFrame = 0.1;

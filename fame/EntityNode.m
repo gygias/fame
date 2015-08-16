@@ -12,7 +12,7 @@
 
 @implementation EntityNode
 
-- (id)initWithImageNamed:(NSString *)name
+- (id)initWithImageNamed:(NSString *)name withPhysics:(BOOL)withPhysics
 {
     if ( ( self = [super initWithImageNamed:name] ))
     {
@@ -20,19 +20,27 @@
         self.zPosition = ENTITY_Z;
         self.texture.filteringMode = SKTextureFilteringNearest;
         
-        SKPhysicsBody *physics = [SKPhysicsBody bodyWithRectangleOfSize:self.texture.size];//[SKPhysicsBody bodyWithTexture:texture size:texture.size];
-        physics.dynamic = YES;
-        physics.affectedByGravity = NO;
-        physics.categoryBitMask = [self _collisionMask];
-        physics.contactTestBitMask = [self _collisionTestMask];
-        physics.collisionBitMask = 0;
-        
-        self.physicsBody = physics;
+        if ( withPhysics )
+        {
+            SKPhysicsBody *physics = [SKPhysicsBody bodyWithRectangleOfSize:self.texture.size];//[SKPhysicsBody bodyWithTexture:texture size:texture.size];
+            physics.dynamic = YES;
+            physics.affectedByGravity = NO;
+            physics.categoryBitMask = [self _collisionMask];
+            physics.contactTestBitMask = [self _collisionTestMask];
+            physics.collisionBitMask = 0;
+            
+            self.physicsBody = physics;
+        }
         
         self.userData = [NSMutableDictionary new];
     }
     
     return self;
+}
+
+- (id)initWithImageNamed:(NSString *)name
+{
+    return [self initWithImageNamed:name withPhysics:YES];
 }
 
 - (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap
