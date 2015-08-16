@@ -464,6 +464,8 @@ static CGFloat gLastYOffset = 0; // XXX
         NSLog(@"ignoring %@ because player is mid non-interruptible action",action);
         return;
     }
+    else if ( self.bouncer.isIncapacitated )
+        return;
     
     point = [self _snapLocationOfNode:self.bouncer toSidewalk:point];
     NSLog(@"%@: %0.2f,%0.2f",action, point.x, point.y);
@@ -516,6 +518,8 @@ static CGFloat gLastYOffset = 0; // XXX
     }
     else if ( [action isEqualToString:@"triple-action-1"] )
     {
+        if ( self.celeb.isIncapacitated )
+            return;
         [self _walkNode:self.celeb to:self.bouncer.position];
         soundName = @"whistle-1.wav";
     }
@@ -677,12 +681,11 @@ static CGFloat gLastYOffset = 0; // XXX
 {
     if ( [node isKindOfClass:[EntityNode class]] )
     {
-        [((EntityNode *)node).actionDispatchSources enumerateObjectsUsingBlock:^(dispatch_source_t actionSource, NSUInteger idx, BOOL *stop) {
-            if ( pausing )
-                dispatch_suspend(actionSource);
-            else
-                dispatch_resume(actionSource);
-        }];
+        EntityNode *entityNode = (EntityNode *)node;
+        if ( pausing )
+            [entityNode dispatchActionPause];
+        else
+            [entityNode dispatchActionResume];
     }
 }
 
@@ -709,7 +712,7 @@ static CGFloat gLastYOffset = 0; // XXX
     }
     
     //SKAction *walkAction = [SKAction animateWithTextures:@[ self.bouncer.node.texture ] timePerFrame:0.1];
-    SKAction *group = [SKAction group:@[ moveAction, customAction]];
+    SKAction *group = [SKAction group:@[ moveAction, customAction ]];
     [node runAction:group completion:^{
         if ( node.xScale < 0 )
             node.xScale = -(node.xScale);
@@ -787,8 +790,13 @@ static CGFloat gLastYOffset = 0; // XXX
             EntityNode *node = (EntityNode *)obj;
             if ( ! node.isUI )
             {
-                CGFloat height = self.gameScreenMap.screenRect.size.height;
-                node.zPosition = ( height - node.position.y ) / height * ENTITY_Z_SPAN + ENTITY_Z;
+                if ( ! node.isFloored )
+                {
+                    CGFloat height = self.gameScreenMap.screenRect.size.height;
+                    node.zPosition = ( height - node.position.y ) / height * ENTITY_Z_SPAN + ENTITY_Z;
+                }
+                else
+                    node.zPosition = ENTITY_Z;
             }
         }
     }];
@@ -853,6 +861,7 @@ static CGFloat gLastYOffset = 0; // XXX
     SKPhysicsBody *genericAIPhysics = nil;
     SKPhysicsBody *bouncerPhysics = nil;
     SKPhysicsBody *celebPhysics = nil;
+    SKPhysicsBody *taxiPhysics = nil;
     SKPhysicsBody *groundEffectPhysics = nil;
     
     NSArray *genericAIPrefixes = @[ @"pedestrian-", @"skater-" ];
@@ -863,14 +872,18 @@ static CGFloat gLastYOffset = 0; // XXX
         bouncerPhysics = contact.bodyA;
     else if ([contact.bodyB.node.name hasPrefix:@"bouncer-"] )
         bouncerPhysics = contact.bodyB;
-    if ( [contact.bodyA.node.name isEqualToString:@"celeb"] )
+    if ( [contact.bodyA.node.name hasPrefix:@"celeb"] )
         celebPhysics = contact.bodyA;
-    else if ( [contact.bodyB.node.name isEqualToString:@"celeb"] )
+    else if ( [contact.bodyB.node.name hasPrefix:@"celeb"] )
         celebPhysics = contact.bodyB;
     if ( [genericAIPrefixes containsPrefixOfString:contact.bodyA.node.name] )
         genericAIPhysics = contact.bodyA;
     else if ( [genericAIPrefixes containsPrefixOfString:contact.bodyB.node.name] )
         genericAIPhysics = contact.bodyB;
+    if ( [contact.bodyA.node.name hasPrefix:@"taxi-"] )
+        taxiPhysics = contact.bodyA;
+    else if ( [contact.bodyB.node.name hasPrefix:@"taxi-"] )
+        taxiPhysics = contact.bodyB;
     if ( [contact.bodyA.node.name hasPrefix:@"ground-effect-"] )
         groundEffectPhysics = contact.bodyA;
     else if ( [contact.bodyB.node.name hasPrefix:@"ground-effect-"] )
@@ -922,7 +935,18 @@ static CGFloat gLastYOffset = 0; // XXX
         
         ((EntityNode *)genericAIPhysics.node).isDead = YES;
         [self _handleKill];
-        
+    }
+    else if ( bouncerPhysics && taxiPhysics )
+    {
+        NSLog(@"bouncer vs taxi");
+        [self _runOverNode:self.bouncer withNode:(EntityNode *)taxiPhysics.node];
+        [Sound playSoundNamed:@"fart-1.wav" onNode:self.bouncer];
+    }
+    else if ( celebPhysics && taxiPhysics )
+    {
+        NSLog(@"celeb vs taxi");
+        [self _runOverNode:self.celeb withNode:(EntityNode *)taxiPhysics.node];
+        [Sound playSoundNamed:@"fart-1.wav" onNode:self.celeb];
     }
     //else NSLog(@"some collisions between %@ and %@",contact.bodyA.node.name,contact.bodyB.node.name);
 }
@@ -952,6 +976,39 @@ static CGFloat gLastYOffset = 0; // XXX
     
     ((EntityNode *)node).isDead = YES;
     [self _handleKill];
+}
+
+- (void)_runOverNode:(EntityNode *)node withNode:(EntityNode *)attacker
+{
+    [node removeAllActions];
+    [node dispatchActionPause];
+    
+    CGPoint midpoint = [node midpointToNode:attacker];
+    [node runAction:[SKAction moveTo:midpoint duration:0.0]];
+    
+    SKSpriteNode *tireTread = [SKSpriteNode spriteNodeWithImageNamed:@"tire-tread-1"];
+    tireTread.zPosition = ENTITY_Z + ENTITY_Z_INC;
+    tireTread.xScale = node.xScale;
+    tireTread.yScale = node.yScale;
+    tireTread.position = midpoint;
+    [self.parentNode addChild:tireTread];
+    
+    node.zPosition = ENTITY_Z;
+    node.isFloored = YES;
+    
+    BOOL leftToRight = ( arc4random() % 2 ) == 0;
+    //node.zRotation =
+    CGFloat radians = ( leftToRight ? ( M_PI_4*3 - M_PI_4 ) : ( M_PI*7 - M_PI_4 * 5 ) ) * (double)( ( arc4random() % 100 ) ) / 100.0;
+    [node runAction:[SKAction rotateToAngle:radians duration:0.0]];
+    node.isIncapacitated = YES;
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        node.isIncapacitated = NO;
+        node.isFloored = YES;
+        //node.zRotation = 0;
+        [node runAction:[SKAction rotateToAngle:0.0 duration:0.0]];
+        [tireTread removeFromParent];
+    });
 }
 
 - (void)_handleKill

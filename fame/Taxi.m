@@ -20,13 +20,23 @@
     return self;
 }
 
+- (CGSize)collisionSize
+{
+    return CGSizeMake(self.texture.size.width * 0.5,self.texture.size.height / 8);
+}
+
+- (CGPoint)collisionCenter
+{
+    return CGPointMake(self.position.x, self.position.y - self.texture.size.height / 8);
+}
+
 - (id)initWithImageNamed:(NSString *)name
 {
     if ( ( self = [super initWithImageNamed:name] ))
     {
         // skater only?
         //self.physicsBody.allowsRotation = NO;
-        [self setScale:3.0];
+        [self setScale:2.5];
     }
     return self;
 }

@@ -17,8 +17,11 @@
 @property BOOL isUI; // XXX seperate inheritances?
 
 @property BOOL rightToLeft;
+@property (readonly) CGSize collisionSize;
 
 @property BOOL isFriendly;
+@property BOOL isIncapacitated;
+@property BOOL isFloored;
 @property BOOL isAirborne;
 @property BOOL isDead;
 @property (nonatomic) BOOL isFrightened;
@@ -34,10 +37,14 @@
 - (NSArray *)frightenedSoundNames;
 - (NSArray *)deathSoundNames;
 
+- (void)dispatchActionPause;
+- (void)dispatchActionResume;
+
 @end
 
 @interface SKNode (CombobulatedExtensions)
 
+- (CGPoint)midpointToNode:(SKNode *)node;
 - (void)removeChildrenNamed:(NSString *)childName;
 
 @end

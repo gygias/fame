@@ -29,6 +29,7 @@
 
 #define EFFECT_Z 2.0
 #define ENTITY_Z 3.0
+#define ENTITY_Z_INC 0.01
 #define ENTITY_Z_MAX 4.0
 #define ENTITY_Z_SPAN ( ENTITY_Z_MAX - ENTITY_Z )
 #define INFO_PANEL_Z 4.1

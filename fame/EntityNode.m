@@ -22,7 +22,9 @@
         
         if ( withPhysics )
         {
-            SKPhysicsBody *physics = [SKPhysicsBody bodyWithRectangleOfSize:self.texture.size];//[SKPhysicsBody bodyWithTexture:texture size:texture.size];
+            CGSize collisionSize = self.collisionSize;
+            CGPoint collisionCenter = self.collisionCenter;
+            SKPhysicsBody *physics = [SKPhysicsBody bodyWithRectangleOfSize:collisionSize center:collisionCenter];//[SKPhysicsBody bodyWithTexture:texture size:texture.size];
             physics.dynamic = YES;
             physics.affectedByGravity = NO;
             physics.categoryBitMask = [self _collisionMask];
@@ -36,6 +38,16 @@
     }
     
     return self;
+}
+
+- (CGSize)collisionSize
+{
+    return self.texture.size;
+}
+
+- (CGPoint)collisionCenter
+{
+    return self.position;
 }
 
 - (id)initWithImageNamed:(NSString *)name
@@ -94,9 +106,30 @@
     return ( self.position.y - self.parent.frame.origin.y ) / self.parent.frame.size.height * ( ENTITY_Z_MAX - ENTITY_Z ) + ENTITY_Z;
 }
 
+- (void)dispatchActionPause
+{
+    [self.actionDispatchSources enumerateObjectsUsingBlock:^(dispatch_source_t actionSource, NSUInteger idx, BOOL *stop) {
+        dispatch_suspend(actionSource);
+    }];
+}
+
+- (void)dispatchActionResume
+{
+    [self.actionDispatchSources enumerateObjectsUsingBlock:^(dispatch_source_t actionSource, NSUInteger idx, BOOL *stop) {
+        dispatch_resume(actionSource);
+    }];
+}
+
 @end
 
 @implementation SKNode (CombobulatedExtensions)
+
+- (CGPoint)midpointToNode:(SKNode *)node
+{
+    CGFloat midX = ( node.position.x + self.position.x ) / 2;
+    CGFloat midY = ( node.position.y + self.position.y ) / 2;
+    return CGPointMake(midX,midY);
+}
 
 - (void)removeChildrenNamed:(NSString *)childName
 {
