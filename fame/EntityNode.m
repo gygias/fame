@@ -22,9 +22,15 @@
         
         if ( withPhysics )
         {
+            SKPhysicsBody *physics = nil;
             CGSize collisionSize = self.collisionSize;
-            CGPoint collisionCenter = self.collisionCenter;
-            SKPhysicsBody *physics = [SKPhysicsBody bodyWithRectangleOfSize:collisionSize center:collisionCenter];//[SKPhysicsBody bodyWithTexture:texture size:texture.size];
+            if ( ! isnan(collisionSize.width) )
+            {
+                CGPoint collisionCenter = self.collisionCenter;
+                physics = [SKPhysicsBody bodyWithRectangleOfSize:collisionSize center:collisionCenter];//[SKPhysicsBody bodyWithTexture:texture size:texture.size];
+            }
+            else // performs horrendously
+                physics = [SKPhysicsBody bodyWithTexture:self.texture size:self.size];
             physics.dynamic = YES;
             physics.affectedByGravity = NO;
             physics.categoryBitMask = [self _collisionMask];
@@ -42,7 +48,7 @@
 
 - (CGSize)collisionSize
 {
-    return self.texture.size;
+    return self.size;//CGSizeMake(NAN,NAN);
 }
 
 - (CGPoint)collisionCenter

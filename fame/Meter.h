@@ -10,7 +10,9 @@
 
 @interface Meter : SKSpriteNode
 
-+ (Meter *)meterWithLabel:(NSString *)label origin:(CGPoint)origin xOffset:(CGFloat)xOffset;
++ (CGSize)meterSize;
+
++ (Meter *)meterWithLabel:(NSString *)label origin:(CGPoint)origin xOffset:(CGFloat)xOffset yOffset:(CGFloat)yOffset;
 
 @property SKSpriteNode *fillerNode;
 

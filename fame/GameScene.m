@@ -189,9 +189,14 @@ static CGFloat gLastYOffset = 0; // XXX
         //[buttonContentNode runAction:rotateForever];
     }
     
-    Meter *meter = [Meter meterWithLabel:@"anger" origin:fuckingBottomLeft xOffset:xOffset];
-    [node addChild:meter];
-    self.meter1 = meter;
+    CGSize meterSize = [Meter meterSize];
+    Meter *angerMeter = [Meter meterWithLabel:@"anger" origin:fuckingBottomLeft xOffset:xOffset yOffset:(meterSize.height / 2) + 1];
+    [node addChild:angerMeter];
+    self.meter1 = angerMeter;
+    
+    Meter *zenMeter = [Meter meterWithLabel:@"zen" origin:fuckingBottomLeft xOffset:xOffset yOffset:-(meterSize.height / 2)];
+    [node addChild:zenMeter];
+    self.meter2 = zenMeter;
     
     //[backgroundSprite runAction:rotateForever];
 }
@@ -221,13 +226,22 @@ static CGFloat gLastYOffset = 0; // XXX
         if ( frame < ( perc * 10 ) )
         {
             SKSpriteNode *fillerNode = (SKSpriteNode *)node;
+            NSLog(@"perc %0.2f",perc);
             CGFloat xDelta = perc * (float)realAngerDelta;
-            CGFloat drawnDelta = origXScale + xDelta;
+            CGFloat absoluteDelta = origXScale + xDelta;
+            CGFloat drawnDelta = absoluteDelta;
             if ( drawnDelta < METER_FILLER_MIN_SCALE )
                 drawnDelta = METER_FILLER_MIN_SCALE;
-            fillerNode.xScale = origXScale + xDelta;
-            fillerNode.position = CGPointMake( origX + xDelta / 2, fillerNode.position.y );
+            if ( drawnDelta > METER_FILLER_MAX_SCALE )
+                drawnDelta = METER_FILLER_MAX_SCALE;
+            fillerNode.xScale = drawnDelta;
+            // accidentally produces interesting grow-from-center effect
+            // fillerNode.position = CGPointMake( ( origX + xDelta / 2 ) * (( absoluteDelta - drawnDelta ) / absoluteDelta), fillerNode.position.y );
+            if ( drawnDelta == absoluteDelta )
+                fillerNode.position = CGPointMake( origX + xDelta / 2, fillerNode.position.y );
             frame++;
+            
+            NSLog(@"-> xScale = %0.1f + %0.1f",origXScale,xDelta);
         }
     }];
     
@@ -948,6 +962,7 @@ NSString *ActionWalkingKey = @"walking";
     {
         NSLog(@"bouncer vs taxi");
         [self _runOverNode:self.bouncer withNode:(EntityNode *)taxiPhysics.node];
+        [self _angerDelta:RUN_OVER_ANGER];
         [Sound playSoundNamed:@"fart-1.wav" onNode:self.bouncer];
     }
     else if ( celebPhysics && taxiPhysics )
@@ -982,8 +997,10 @@ NSString *ActionWalkingKey = @"walking";
         }];
     }];
     
+    [Sound playSoundNamed:@"pop-1.wav" onNode:node];
     ((EntityNode *)node).isDead = YES;
     [self _handleKill];
+    
 }
 
 - (void)_runOverNode:(EntityNode *)node withNode:(EntityNode *)attacker

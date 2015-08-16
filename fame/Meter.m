@@ -12,16 +12,31 @@
 
 @implementation Meter
 
-+ (Meter *)meterWithLabel:(NSString *)label origin:(CGPoint)origin xOffset:(CGFloat)xOffset
+NSString *MeterBorderName = @"meter-border-1";
+
++ (CGSize)meterSize
 {
-    NSString *textureName = @"meter-border-1";
+    NSString *textureName = MeterBorderName;
     Meter *meter = [Meter spriteNodeWithImageNamed:textureName];
     meter.texture.filteringMode = SKTextureFilteringNearest;
     meter.name = @"meter-border";
     meter.zPosition = CONTROL_PANEL_BACKGROUND_Z;
     meter.xScale = METER_X_SCALE; // XXX
     meter.yScale = METER_Y_SCALE;
-    meter.position = CGPointMake(origin.x + xOffset + meter.size.width, origin.y + 1);
+    
+    return meter.size;
+}
+
++ (Meter *)meterWithLabel:(NSString *)label origin:(CGPoint)origin xOffset:(CGFloat)xOffset yOffset:(CGFloat)yOffset
+{
+    NSString *textureName = MeterBorderName;
+    Meter *meter = [Meter spriteNodeWithImageNamed:textureName];
+    meter.texture.filteringMode = SKTextureFilteringNearest;
+    meter.name = @"meter-border";
+    meter.zPosition = CONTROL_PANEL_BACKGROUND_Z;
+    meter.xScale = METER_X_SCALE; // XXX
+    meter.yScale = METER_Y_SCALE;
+    meter.position = CGPointMake(origin.x + xOffset + meter.size.width, origin.y + 1 + yOffset);
     //meter1Border.yScale = ( backgroundSprite.size.height ) / ( ( meter1Border.texture.size.height - 1 ) / 2 );
     
     SKLabelNode *backLabelNode = [SKLabelNode labelNodeWithFontNamed:@"Chalkduster"];
@@ -41,7 +56,7 @@
     fillerNode.name = @"meter-filler";
     fillerNode.xScale = METER_FILLER_MIN_SCALE / METER_X_SCALE;
     fillerNode.yScale = METER_FILLER_Y_SCALE / METER_Y_SCALE;
-    fillerNode.position = CGPointMake( -4.4, 0 );
+    fillerNode.position = CGPointMake( -4.8, 0 );
     fillerNode.zPosition = CONTROL_PANEL_CD_Z;
     meter.fillerNode = fillerNode;
     [meter addChild:fillerNode];
