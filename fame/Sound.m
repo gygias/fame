@@ -21,11 +21,33 @@ static SKScene *sScene;
 {
     if ( soundName )
     {
-        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        //dispatch_async(dispatch_get_global_queue(0, 0), ^{
             SKAction *soundEffect = [SKAction playSoundFileNamed:soundName waitForCompletion:NO];
-            [sScene runAction:soundEffect];
-        });
+            NSString *key = [NSString stringWithFormat:@"sound-%@-%u",soundName,arc4random()];
+            [sScene runAction:soundEffect withKey:key];
+        //});
     }
+}
+
++ (NSObject *)playStoppableSoundNamed:(NSString *)soundName onNode:(SKNode *)node
+{
+    NSURL *url = [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@", [[NSBundle mainBundle] resourcePath], soundName]];
+    
+    NSError *error;
+    AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:&error];
+    //player.numberOfLoops = 1;
+    
+    if (!player)
+        NSLog(@"%@",[error localizedDescription]);
+    else
+        [player play];
+    
+    return player;
+}
+
++ (void)stopSound:(NSObject *)sound
+{
+    [(AVAudioPlayer *)sound stop];
 }
 
 NSInteger   gMaxSlotSpin = -1;

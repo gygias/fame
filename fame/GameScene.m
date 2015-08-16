@@ -529,7 +529,23 @@ NSString *FlashMeterKey = @"flash-meter";
     
     if ( [action isEqualToString:@"action-1"] )
     {
-        if ( self.bouncer.lastMove )
+        if ( self.nextAction1ToSpeechBubble )
+        {
+            if ( self.advancePageOnTouch )
+                [self.speechBubble advancePage];
+            else
+            {
+                SKAction *fadeOut = [SKAction fadeOutWithDuration:0.25];
+                [self.speechBubble runAction:fadeOut completion:^{
+                    [self.speechBubble removeFromParent];
+                    //self.speechBubble = nil;
+                }];
+            }
+            self.advancePageOnTouch = NO;
+            self.nextAction1ToSpeechBubble = NO;
+            return;
+        }
+        else if ( self.bouncer.lastMove )
         {
             [self _flashButton:1];
             return;
@@ -903,11 +919,8 @@ NSString *ActionWalkingKey = @"walking";
     
     if ( ! self.speechBubble )
     {
-        CGPoint origin = CGPointMake(CGRectGetMidX(self.gameScreenMap.screenRect),self.gameScreenMap.screenRect.size.height + INFO_PANEL_Y_OFFSET * 2 + 1);
-        SpeechBubble *speechBubble = [SpeechBubble speechBubbleWithText:@"abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz, when you hurr, you must not forget to durr, inside the gurr blur. thanks."
-                                                                 origin:origin];
-        [self.parentNode addChild:speechBubble];
-        self.speechBubble = speechBubble;
+        NSString *ORIGINALSPEECH = @"abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz, when you hurr, you must not forget to durr, inside the gurr blur. thanks.";
+        [self _runSpeechBubbleWithText:ORIGINALSPEECH];
     }
 }
 
@@ -1161,6 +1174,27 @@ NSString *KillScaleKey = @"kill-scale";
     }
 }
 
+- (void)_runSpeechBubbleWithText:(NSString *)text
+{
+    CGPoint origin = CGPointMake(CGRectGetMidX(self.gameScreenMap.screenRect),self.gameScreenMap.screenRect.size.height + INFO_PANEL_Y_OFFSET * 2 + 1);
+    SKSpriteNode *bouncerSprite = [SKSpriteNode spriteNodeWithImageNamed:@"bouncer-1"];
+    bouncerSprite.texture.filteringMode = SKTextureFilteringNearest;
+    SpeechBubble *speechBubble = [SpeechBubble speechBubbleWithText:text
+                                                             origin:origin
+                                                          imageNode:bouncerSprite];
+    [self.parentNode addChild:speechBubble];
+    [speechBubble animate];
+    speechBubble.pageFinishedAnimatingHandler = ^(SpeechBubble *speechBubble, BOOL morePages) {
+        self.advancePageOnTouch = morePages;
+        self.nextAction1ToSpeechBubble = YES;
+    };
+    
+    if ( self.speechBubble )
+        [self.speechBubble removeFromParent];
+    
+    self.speechBubble = speechBubble;
+}
+
 @end
 
 @implementation GameScene (RefactorMe)
@@ -1351,7 +1385,7 @@ NSString *KillScaleKey = @"kill-scale";
     }];
     SKAction *wait = [SKAction waitForDuration:1.0];
     SKAction *peekScale = [SKAction scaleXTo:10.0 y:10.0 duration:0.0];
-    CGFloat peekHeight = self.bouncer.size.height * 1.3;
+    CGFloat peekHeight = self.bouncer.size.height * 1.4;
     SKAction *hide = [SKAction moveToY:self.gameScreenMap.belowMountainsY duration:0.0];
     NSTimeInterval peekDuration = 5.0;
     SKAction *peek = [SKAction moveToY:self.gameScreenMap.belowMountainsY + peekHeight duration:peekDuration];
@@ -1361,6 +1395,8 @@ NSString *KillScaleKey = @"kill-scale";
     }];
     SKAction *flyAway = [SKAction moveToY:self.gameScreenMap.screenRect.origin.y + self.gameScreenMap.screenRect.size.height + self.bouncer.size.height*3
                                  duration:0.5];
+    SKAction *disappearNow = [SKAction fadeOutWithDuration:0.0];
+    SKAction *flyAwayAndDisappear = [SKAction sequence:@[ flyAway, disappearNow ]];
     NSTimeInterval colorizeDuration = 1.0;
     __block NSMutableArray *dyingNodes = [NSMutableArray new];
     SKAction *paintWorldRed = [SKAction runBlock:^{
@@ -1392,7 +1428,7 @@ NSString *KillScaleKey = @"kill-scale";
     }];
     SKAction *explosionAndRed = [SKAction group:@[playExplosion, paintWorldRed]];
     //SKAction *leerSomeMore = leer;
-    SKAction *sequence = [SKAction sequence:@[ upright, flyTowardMid, peekScale, disappear, hide, wait, peek, leer, flyAway, explosionAndRed/*, leerSomeMore*/ ]];
+    SKAction *sequence = [SKAction sequence:@[ upright, flyTowardMid, peekScale, disappear, hide, wait, peek, leer, flyAwayAndDisappear, explosionAndRed/*, leerSomeMore*/ ]];
     [self.bouncer runAction:sequence withKey:@"lol" completion:^{
         NSLog(@"lol completed");
         SKAction *playTeleport = [SKAction runBlock:^{
@@ -1429,6 +1465,8 @@ NSString *KillScaleKey = @"kill-scale";
             self.bouncer.isMidAction = NO;
             self.bouncer.isAirborne = NO;
             self.bouncer.isManualZ = NO;
+            
+            [self _runSpeechBubbleWithText:@"that'll show them."];
         }];
     }];
 }

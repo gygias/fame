@@ -87,7 +87,7 @@
 #warning there are magical mystery numbers
 #define MAGICAL_MYSTERY_FILLER_INSET 17.0
 #define MAGICAL_MYSTERY_METER_LABEL_X_OFFSET 3.5
-#define MAGICAL_MYSTERY_BELOW_MOUNTAINS 440.0
+#define MAGICAL_MYSTERY_BELOW_MOUNTAINS 430.0
 typedef enum : uint8_t {
     ColliderEntity                  = 1,
     ColliderBouncer                 = 2,

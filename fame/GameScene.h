@@ -52,5 +52,8 @@
 @property Meter *meter2;
 
 @property SpeechBubble *speechBubble;
+@property BOOL nextAction1ToSpeechBubble;
+@property BOOL advancePageOnTouch;
+
 
 @end

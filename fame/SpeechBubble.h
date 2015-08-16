@@ -9,11 +9,23 @@
 #import <SpriteKit/SpriteKit.h>
 
 @interface SpeechBubble : SKSpriteNode
+{
+    NSUInteger _charIdx;
+    NSUInteger _lineIdx;
+    dispatch_source_t _animateTimer;
+    NSObject *_currentSound;
+}
 
 @property NSString *text;
 @property NSArray *lines;
 @property NSUInteger currentPage;
+@property SKSpriteNode *imageNode;
 
-+ (id)speechBubbleWithText:(NSString *)text origin:(CGPoint)origin;
++ (id)speechBubbleWithText:(NSString *)text origin:(CGPoint)origin imageNode:(SKSpriteNode *)imageNode;
+
+typedef void (^PageFinishedAnimatingHandler)(SpeechBubble*,BOOL);
+@property (copy) PageFinishedAnimatingHandler pageFinishedAnimatingHandler;
+- (void)animate;
+- (void)advancePage;
 
 @end

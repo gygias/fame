@@ -39,6 +39,8 @@
 		6395C9631B805D71003D4EA6 /* flyby-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C95F1B805D71003D4EA6 /* flyby-1.wav */; };
 		6395C9641B805D71003D4EA6 /* teleport-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C9601B805D71003D4EA6 /* teleport-1.wav */; };
 		6395C9671B8111DD003D4EA6 /* SpeechBubble.m in Sources */ = {isa = PBXBuildFile; fileRef = 6395C9661B8111DD003D4EA6 /* SpeechBubble.m */; };
+		6395C96B1B81384C003D4EA6 /* typewriter-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C96A1B81384C003D4EA6 /* typewriter-1.wav */; };
+		6395C96D1B813CEE003D4EA6 /* carriage-return-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C96C1B813CEE003D4EA6 /* carriage-return-1.wav */; };
 		639945271B753F0300A62D1B /* child_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451D1B753F0300A62D1B /* child_scream_01.wav */; };
 		639945281B753F0300A62D1B /* female_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451E1B753F0300A62D1B /* female_scream_01.wav */; };
 		639945291B753F0300A62D1B /* female_scream_02.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451F1B753F0300A62D1B /* female_scream_02.wav */; };
@@ -141,6 +143,8 @@
 		6395C9601B805D71003D4EA6 /* teleport-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "teleport-1.wav"; path = "Sound/teleport-1.wav"; sourceTree = "<group>"; };
 		6395C9651B8111DD003D4EA6 /* SpeechBubble.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpeechBubble.h; sourceTree = "<group>"; };
 		6395C9661B8111DD003D4EA6 /* SpeechBubble.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpeechBubble.m; sourceTree = "<group>"; };
+		6395C96A1B81384C003D4EA6 /* typewriter-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "typewriter-1.wav"; path = "Sound/typewriter-1.wav"; sourceTree = "<group>"; };
+		6395C96C1B813CEE003D4EA6 /* carriage-return-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "carriage-return-1.wav"; path = "Sound/carriage-return-1.wav"; sourceTree = "<group>"; };
 		6399451D1B753F0300A62D1B /* child_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = child_scream_01.wav; path = Sound/child_scream_01.wav; sourceTree = "<group>"; };
 		6399451E1B753F0300A62D1B /* female_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_01.wav; path = Sound/female_scream_01.wav; sourceTree = "<group>"; };
 		6399451F1B753F0300A62D1B /* female_scream_02.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_02.wav; path = Sound/female_scream_02.wav; sourceTree = "<group>"; };
@@ -289,6 +293,8 @@
 		6399451C1B753EEE00A62D1B /* Sound */ = {
 			isa = PBXGroup;
 			children = (
+				6395C96C1B813CEE003D4EA6 /* carriage-return-1.wav */,
+				6395C96A1B81384C003D4EA6 /* typewriter-1.wav */,
 				6395C95D1B805D71003D4EA6 /* chant-1.wav */,
 				6395C95E1B805D71003D4EA6 /* explosion-1.wav */,
 				6395C95F1B805D71003D4EA6 /* flyby-1.wav */,
@@ -425,6 +431,7 @@
 				6399452B1B753F0300A62D1B /* male_grunt_02.wav in Resources */,
 				637D562B1B7456200013B155 /* Images.xcassets in Resources */,
 				6395C9641B805D71003D4EA6 /* teleport-1.wav in Resources */,
+				6395C96B1B81384C003D4EA6 /* typewriter-1.wav in Resources */,
 				6399454B1B75F94A00A62D1B /* slot-machine-spin-1.wav in Resources */,
 				639945341B75449500A62D1B /* male_scream_02.wav in Resources */,
 				6383CBFF1B7C4364002073A2 /* no-beep.wav in Resources */,
@@ -432,6 +439,7 @@
 				639945301B753F0300A62D1B /* woman_scream_long_01.wav in Resources */,
 				6399452A1B753F0300A62D1B /* male_grunt_01.wav in Resources */,
 				6395C9611B805D71003D4EA6 /* chant-1.wav in Resources */,
+				6395C96D1B813CEE003D4EA6 /* carriage-return-1.wav in Resources */,
 				639945291B753F0300A62D1B /* female_scream_02.wav in Resources */,
 				637D56231B7456200013B155 /* GameScene.sks in Resources */,
 				6395C95A1B803B0A003D4EA6 /* fart-2.wav in Resources */,
