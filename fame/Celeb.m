@@ -23,10 +23,10 @@
     return self;
 }
 
-- (CGSize)collisionSize
-{
-    return CGSizeMake(self.size.width * 0.5, self.size.height * 0.6);
-}
+//- (CGSize)collisionSize
+//{
+//    return CGSizeMake(self.size.width * 0.5, self.size.height * 0.6);
+//}
 
 - (uint8_t)_collisionMask
 {

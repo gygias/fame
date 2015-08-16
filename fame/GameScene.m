@@ -205,17 +205,17 @@ NSString *FlashMeterKey = @"flash-meter";
 
 - (void)_angerDelta:(NSInteger)angerDelta
 {
-    NSInteger origAnger = self.bouncer.anger;
-    NSInteger netAnger = origAnger + angerDelta;
-    if ( netAnger > MAX_ANGER )
-        netAnger = MAX_ANGER;
-    if ( netAnger < 0 )
-        netAnger = 0;
+    NSInteger startAnger = self.bouncer.anger;
+    NSInteger endAnger = startAnger + angerDelta;
+    if ( endAnger > MAX_ANGER )
+        endAnger = MAX_ANGER;
+    if ( endAnger < 0 )
+        endAnger = 0;
     
-    NSInteger realAngerDelta = netAnger - origAnger;
+    NSInteger realAngerDelta = endAnger - startAnger;
     //NSLog(@"ad %ld orig %ld net %ld real %ld",angerDelta,origAnger,netAnger,realAngerDelta);
     
-    self.bouncer.anger = netAnger;
+    self.bouncer.anger = endAnger;
     
     //NSLog(@"anger %ld + d%ld -> %lu",(long)origAnger,(long)angerDelta,(unsigned long)self.bouncer.anger);
     
@@ -228,8 +228,8 @@ NSString *FlashMeterKey = @"flash-meter";
         if ( frame < ( perc * 10 ) )
         {
             SKSpriteNode *fillerNode = (SKSpriteNode *)node;
-            NSLog(@"perc %0.2f",perc);
-            CGFloat xDelta = perc * (float)realAngerDelta;
+            //NSLog(@"perc %0.2f",perc);
+            CGFloat xDelta = perc * (float)realAngerDelta / METER_FILLER_MAX_SCALE;
             CGFloat absoluteDelta = origXScale + xDelta;
             CGFloat drawnDelta = absoluteDelta;
             if ( drawnDelta < METER_FILLER_MIN_SCALE )
@@ -239,17 +239,18 @@ NSString *FlashMeterKey = @"flash-meter";
             fillerNode.xScale = drawnDelta;
             // accidentally produces interesting grow-from-center effect
             // fillerNode.position = CGPointMake( ( origX + xDelta / 2 ) * (( absoluteDelta - drawnDelta ) / absoluteDelta), fillerNode.position.y );
-            if ( drawnDelta == absoluteDelta )
+            CGFloat newX = origX + xDelta / 2;
+            NSLog(@"newX : %0.2f",newX);
                 fillerNode.position = CGPointMake( origX + xDelta / 2, fillerNode.position.y );
             frame++;
             
-            NSLog(@"-> xScale = %0.1f + %0.1f",origXScale,xDelta);
+            //NSLog(@"-> xScale = %0.1f + %0.1f",origXScale,xDelta);
         }
     }];
     
     [self.meter1.fillerNode runAction:setAction];
     
-    if ( netAnger == MAX_ANGER )
+    if ( endAnger == MAX_ANGER )
     {
         NSTimeInterval fadeDuration = 0.5;
         SKAction *fadeOut = [SKAction fadeOutWithDuration:fadeDuration];

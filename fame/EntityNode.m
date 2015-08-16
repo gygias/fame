@@ -12,6 +12,11 @@
 
 @implementation EntityNode
 
+- (id)initWithImageNamed:(NSString *)name
+{
+    return [self initWithImageNamed:name withPhysics:YES];
+}
+
 - (id)initWithImageNamed:(NSString *)name withPhysics:(BOOL)withPhysics
 {
     if ( ( self = [super initWithImageNamed:name] ))
@@ -54,11 +59,6 @@
 - (CGPoint)collisionCenter
 {
     return self.position;
-}
-
-- (id)initWithImageNamed:(NSString *)name
-{
-    return [self initWithImageNamed:name withPhysics:YES];
 }
 
 - (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap
