@@ -43,7 +43,12 @@ NSString * PointString(CGPoint point)
 
 NSString * RectString(CGRect rect)
 {
-    return [NSString stringWithFormat:@"%@[w=%0.2f,h=%0.2f]",PointString(rect.origin),rect.size.width,rect.size.height];
+    return [NSString stringWithFormat:@"%@%@",PointString(rect.origin),SizeString(rect.size)];
+}
+
+NSString * SizeString(CGSize size)
+{
+    return [NSString stringWithFormat:@"[w=%0.2f,h=%0.2f]",size.width,size.height];
 }
 
 CGPoint CGRectGetMid(CGRect rect)

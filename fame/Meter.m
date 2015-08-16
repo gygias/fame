@@ -27,7 +27,7 @@ NSString *MeterBorderName = @"meter-border-1";
     return meter.size;
 }
 
-+ (Meter *)meterWithLabel:(NSString *)label origin:(CGPoint)origin xOffset:(CGFloat)xOffset yOffset:(CGFloat)yOffset
++ (Meter *)meterWithLabel:(NSString *)label origin:(CGPoint)origin xOffset:(CGFloat)xOffset yOffset:(CGFloat)yOffset centered:(BOOL)centered
 {
     NSString *textureName = MeterBorderName;
     Meter *meter = [Meter spriteNodeWithImageNamed:textureName];
@@ -56,7 +56,7 @@ NSString *MeterBorderName = @"meter-border-1";
     fillerNode.name = @"meter-filler";
     fillerNode.xScale = METER_FILLER_MIN_SCALE / METER_X_SCALE;
     fillerNode.yScale = METER_FILLER_Y_SCALE / METER_Y_SCALE;
-    fillerNode.position = CGPointMake( -4.8, 0 );
+    fillerNode.position = centered ? CGPointMake(0,0) : CGPointMake( -4.8, 0 );
     fillerNode.zPosition = CONTROL_PANEL_CD_Z;
     meter.fillerNode = fillerNode;
     [meter addChild:fillerNode];
@@ -70,6 +70,8 @@ NSString *MeterBorderName = @"meter-border-1";
     //backLabelNode.userData = [NSMutableDictionary dictionary];
     //backLabelNode.text = @"anger";
     [meter addChild:frontLabelNode];
+    
+    meter.centered = centered;
     
     return meter;
 }

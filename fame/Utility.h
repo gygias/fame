@@ -17,6 +17,7 @@
 
 NSString * PointString(CGPoint point);
 NSString * RectString(CGRect rect);
+NSString * SizeString(CGSize size);
 
 CGPoint CGRectGetMid(CGRect rect);
 

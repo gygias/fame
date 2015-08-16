@@ -51,4 +51,6 @@
 @property Meter *meter1;
 @property Meter *meter2;
 
+@property SpeechBubble *speechBubble;
+
 @end

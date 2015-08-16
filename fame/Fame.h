@@ -16,6 +16,7 @@
 #import "Meter.h"
 #import "ComboBox.h"
 #import "Sound.h"
+#import "SpeechBubble.h"
 
 #import "Utility.h"
 
@@ -79,6 +80,8 @@
 #define METER_Y_SCALE 1.5
 #define METER_FILLER_Y_SCALE 2.0
 #define METER_LABEL_FONT_SIZE (8.0 * METER_Y_SCALE)
+
+#define SPEECH_BUBBLE_FONT_SIZE 10.0
 
 // XXX MYSTERY NUMBERS
 #warning there are magical mystery numbers

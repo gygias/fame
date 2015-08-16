@@ -52,7 +52,6 @@
                                             self.frame.size.width,
                                             quarterHeight);
     self.gameScreenMap.belowMountainsY = MAGICAL_MYSTERY_BELOW_MOUNTAINS;
-                                            
     
     [self _addWorldToNode:parentNode];
     [self _addFriendliesToNode:parentNode];
@@ -198,11 +197,11 @@ static CGFloat gLastYOffset = 0; // XXX
     }
     
     CGSize meterSize = [Meter meterSize];
-    Meter *angerMeter = [Meter meterWithLabel:@"anger" origin:fuckingBottomLeft xOffset:xOffset yOffset:(meterSize.height / 2) + 1];
+    Meter *angerMeter = [Meter meterWithLabel:@"anger" origin:fuckingBottomLeft xOffset:xOffset yOffset:(meterSize.height / 2) + 1 centered:NO];
     [node addChild:angerMeter];
     self.meter1 = angerMeter;
     
-    Meter *zenMeter = [Meter meterWithLabel:@"zen" origin:fuckingBottomLeft xOffset:xOffset yOffset:-(meterSize.height / 2)];
+    Meter *zenMeter = [Meter meterWithLabel:@"zen" origin:fuckingBottomLeft xOffset:xOffset yOffset:-(meterSize.height / 2) centered:YES];
     [node addChild:zenMeter];
     self.meter2 = zenMeter;
     
@@ -900,6 +899,15 @@ NSString *ActionWalkingKey = @"walking";
     if ( [ai introduceWithScreenMap:self.gameScreenMap] )
     {
         [Sound playSoundNamed:ai.introSoundNames.randomObject onNode:ai];
+    }
+    
+    if ( ! self.speechBubble )
+    {
+        CGPoint origin = CGPointMake(CGRectGetMidX(self.gameScreenMap.screenRect),self.gameScreenMap.screenRect.size.height + INFO_PANEL_Y_OFFSET * 2 + 1);
+        SpeechBubble *speechBubble = [SpeechBubble speechBubbleWithText:@"abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz, when you hurr, you must not forget to durr, inside the gurr blur. thanks."
+                                                                 origin:origin];
+        [self.parentNode addChild:speechBubble];
+        self.speechBubble = speechBubble;
     }
 }
 
