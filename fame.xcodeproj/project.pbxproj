@@ -34,6 +34,10 @@
 		6395C9581B8038CE003D4EA6 /* fart-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C9571B8038CE003D4EA6 /* fart-1.wav */; };
 		6395C95A1B803B0A003D4EA6 /* fart-2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C9591B803B0A003D4EA6 /* fart-2.wav */; };
 		6395C95C1B8047BF003D4EA6 /* pop-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C95B1B8047BF003D4EA6 /* pop-1.wav */; };
+		6395C9611B805D71003D4EA6 /* chant-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C95D1B805D71003D4EA6 /* chant-1.wav */; };
+		6395C9621B805D71003D4EA6 /* explosion-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C95E1B805D71003D4EA6 /* explosion-1.wav */; };
+		6395C9631B805D71003D4EA6 /* flyby-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C95F1B805D71003D4EA6 /* flyby-1.wav */; };
+		6395C9641B805D71003D4EA6 /* teleport-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6395C9601B805D71003D4EA6 /* teleport-1.wav */; };
 		639945271B753F0300A62D1B /* child_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451D1B753F0300A62D1B /* child_scream_01.wav */; };
 		639945281B753F0300A62D1B /* female_scream_01.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451E1B753F0300A62D1B /* female_scream_01.wav */; };
 		639945291B753F0300A62D1B /* female_scream_02.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6399451F1B753F0300A62D1B /* female_scream_02.wav */; };
@@ -130,6 +134,10 @@
 		6395C9571B8038CE003D4EA6 /* fart-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "fart-1.wav"; path = "Sound/fart-1.wav"; sourceTree = "<group>"; };
 		6395C9591B803B0A003D4EA6 /* fart-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "fart-2.wav"; path = "Sound/fart-2.wav"; sourceTree = "<group>"; };
 		6395C95B1B8047BF003D4EA6 /* pop-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "pop-1.wav"; path = "Sound/pop-1.wav"; sourceTree = "<group>"; };
+		6395C95D1B805D71003D4EA6 /* chant-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "chant-1.wav"; path = "Sound/chant-1.wav"; sourceTree = "<group>"; };
+		6395C95E1B805D71003D4EA6 /* explosion-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "explosion-1.wav"; path = "Sound/explosion-1.wav"; sourceTree = "<group>"; };
+		6395C95F1B805D71003D4EA6 /* flyby-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "flyby-1.wav"; path = "Sound/flyby-1.wav"; sourceTree = "<group>"; };
+		6395C9601B805D71003D4EA6 /* teleport-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "teleport-1.wav"; path = "Sound/teleport-1.wav"; sourceTree = "<group>"; };
 		6399451D1B753F0300A62D1B /* child_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = child_scream_01.wav; path = Sound/child_scream_01.wav; sourceTree = "<group>"; };
 		6399451E1B753F0300A62D1B /* female_scream_01.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_01.wav; path = Sound/female_scream_01.wav; sourceTree = "<group>"; };
 		6399451F1B753F0300A62D1B /* female_scream_02.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = female_scream_02.wav; path = Sound/female_scream_02.wav; sourceTree = "<group>"; };
@@ -276,6 +284,10 @@
 		6399451C1B753EEE00A62D1B /* Sound */ = {
 			isa = PBXGroup;
 			children = (
+				6395C95D1B805D71003D4EA6 /* chant-1.wav */,
+				6395C95E1B805D71003D4EA6 /* explosion-1.wav */,
+				6395C95F1B805D71003D4EA6 /* flyby-1.wav */,
+				6395C9601B805D71003D4EA6 /* teleport-1.wav */,
 				6395C95B1B8047BF003D4EA6 /* pop-1.wav */,
 				6395C9591B803B0A003D4EA6 /* fart-2.wav */,
 				6395C9571B8038CE003D4EA6 /* fart-1.wav */,
@@ -400,18 +412,21 @@
 				639945491B75F94A00A62D1B /* cash-register-ding.wav in Resources */,
 				639945281B753F0300A62D1B /* female_scream_01.wav in Resources */,
 				6383CC011B7C48A0002073A2 /* clown-squeak.wav in Resources */,
+				6395C9621B805D71003D4EA6 /* explosion-1.wav in Resources */,
 				6399454D1B75F94A00A62D1B /* slot-machine-spin-3.wav in Resources */,
 				6383CBFD1B7C0DA3002073A2 /* whistle-1.wav in Resources */,
 				639945511B75F9CF00A62D1B /* slot-machine-cash-out-2.wav in Resources */,
 				637D562E1B7456200013B155 /* LaunchScreen.xib in Resources */,
 				6399452B1B753F0300A62D1B /* male_grunt_02.wav in Resources */,
 				637D562B1B7456200013B155 /* Images.xcassets in Resources */,
+				6395C9641B805D71003D4EA6 /* teleport-1.wav in Resources */,
 				6399454B1B75F94A00A62D1B /* slot-machine-spin-1.wav in Resources */,
 				639945341B75449500A62D1B /* male_scream_02.wav in Resources */,
 				6383CBFF1B7C4364002073A2 /* no-beep.wav in Resources */,
 				639945361B754AE500A62D1B /* boom_01.wav in Resources */,
 				639945301B753F0300A62D1B /* woman_scream_long_01.wav in Resources */,
 				6399452A1B753F0300A62D1B /* male_grunt_01.wav in Resources */,
+				6395C9611B805D71003D4EA6 /* chant-1.wav in Resources */,
 				639945291B753F0300A62D1B /* female_scream_02.wav in Resources */,
 				637D56231B7456200013B155 /* GameScene.sks in Resources */,
 				6395C95A1B803B0A003D4EA6 /* fart-2.wav in Resources */,
@@ -420,6 +435,7 @@
 				6399454F1B75F94A00A62D1B /* slot-machine-win-1.wav in Resources */,
 				637D56291B7456200013B155 /* Main.storyboard in Resources */,
 				6399452C1B753F0300A62D1B /* male_grunt_03.wav in Resources */,
+				6395C9631B805D71003D4EA6 /* flyby-1.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

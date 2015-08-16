@@ -12,6 +12,10 @@
 
 @property CGRect screenRect;
 
+@property CGRect skyRect;
+
+@property CGFloat belowMountainsY;
+
 @property CGFloat controlPanelHeight;
 
 @property CGFloat bottomSidewalkLower;

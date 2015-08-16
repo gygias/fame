@@ -24,6 +24,7 @@
 @property BOOL isFloored;
 @property BOOL isAirborne;
 @property BOOL isDead;
+@property BOOL isManualZ; // don't automatically set zPos on update: (flyaway, etc)
 @property (nonatomic) BOOL isFrightened;
 @property BOOL isMidAction;
 @property BOOL currentActionIsInterruptible;

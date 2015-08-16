@@ -45,6 +45,13 @@
     [Sound setScene:self];
     self.gameScreenMap = [GameScreenMap new];
     self.gameScreenMap.screenRect = self.frame;
+    CGFloat quarterHeight = ( self.frame.size.height / 4 );
+    self.gameScreenMap.skyRect = CGRectMake(self.frame.origin.x,
+                                            self.frame.origin.y + self.frame.size.height - quarterHeight,
+                                            self.frame.size.width,
+                                            quarterHeight);
+    self.gameScreenMap.belowMountainsY = MAGICAL_MYSTERY_BELOW_MOUNTAINS;
+                                            
     
     [self _addWorldToNode:parentNode];
     [self _addFriendliesToNode:parentNode];
@@ -240,7 +247,7 @@ NSString *FlashMeterKey = @"flash-meter";
             // accidentally produces interesting grow-from-center effect
             // fillerNode.position = CGPointMake( ( origX + xDelta / 2 ) * (( absoluteDelta - drawnDelta ) / absoluteDelta), fillerNode.position.y );
             CGFloat newX = origX + xDelta / 2;
-            NSLog(@"newX : %0.2f",newX);
+            //NSLog(@"newX : %0.2f",newX);
                 fillerNode.position = CGPointMake( origX + xDelta / 2, fillerNode.position.y );
             frame++;
             
@@ -365,24 +372,138 @@ NSString *FlashMeterKey = @"flash-meter";
 
 - (void)pan:(MyPanGestureRecognizer *)recognizer
 {
+    CGPoint uiKitEndPoint = [recognizer locationInView:self.view];
+    CGPoint endPoint = [self convertPointFromView:uiKitEndPoint];
     if ( recognizer.state == UIGestureRecognizerStateEnded )
     {
         CGPoint startPoint = [self convertPointFromView:recognizer.currentStartPoint];
-        if ( ! CGRectContainsPoint(ScaledRect(self.bouncer.frame,2.0),startPoint ) )
-            return;
-        
-        [_panRecognizer reset];
-        
-        CGPoint velocity = [recognizer velocityInView:self.view];
-        CGFloat sumVelocity = ( velocity.x > 0) ? velocity.x : -(velocity.x);
-        sumVelocity += ( velocity.y > 0 ) ? velocity.y : -(velocity.y);
-        if ( sumVelocity < VELOCITY_THRESHOLD )
-            return;
-        //NSLog(@"pan velocity: %0.2f,%0.2f",velocity.x,velocity.y);
-        CGPoint location = [recognizer locationInView:self.view];
-        //NSLog(@"pan %@ -> %@",PointString(startPoint),PointString(location));
-        location = [self convertPointFromView:location];
-        [self _playerAction:@"action-4" targetPoint:location];
+        if ( CGRectContainsPoint(ScaledRect(self.bouncer.frame,2.0),startPoint ) )
+        {
+            [_panRecognizer reset];
+            
+            if ( CGRectContainsPoint(self.gameScreenMap.skyRect,endPoint) )
+            {
+                self.bouncer.isAirborne = YES;
+                self.bouncer.isManualZ = YES;
+                [self.bouncer dispatchActionPause];
+                
+                CGPoint origLocation = self.bouncer.position;
+                CGFloat defaultXScale = self.bouncer.xScale, defaultYScale = self.bouncer.yScale;
+                CGFloat origZPosition = self.bouncer.zPosition;
+                
+                NSTimeInterval flyTowardDuration = 0.33;
+                SKAction *upright = [SKAction rotateToAngle:0 duration:0.0];
+                SKAction *flyToward = [SKAction scaleXBy:50.0 y:50.0 duration:flyTowardDuration];
+                SKAction *flyMid = [SKAction moveTo:CGRectGetMid(self.gameScreenMap.screenRect) duration:flyTowardDuration];
+                SKAction *fade = [SKAction fadeOutWithDuration:flyTowardDuration];
+                fade.timingMode = SKActionTimingEaseIn;
+                SKAction *playFlybyAndFadeCeleb = [SKAction runBlock:^{
+                    [Sound playSoundNamed:@"flyby-1.wav" onNode:self.bouncer];
+                    
+                    SKAction *fadeCeleb = [SKAction fadeOutWithDuration:1.0];
+                    self.celeb.isAirborne = YES;
+                    [self.celeb dispatchActionPause];
+                    [self.celeb runAction:fadeCeleb];
+                }];
+                //SKAction *fadeIn = [SKAction fadeInWithDuration:0.0];
+                SKAction *flyTowardMid = [SKAction group:@[flyToward,flyMid,fade,playFlybyAndFadeCeleb]];
+                SKAction *disappear = [SKAction runBlock:^{
+                    self.bouncer.zPosition = BEHIND_BACKGROUND_Z;
+                    self.bouncer.alpha = 1.0;
+                    //NSLog(@"hid...");
+                    [Sound playSoundNamed:@"chant-1.wav" onNode:self.bouncer];
+                }];
+                SKAction *wait = [SKAction waitForDuration:1.0];
+                SKAction *peekScale = [SKAction scaleXTo:10.0 y:10.0 duration:0.0];
+                CGFloat peekHeight = self.bouncer.size.height;
+                SKAction *hide = [SKAction moveToY:self.gameScreenMap.belowMountainsY duration:0.0];
+                NSTimeInterval peekDuration = 5.0;
+                SKAction *peek = [SKAction moveToY:self.gameScreenMap.belowMountainsY + peekHeight duration:peekDuration];
+                SKAction *leer = [SKAction waitForDuration:1.5];
+                SKAction *playExplosion = [SKAction runBlock:^{
+                    [Sound playSoundNamed:@"explosion-1.wav" onNode:self.bouncer];
+                }];
+                NSTimeInterval colorizeDuration = 1.0;
+                __block NSMutableArray *dyingNodes = [NSMutableArray new];
+                SKAction *paintWorldRed = [SKAction runBlock:^{
+                    SKAction *paint = [SKAction colorizeWithColor:[[UIColor redColor] colorWithAlphaComponent:0.8]  colorBlendFactor:1.0 duration:colorizeDuration];
+                    [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
+                        EntityNode *entityNode = nil;
+                        if ( [childNode isKindOfClass:[EntityNode class]] )
+                        {
+                            entityNode = (EntityNode *)childNode;
+                            if ( ! entityNode.isFriendly )
+                            {
+                                [entityNode dispatchActionPause];
+                                [entityNode removeAllActions];
+                                entityNode.isDead = YES;
+                            }
+                        }
+                        
+                        [childNode runAction:paint completion:^{
+                            if ( ! entityNode || entityNode.isFriendly )
+                            {
+                                // colorize is not reversible
+                                SKAction *unpaint = [SKAction colorizeWithColor:[UIColor clearColor] colorBlendFactor:0.0 duration:colorizeDuration];
+                                [childNode runAction:unpaint];
+                            }
+                            else
+                                [dyingNodes addObject:entityNode];
+                        }];
+                    }];
+                }];
+                SKAction *leerSomeMore = leer;
+                SKAction *sequence = [SKAction sequence:@[ upright, flyTowardMid, peekScale, disappear, hide, wait, peek, leer, paintWorldRed, playExplosion, leerSomeMore ]];
+                [self.bouncer runAction:sequence withKey:@"lol" completion:^{
+                    NSLog(@"lol completed");
+                    SKAction *playTeleport = [SKAction runBlock:^{
+                        [Sound playSoundNamed:@"teleport-1.wav" onNode:self.bouncer];
+                    }];
+                    NSTimeInterval teleportDuration = 1.5;
+                    SKAction *fadeOut = [SKAction fadeOutWithDuration:teleportDuration];
+                    SKAction *moveBack = [SKAction moveTo:origLocation duration:0.0];
+                    SKAction *scaleBack = [SKAction scaleXTo:defaultXScale y:defaultYScale duration:0.0];
+                    SKAction *changeZ = [SKAction runBlock:^{
+                        [self.bouncer dispatchActionResume];
+                        self.bouncer.zPosition = origZPosition;
+                    }];
+                    NSLog(@"returning to %@ (%0.2fxs,%0.2fys)",PointString(origLocation),defaultXScale,defaultYScale);
+                    SKAction *fadeIn = [SKAction fadeInWithDuration:teleportDuration];
+                    SKAction *fadeDead = [SKAction runBlock:^{
+                        SKAction *fade = [SKAction fadeOutWithDuration:teleportDuration];
+                        [dyingNodes enumerateObjectsUsingBlock:^(EntityNode *obj, NSUInteger idx, BOOL *stop) {
+                            [obj runAction:fade completion:^{
+                                [obj removeFromParent];
+                            }];
+                        }];
+                    }];
+                    SKAction *fadeInCeleb = [SKAction runBlock:^{
+                        [self.celeb runAction:fadeIn completion:^{
+                            self.celeb.isAirborne = NO;
+                            self.celeb.isManualZ = NO;
+                            [self.celeb dispatchActionResume];
+                        }];
+                    }];
+                    SKAction *fadeInAndFadeOutDead = [SKAction group:@[ fadeIn, fadeDead, fadeInCeleb ]];
+                    SKAction *sequence = [SKAction sequence:@[ playTeleport,fadeOut,moveBack,scaleBack,changeZ,fadeInAndFadeOutDead ]];
+                    [self.bouncer runAction:sequence withKey:@"return" completion:^{
+                        self.bouncer.isAirborne = NO;
+                        self.bouncer.isManualZ = NO;
+                    }];
+                }];
+            }
+            else
+            {
+                CGPoint velocity = [recognizer velocityInView:self.view];
+                CGFloat sumVelocity = ( velocity.x > 0) ? velocity.x : -(velocity.x);
+                sumVelocity += ( velocity.y > 0 ) ? velocity.y : -(velocity.y);
+                if ( sumVelocity < VELOCITY_THRESHOLD )
+                    return;
+                //NSLog(@"pan velocity: %0.2f,%0.2f",velocity.x,velocity.y);
+                //NSLog(@"pan %@ -> %@",PointString(startPoint),PointString(location));
+                [self _playerAction:@"action-4" targetPoint:endPoint];
+            }
+        }
     }
 }
 
@@ -822,7 +943,7 @@ NSString *ActionWalkingKey = @"walking";
         if ( [obj isKindOfClass:[EntityNode class]] )
         {
             EntityNode *node = (EntityNode *)obj;
-            if ( ! node.isUI )
+            if ( ! node.isUI && ! node.isManualZ )
             {
                 if ( ! node.isFloored )
                 {
@@ -1065,6 +1186,7 @@ NSString *KillScaleKey = @"kill-scale";
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         node.isIncapacitated = NO;
         node.isFloored = YES;
+        [node dispatchActionResume];
         //node.zRotation = 0;
         [node runAction:[SKAction rotateToAngle:0.0 duration:0.0]];
         [tireTread removeFromParent];
