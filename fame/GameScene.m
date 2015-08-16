@@ -689,7 +689,9 @@ static CGFloat gLastYOffset = 0; // XXX
     }
 }
 
-- (void)_walkNode:(SKNode *)node to:(CGPoint)point
+NSString *ActionWalkingKey = @"walking";
+
+- (void)_walkNode:(EntityNode *)node to:(CGPoint)point
 {
     SKAction *moveAction = [SKAction moveTo:point duration:STANDARD_MOVE_DURATION];
     __block float stepped = 0, steps = 5;
@@ -713,7 +715,7 @@ static CGFloat gLastYOffset = 0; // XXX
     
     //SKAction *walkAction = [SKAction animateWithTextures:@[ self.bouncer.node.texture ] timePerFrame:0.1];
     SKAction *group = [SKAction group:@[ moveAction, customAction ]];
-    [node runAction:group completion:^{
+    [node runAction:group withKey:ActionWalkingKey completion:^{
         if ( node.xScale < 0 )
             node.xScale = -(node.xScale);
         self.bouncer.isMidAction = NO;
@@ -986,17 +988,20 @@ static CGFloat gLastYOffset = 0; // XXX
 
 - (void)_runOverNode:(EntityNode *)node withNode:(EntityNode *)attacker
 {
+    BOOL wasMoving = [node actionForKey:ActionWalkingKey] != nil;
+    
     [node removeAllActions];
     [node dispatchActionPause];
     
-    CGPoint midpoint = [node midpointToNode:attacker];
-    [node runAction:[SKAction moveTo:midpoint duration:0.0]];
+    NSLog(@"%@ %@ moving",node.name, wasMoving ? @"was" : @"wasn't");
+    CGPoint point = wasMoving ? [node midpointToNode:attacker] : node.position;
+    [node runAction:[SKAction moveTo:point duration:0.0]];
     
     SKSpriteNode *tireTread = [SKSpriteNode spriteNodeWithImageNamed:@"tire-tread-1"];
     tireTread.zPosition = ENTITY_Z + ENTITY_Z_INC;
     tireTread.xScale = node.xScale;
     tireTread.yScale = node.yScale;
-    tireTread.position = midpoint;
+    tireTread.position = point;
     [self.parentNode addChild:tireTread];
     
     node.zPosition = ENTITY_Z;

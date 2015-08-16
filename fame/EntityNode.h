@@ -30,15 +30,17 @@
 @property NSArray *actionDispatchSources;
 
 - (id)initWithImageNamed:(NSString *)name withPhysics:(BOOL)withPhysics;
+- (void)dispatchActionPause;
+- (void)dispatchActionResume;
 
-// overrides
+// super overrides
+- (void)runAction:(SKAction *)action withKey:(NSString *)key completion:(void (^)())block;
+
+// subclass overrides
 - (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap;
 - (NSArray *)introSoundNames;
 - (NSArray *)frightenedSoundNames;
 - (NSArray *)deathSoundNames;
-
-- (void)dispatchActionPause;
-- (void)dispatchActionResume;
 
 @end
 

@@ -120,6 +120,28 @@
     }];
 }
 
+- (SKAction *)actionForKey:(NSString *)key
+{
+    SKAction *theAction = [super actionForKey:key];
+    if ( ! theAction )
+        theAction = ((NSDictionary *)self.userData[MyActionsKey])[key];
+    return theAction;
+}
+
+NSString *MyActionsKey = @"myActions";
+
+- (void)runAction:(SKAction *)action withKey:(NSString *)key completion:(void (^)())block
+{
+    if ( ! self.userData[MyActionsKey] )
+        self.userData[MyActionsKey] = [NSMutableDictionary new];
+    ((NSMutableDictionary *)self.userData[MyActionsKey])[key] = action;
+    
+    [self runAction:action completion:^{
+        [((NSMutableDictionary *)self.userData[MyActionsKey]) removeObjectForKey:key];
+        block();
+    }];
+}
+
 @end
 
 @implementation SKNode (CombobulatedExtensions)
