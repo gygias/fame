@@ -459,7 +459,7 @@ static CGFloat gLastYOffset = 0; // XXX
 {
     if ( self.bouncer.isMidAction
         && ! self.bouncer.currentActionIsInterruptible
-        && ! [@[ @"double-action-1" ] containsObject:action] )
+        && ! [@[ @"triple-action-1" ] containsObject:action] )
     {
         NSLog(@"ignoring %@ because player is mid non-interruptible action",action);
         return;
@@ -514,14 +514,14 @@ static CGFloat gLastYOffset = 0; // XXX
     }
     else if ( [action isEqualToString:@"double-action-1"] )
     {
-        [self _togglePause:self.parentNode];
-    }
-    else if ( [action isEqualToString:@"triple-action-1"] )
-    {
         if ( self.celeb.isIncapacitated )
             return;
         [self _walkNode:self.celeb to:self.bouncer.position];
         soundName = @"whistle-1.wav";
+    }
+    else if ( [action isEqualToString:@"triple-action-1"] )
+    {
+        [self _togglePause:self.parentNode];
     }
     
     if ( angerDelta )
@@ -909,13 +909,19 @@ static CGFloat gLastYOffset = 0; // XXX
     }
     else if ( celebPhysics && genericAIPhysics )
     {
-        //NSLog(@"ped->celeb spin %0.2f, %0.2f",contact.contactNormal.dx,contact.contactNormal.dy);
-        CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
-        SKAction *action = [SKAction rotateByAngle:angle duration:1];
-        [celebPhysics.node runAction:action];
-        NSString *sound = [Sound randomScream:NO];
-        SKAction *scream = [SKAction playSoundFileNamed:sound waitForCompletion:NO];
-        [self runAction:scream];
+        EntityNode *celeb = (EntityNode *)celebPhysics.node;
+        if ( ! celeb.isFloored )
+        {
+            //NSLog(@"ped->celeb spin %0.2f, %0.2f",contact.contactNormal.dx,contact.contactNormal.dy);
+            CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
+            SKAction *action = [SKAction rotateByAngle:angle duration:1];
+            [celeb runAction:action];
+            NSString *sound = [Sound randomScream:NO];
+            SKAction *scream = [SKAction playSoundFileNamed:sound waitForCompletion:NO];
+            [self runAction:scream completion:^{
+                [celeb runAction:[SKAction rotateToAngle:0 duration:0.0]];
+            }];
+        }
     }
     else if ( genericAIPhysics && groundEffectPhysics )
     {
@@ -946,7 +952,7 @@ static CGFloat gLastYOffset = 0; // XXX
     {
         NSLog(@"celeb vs taxi");
         [self _runOverNode:self.celeb withNode:(EntityNode *)taxiPhysics.node];
-        [Sound playSoundNamed:@"fart-1.wav" onNode:self.celeb];
+        [Sound playSoundNamed:@"fart-2.wav" onNode:self.celeb];
     }
     //else NSLog(@"some collisions between %@ and %@",contact.bodyA.node.name,contact.bodyB.node.name);
 }
