@@ -18,6 +18,7 @@ NSString *ComboBoxLabelChildName = @"label-node";
 {
     if ( ( self = [super initWithImageNamed:@"combo-background" withPhysics:NO] ) )
     {
+        self.isUI = YES;
         self.comboDuration = COMBO_TIMEOUT;
         self.zPosition = INFO_PANEL_Z;
         self.xScale = 1.7;

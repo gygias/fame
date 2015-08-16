@@ -14,6 +14,8 @@
 
 @interface EntityNode : SKSpriteNode
 
+@property BOOL isUI; // XXX seperate inheritances?
+
 @property BOOL rightToLeft;
 
 @property BOOL isFriendly;

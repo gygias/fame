@@ -780,6 +780,18 @@ static CGFloat gLastYOffset = 0; // XXX
         return;
     if ( ( arc4random() % 10 ) == 0 )
         [self _addRandomAI];
+    
+    [self.parentNode.children enumerateObjectsUsingBlock:^(SKSpriteNode *obj, NSUInteger idx, BOOL *stop) {
+        if ( [obj isKindOfClass:[EntityNode class]] )
+        {
+            EntityNode *node = (EntityNode *)obj;
+            if ( ! node.isUI )
+            {
+                CGFloat height = self.gameScreenMap.screenRect.size.height;
+                node.zPosition = ( height - node.position.y ) / height * ENTITY_Z_SPAN + ENTITY_Z;
+            }
+        }
+    }];
 }
 
 - (void)_addRandomAI

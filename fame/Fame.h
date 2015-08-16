@@ -19,6 +19,8 @@
 
 #import "Utility.h"
 
+#define GLOBAL_TIME_SCALAR 1.0
+
 #define FOREGROUND_SPEED 0.02
 #define FOREGROUND_Z 2.0
 
@@ -28,6 +30,7 @@
 #define EFFECT_Z 2.0
 #define ENTITY_Z 3.0
 #define ENTITY_Z_MAX 4.0
+#define ENTITY_Z_SPAN ( ENTITY_Z_MAX - ENTITY_Z )
 #define INFO_PANEL_Z 4.1
 #define INFO_PANEL_CONTENT_Z 4.2
 
