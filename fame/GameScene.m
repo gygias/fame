@@ -23,6 +23,7 @@
 
 @interface GameScene (RefactorMe)
 - (void)_runEarthquakeAtPoint:(CGPoint)point;
+- (void)_runCataclysm;
 @end
 
 @implementation GameScene
@@ -383,114 +384,7 @@ NSString *FlashMeterKey = @"flash-meter";
             
             if ( CGRectContainsPoint(self.gameScreenMap.skyRect,endPoint) )
             {
-                self.bouncer.isAirborne = YES;
-                self.bouncer.isManualZ = YES;
-                [self.bouncer dispatchActionPause];
-                
-                CGPoint origLocation = self.bouncer.position;
-                CGFloat defaultXScale = self.bouncer.xScale, defaultYScale = self.bouncer.yScale;
-                CGFloat origZPosition = self.bouncer.zPosition;
-                
-                NSTimeInterval flyTowardDuration = 0.33;
-                SKAction *upright = [SKAction rotateToAngle:0 duration:0.0];
-                SKAction *flyToward = [SKAction scaleXBy:50.0 y:50.0 duration:flyTowardDuration];
-                SKAction *flyMid = [SKAction moveTo:CGRectGetMid(self.gameScreenMap.screenRect) duration:flyTowardDuration];
-                SKAction *fade = [SKAction fadeOutWithDuration:flyTowardDuration];
-                fade.timingMode = SKActionTimingEaseIn;
-                SKAction *playFlybyAndFadeCeleb = [SKAction runBlock:^{
-                    [Sound playSoundNamed:@"flyby-1.wav" onNode:self.bouncer];
-                    
-                    SKAction *fadeCeleb = [SKAction fadeOutWithDuration:1.0];
-                    self.celeb.isAirborne = YES;
-                    [self.celeb dispatchActionPause];
-                    [self.celeb runAction:fadeCeleb];
-                }];
-                //SKAction *fadeIn = [SKAction fadeInWithDuration:0.0];
-                SKAction *flyTowardMid = [SKAction group:@[flyToward,flyMid,fade,playFlybyAndFadeCeleb]];
-                SKAction *disappear = [SKAction runBlock:^{
-                    self.bouncer.zPosition = BEHIND_BACKGROUND_Z;
-                    self.bouncer.alpha = 1.0;
-                    //NSLog(@"hid...");
-                    [Sound playSoundNamed:@"chant-1.wav" onNode:self.bouncer];
-                }];
-                SKAction *wait = [SKAction waitForDuration:1.0];
-                SKAction *peekScale = [SKAction scaleXTo:10.0 y:10.0 duration:0.0];
-                CGFloat peekHeight = self.bouncer.size.height;
-                SKAction *hide = [SKAction moveToY:self.gameScreenMap.belowMountainsY duration:0.0];
-                NSTimeInterval peekDuration = 5.0;
-                SKAction *peek = [SKAction moveToY:self.gameScreenMap.belowMountainsY + peekHeight duration:peekDuration];
-                SKAction *leer = [SKAction waitForDuration:1.5];
-                SKAction *playExplosion = [SKAction runBlock:^{
-                    [Sound playSoundNamed:@"explosion-1.wav" onNode:self.bouncer];
-                }];
-                NSTimeInterval colorizeDuration = 1.0;
-                __block NSMutableArray *dyingNodes = [NSMutableArray new];
-                SKAction *paintWorldRed = [SKAction runBlock:^{
-                    SKAction *paint = [SKAction colorizeWithColor:[[UIColor redColor] colorWithAlphaComponent:0.8]  colorBlendFactor:1.0 duration:colorizeDuration];
-                    [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
-                        EntityNode *entityNode = nil;
-                        if ( [childNode isKindOfClass:[EntityNode class]] )
-                        {
-                            entityNode = (EntityNode *)childNode;
-                            if ( ! entityNode.isFriendly )
-                            {
-                                [entityNode dispatchActionPause];
-                                [entityNode removeAllActions];
-                                entityNode.isDead = YES;
-                            }
-                        }
-                        
-                        [childNode runAction:paint completion:^{
-                            if ( ! entityNode || entityNode.isFriendly )
-                            {
-                                // colorize is not reversible
-                                SKAction *unpaint = [SKAction colorizeWithColor:[UIColor clearColor] colorBlendFactor:0.0 duration:colorizeDuration];
-                                [childNode runAction:unpaint];
-                            }
-                            else
-                                [dyingNodes addObject:entityNode];
-                        }];
-                    }];
-                }];
-                SKAction *leerSomeMore = leer;
-                SKAction *sequence = [SKAction sequence:@[ upright, flyTowardMid, peekScale, disappear, hide, wait, peek, leer, paintWorldRed, playExplosion, leerSomeMore ]];
-                [self.bouncer runAction:sequence withKey:@"lol" completion:^{
-                    NSLog(@"lol completed");
-                    SKAction *playTeleport = [SKAction runBlock:^{
-                        [Sound playSoundNamed:@"teleport-1.wav" onNode:self.bouncer];
-                    }];
-                    NSTimeInterval teleportDuration = 1.5;
-                    SKAction *fadeOut = [SKAction fadeOutWithDuration:teleportDuration];
-                    SKAction *moveBack = [SKAction moveTo:origLocation duration:0.0];
-                    SKAction *scaleBack = [SKAction scaleXTo:defaultXScale y:defaultYScale duration:0.0];
-                    SKAction *changeZ = [SKAction runBlock:^{
-                        [self.bouncer dispatchActionResume];
-                        self.bouncer.zPosition = origZPosition;
-                    }];
-                    NSLog(@"returning to %@ (%0.2fxs,%0.2fys)",PointString(origLocation),defaultXScale,defaultYScale);
-                    SKAction *fadeIn = [SKAction fadeInWithDuration:teleportDuration];
-                    SKAction *fadeDead = [SKAction runBlock:^{
-                        SKAction *fade = [SKAction fadeOutWithDuration:teleportDuration];
-                        [dyingNodes enumerateObjectsUsingBlock:^(EntityNode *obj, NSUInteger idx, BOOL *stop) {
-                            [obj runAction:fade completion:^{
-                                [obj removeFromParent];
-                            }];
-                        }];
-                    }];
-                    SKAction *fadeInCeleb = [SKAction runBlock:^{
-                        [self.celeb runAction:fadeIn completion:^{
-                            self.celeb.isAirborne = NO;
-                            self.celeb.isManualZ = NO;
-                            [self.celeb dispatchActionResume];
-                        }];
-                    }];
-                    SKAction *fadeInAndFadeOutDead = [SKAction group:@[ fadeIn, fadeDead, fadeInCeleb ]];
-                    SKAction *sequence = [SKAction sequence:@[ playTeleport,fadeOut,moveBack,scaleBack,changeZ,fadeInAndFadeOutDead ]];
-                    [self.bouncer runAction:sequence withKey:@"return" completion:^{
-                        self.bouncer.isAirborne = NO;
-                        self.bouncer.isManualZ = NO;
-                    }];
-                }];
+                [self _runCataclysm];
             }
             else
             {
@@ -1376,6 +1270,122 @@ NSString *KillScaleKey = @"kill-scale";
             }];
         }];
         
+    }];
+}
+
+- (void)_runCataclysm
+{
+    
+    self.bouncer.isAirborne = YES;
+    self.bouncer.isManualZ = YES;
+    [self.bouncer dispatchActionPause];
+    
+    CGPoint origLocation = self.bouncer.position;
+    CGFloat defaultXScale = self.bouncer.xScale, defaultYScale = self.bouncer.yScale;
+    CGFloat origZPosition = self.bouncer.zPosition;
+    
+    NSTimeInterval flyTowardDuration = 0.33;
+    SKAction *upright = [SKAction rotateToAngle:0 duration:0.0];
+    SKAction *flyToward = [SKAction scaleXBy:50.0 y:50.0 duration:flyTowardDuration];
+    SKAction *flyMid = [SKAction moveTo:CGRectGetMid(self.gameScreenMap.screenRect) duration:flyTowardDuration];
+    SKAction *fade = [SKAction fadeOutWithDuration:flyTowardDuration];
+    fade.timingMode = SKActionTimingEaseIn;
+    SKAction *playFlybyAndFadeCeleb = [SKAction runBlock:^{
+        [Sound playSoundNamed:@"flyby-1.wav" onNode:self.bouncer];
+        
+        SKAction *fadeCeleb = [SKAction fadeOutWithDuration:1.0];
+        self.celeb.isAirborne = YES;
+        [self.celeb dispatchActionPause];
+        [self.celeb runAction:fadeCeleb];
+    }];
+    //SKAction *fadeIn = [SKAction fadeInWithDuration:0.0];
+    SKAction *flyTowardMid = [SKAction group:@[flyToward,flyMid,fade,playFlybyAndFadeCeleb]];
+    SKAction *disappear = [SKAction runBlock:^{
+        self.bouncer.zPosition = BEHIND_BACKGROUND_Z;
+        self.bouncer.alpha = 1.0;
+        //NSLog(@"hid...");
+        [Sound playSoundNamed:@"chant-1.wav" onNode:self.bouncer];
+    }];
+    SKAction *wait = [SKAction waitForDuration:1.0];
+    SKAction *peekScale = [SKAction scaleXTo:10.0 y:10.0 duration:0.0];
+    CGFloat peekHeight = self.bouncer.size.height * 1.3;
+    SKAction *hide = [SKAction moveToY:self.gameScreenMap.belowMountainsY duration:0.0];
+    NSTimeInterval peekDuration = 5.0;
+    SKAction *peek = [SKAction moveToY:self.gameScreenMap.belowMountainsY + peekHeight duration:peekDuration];
+    SKAction *leer = [SKAction waitForDuration:1.5];
+    SKAction *playExplosion = [SKAction runBlock:^{
+        [Sound playSoundNamed:@"explosion-1.wav" onNode:self.bouncer];
+    }];
+    SKAction *flyAway = [SKAction moveToY:self.gameScreenMap.screenRect.origin.y + self.gameScreenMap.screenRect.size.height + self.bouncer.size.height*3
+                                 duration:0.5];
+    NSTimeInterval colorizeDuration = 1.0;
+    __block NSMutableArray *dyingNodes = [NSMutableArray new];
+    SKAction *paintWorldRed = [SKAction runBlock:^{
+        SKAction *paint = [SKAction colorizeWithColor:[UIColor redColor] colorBlendFactor:1.0 duration:colorizeDuration];
+        [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *childNode, NSUInteger idx, BOOL *stop) {
+            EntityNode *entityNode = nil;
+            if ( [childNode isKindOfClass:[EntityNode class]] )
+            {
+                entityNode = (EntityNode *)childNode;
+                if ( ! entityNode.isFriendly )
+                {
+                    [entityNode dispatchActionPause];
+                    [entityNode removeAllActions];
+                    entityNode.isDead = YES;
+                }
+            }
+            
+            [childNode runAction:paint completion:^{
+                if ( ! entityNode || entityNode.isFriendly )
+                {
+                    // colorize is not reversible
+                    SKAction *unpaint = [SKAction colorizeWithColor:[UIColor clearColor] colorBlendFactor:0.0 duration:colorizeDuration];
+                    [childNode runAction:unpaint];
+                }
+                else
+                    [dyingNodes addObject:entityNode];
+            }];
+        }];
+    }];
+    SKAction *explosionAndRed = [SKAction group:@[playExplosion, paintWorldRed]];
+    //SKAction *leerSomeMore = leer;
+    SKAction *sequence = [SKAction sequence:@[ upright, flyTowardMid, peekScale, disappear, hide, wait, peek, leer, flyAway, explosionAndRed/*, leerSomeMore*/ ]];
+    [self.bouncer runAction:sequence withKey:@"lol" completion:^{
+        NSLog(@"lol completed");
+        SKAction *playTeleport = [SKAction runBlock:^{
+            [Sound playSoundNamed:@"teleport-1.wav" onNode:self.bouncer];
+        }];
+        NSTimeInterval teleportDuration = 1.5;
+        SKAction *fadeOut = [SKAction fadeOutWithDuration:teleportDuration];
+        SKAction *moveBack = [SKAction moveTo:origLocation duration:0.0];
+        SKAction *scaleBack = [SKAction scaleXTo:defaultXScale y:defaultYScale duration:0.0];
+        SKAction *changeZ = [SKAction runBlock:^{
+            [self.bouncer dispatchActionResume];
+            self.bouncer.zPosition = origZPosition;
+        }];
+        NSLog(@"returning to %@ (%0.2fxs,%0.2fys)",PointString(origLocation),defaultXScale,defaultYScale);
+        SKAction *fadeIn = [SKAction fadeInWithDuration:teleportDuration];
+        SKAction *fadeDead = [SKAction runBlock:^{
+            SKAction *fade = [SKAction fadeOutWithDuration:teleportDuration];
+            [dyingNodes enumerateObjectsUsingBlock:^(EntityNode *obj, NSUInteger idx, BOOL *stop) {
+                [obj runAction:fade completion:^{
+                    [obj removeFromParent];
+                }];
+            }];
+        }];
+        SKAction *fadeInCeleb = [SKAction runBlock:^{
+            [self.celeb runAction:fadeIn completion:^{
+                self.celeb.isAirborne = NO;
+                self.celeb.isManualZ = NO;
+                [self.celeb dispatchActionResume];
+            }];
+        }];
+        SKAction *fadeInAndFadeOutDead = [SKAction group:@[ fadeIn, fadeDead, fadeInCeleb ]];
+        SKAction *sequence = [SKAction sequence:@[ playTeleport,fadeOut,moveBack,scaleBack,changeZ,fadeInAndFadeOutDead ]];
+        [self.bouncer runAction:sequence withKey:@"return" completion:^{
+            self.bouncer.isAirborne = NO;
+            self.bouncer.isManualZ = NO;
+        }];
     }];
 }
 
