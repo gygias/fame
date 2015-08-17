@@ -921,7 +921,7 @@ NSString *ActionWalkingKey = @"walking";
     
     if ( self.parentNode.paused )
         return;
-    if ( ! self.suspended && ( arc4random() % 2 ) == 0 )
+    if ( ! self.suspended && ( arc4random() % 5 ) == 0 )
         [self _addRandomAI];
     
     if ( ! CGRectContainsPoint(self.frame, self.bouncer.position ) )
@@ -1256,7 +1256,7 @@ NSString *KillScaleKey = @"kill-scale";
 
 - (void)_runSpeechBubbleWithText:(NSString *)text
 {
-    CGPoint origin = CGPointMake(CGRectGetMidX(self.gameScreenMap.screenRect),self.gameScreenMap.screenRect.size.height + INFO_PANEL_Y_OFFSET * 2 + 1);
+    CGPoint origin = CGPointMake(CGRectGetMidX(self.gameScreenMap.screenRect),self.gameScreenMap.screenRect.size.height + INFO_PANEL_Y_OFFSET * 2 - 5);
     SKSpriteNode *bouncerSprite = [SKSpriteNode spriteNodeWithImageNamed:@"bouncer-1"];
     bouncerSprite.texture.filteringMode = SKTextureFilteringNearest;
     SpeechBubble *speechBubble = [SpeechBubble speechBubbleWithText:text
@@ -1265,8 +1265,9 @@ NSString *KillScaleKey = @"kill-scale";
     [self.parentNode addChild:speechBubble];
     [speechBubble animate];
     speechBubble.pageFinishedAnimatingHandler = ^(SpeechBubble *speechBubble, BOOL morePages) {
-        self.advancePageOnTouch = morePages;
-        self.nextAction1ToSpeechBubble = YES;
+        // now handled by touch events directly to userInteractionEnabled=YES SpeechBubble!
+        //self.advancePageOnTouch = morePages;
+        //self.nextAction1ToSpeechBubble = YES;
     };
     
     if ( self.speechBubble )

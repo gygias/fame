@@ -29,6 +29,7 @@
     speechBubble.position = origin;
     speechBubble.xScale = 5.0;
     speechBubble.yScale = 2.5;
+    speechBubble.userInteractionEnabled = YES;
     speechBubble.text = text;
     
     if ( imageNode )
@@ -87,6 +88,7 @@ typedef void (^AnimateBlock)();
                 //NSLog(@"end of page...?");
                 [self _stopAnimation];
                 self.currentPage++;
+                _lineIdx = 0;
                 BOOL moreToCome = self.currentPage < self.lines.count;
                 if ( moreToCome )
                     [Sound playSoundNamed:@"carriage-return-1.wav" onNode:self];
@@ -160,6 +162,21 @@ typedef void (^AnimateBlock)();
             }
         }];
     }
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    //NSLog(@"touched speech?");
+    if ( ( self.currentPage * LINES_PER_PAGE + _lineIdx ) < self.lines.count )
+        [self _animateFromChar:0 line:0 page:self.currentPage];
+    else
+    {
+        SKAction *fadeOut = [SKAction fadeOutWithDuration:0.25];
+        [self runAction:fadeOut completion:^{
+            [self removeFromParent];
+        }];
+    }
+    
 }
 
 - (void)advancePage

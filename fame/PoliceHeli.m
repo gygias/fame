@@ -53,7 +53,7 @@
     
     SKTexture *texture1 = [SKTexture textureWithImageNamed:@"helicopter-1"];
     SKTexture *texture2 = [SKTexture textureWithImageNamed:@"helicopter-2"];
-    NSTimeInterval timePerFrame = 0.025;
+    NSTimeInterval timePerFrame = 0.05;
     NSUInteger animations = speedScalar / timePerFrame * 2;
     SKAction *animate = [SKAction animateWithTextures:@[ texture1, texture2 ] timePerFrame:timePerFrame];
     SKAction *repeatAnimate = [SKAction repeatAction:animate count:animations];
