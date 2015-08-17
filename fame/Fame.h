@@ -30,6 +30,7 @@
 #define BACKGROUND_SPEED 0.10
 #define BACKGROUND_Z 1.0
 #define BEHIND_BACKGROUND_Z ( BACKGROUND_Z - 0.1 )
+#define FRONT_BACKGROUND_Z ( BACKGROUND_Z + 0.1 )
 
 #define EFFECT_Z 2.0
 #define ENTITY_Z 3.0
@@ -93,6 +94,7 @@
 #define MAGICAL_MYSTERY_FILLER_INSET 17.0
 #define MAGICAL_MYSTERY_METER_LABEL_X_OFFSET 3.5
 #define MAGICAL_MYSTERY_BELOW_MOUNTAINS 430.0
+#define MAGICAL_MYSTERY_CLOUD_MIN_ALTITUDE 650.0
 typedef enum : uint8_t {
     ColliderEntity                  = 1,
     ColliderBouncer                 = 2,

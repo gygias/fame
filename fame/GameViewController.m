@@ -46,8 +46,8 @@
     scene.scaleMode = SKSceneScaleModeAspectFill;
     
     NSLog(@"%@",[[NSBundle mainBundle] bundlePath]);
-    NSString *textureNamesPath = [[NSBundle mainBundle] pathForResource:@"textures" ofType:@"txt"];
-    NSArray *textureNames = [[NSString stringWithContentsOfFile:textureNamesPath encoding:NSUTF8StringEncoding error:NULL] componentsSeparatedByString:@"\n"];
+//    NSString *textureNamesPath = [[NSBundle mainBundle] pathForResource:@"textures" ofType:@"txt"];
+//    NSArray *textureNames = [[NSString stringWithContentsOfFile:textureNamesPath encoding:NSUTF8StringEncoding error:NULL] componentsSeparatedByString:@"\n"];
     
 //    NSMutableArray *allTextures = [NSMutableArray new];
 //    [textureNames enumerateObjectsUsingBlock:^(NSString *textureName, NSUInteger idx, BOOL *stop) {

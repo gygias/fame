@@ -35,7 +35,7 @@
 {
     UIBezierPath *path = [UIBezierPath bezierPath];
     
-    self.rightToLeft = ( arc4random() % 2 ) == 0;
+    self.rightToLeft = RandomBool();
     
     if ( self.rightToLeft )
         self.xScale = ( self.xScale * -1.0 );
@@ -44,7 +44,7 @@
     CGFloat stageLeft = ( screenMap.screenRect.origin.x - self.texture.size.width );
     CGFloat startX = self.rightToLeft ? stageRight : stageLeft;
     CGFloat endX = self.rightToLeft ? stageLeft : stageRight;
-    CGFloat randomY = (double)( arc4random() % 100 ) / 100.0 * ( screenMap.topSidewalkUpper - screenMap.bottomSidewalkLower ) + screenMap.bottomSidewalkLower;
+    CGFloat randomY = Random0Thru1() * ( screenMap.topSidewalkUpper - screenMap.bottomSidewalkLower ) + screenMap.bottomSidewalkLower;
     CGPoint startPoint = CGPointMake(startX, randomY);
     CGPoint endPoint = CGPointMake(endX, randomY);
     [path moveToPoint:startPoint];
@@ -57,14 +57,14 @@
             thisEndpoint = endPoint;
         else
         {
-            CGFloat x = (double)( arc4random() % 100 ) / 100.0 * ( screenMap.streetRight - screenMap.streetLeft );
-            CGFloat y = (double)( arc4random() % 100 ) / 100.0 * ( screenMap.streetUpper - screenMap.streetLower );
+            CGFloat x = Random0Thru1() * ( screenMap.streetRight - screenMap.streetLeft );
+            CGFloat y = Random0Thru1() * ( screenMap.streetUpper - screenMap.streetLower );
             thisEndpoint = CGPointMake(x,y);
         }
-        CGFloat randomControlPoint1X = (double)( arc4random() % 100 ) / 100.0 * ( screenMap.screenRect.size.width ) + screenMap.screenRect.origin.x;
-        CGFloat randomControlPoint1Y = (double)( arc4random() % 100 ) / 100.0  * ( screenMap.groundHeight ) + screenMap.bottomSidewalkLower;
-        CGFloat randomControlPoint2X = (double)( arc4random() % 100 ) / 100.0  * ( screenMap.screenRect.size.width ) + screenMap.screenRect.origin.x;
-        CGFloat randomControlPoint2Y = (double)( arc4random() % 100 ) / 100.0  * ( screenMap.groundHeight ) + screenMap.bottomSidewalkLower;
+        CGFloat randomControlPoint1X = Random0Thru1() * ( screenMap.screenRect.size.width ) + screenMap.screenRect.origin.x;
+        CGFloat randomControlPoint1Y = Random0Thru1()  * ( screenMap.groundHeight ) + screenMap.bottomSidewalkLower;
+        CGFloat randomControlPoint2X = Random0Thru1()  * ( screenMap.screenRect.size.width ) + screenMap.screenRect.origin.x;
+        CGFloat randomControlPoint2Y = Random0Thru1()  * ( screenMap.groundHeight ) + screenMap.bottomSidewalkLower;
         [path addCurveToPoint:thisEndpoint
                 controlPoint1:CGPointMake(randomControlPoint1X, randomControlPoint1Y)
                 controlPoint2:CGPointMake(randomControlPoint2X, randomControlPoint2Y)];
@@ -74,7 +74,7 @@
     SKAction *move = [SKAction followPath:path.CGPath asOffset:NO orientToPath:NO duration:duration];
     
     SKAction *animate = [SKAction customActionWithDuration:duration actionBlock:^(SKNode *node, CGFloat elapsedTime) {
-        BOOL shouldAnimate = ( arc4random() % ( _isManual ? 10 : 20 ) ) == 0;
+        BOOL shouldAnimate = RandomBoolM( _isManual ? 10 : 20 );
         if ( shouldAnimate )
         {
             NSString *textureName = _isManual ? @"skater-1" : @"skater-2";

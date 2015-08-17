@@ -29,13 +29,13 @@ extern CGFloat gControlPanelHeight;
     CGFloat stageRight = screenMap.screenRect.origin.x + screenMap.screenRect.size.width + textureWidth;
     CGFloat stageLeft = screenMap.screenRect.origin.x - textureWidth;
     
-    self.rightToLeft = ( arc4random() % 2 ) == 0;
+    self.rightToLeft = RandomBool();
     
     if ( self.rightToLeft )
         self.xScale = ( self.xScale * -1.0 );
     
-    BOOL upperOrLower = ( arc4random() % 2 ) == 0;
-    double div = (double)(arc4random() % 100 + 1) / 100.0;
+    BOOL upperOrLower = RandomBool();
+    double div = Random0Thru1();
     CGFloat randomY = screenMap.screenRect.origin.y +
                             ( upperOrLower ? ( screenMap.topSidewalkLower + div * screenMap.topSidewalkHeight + textureHeight / 2 ) :
                                                 ( screenMap.bottomSidewalkLower + div * screenMap.bottomSidewalkHeight + textureHeight / 2 ) );

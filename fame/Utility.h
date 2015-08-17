@@ -22,3 +22,7 @@ NSString * SizeString(CGSize size);
 CGPoint CGRectGetMid(CGRect rect);
 
 CGRect ScaledRect(CGRect rect, CGFloat scale);
+
+double Random0Thru1();
+BOOL RandomBool();
+BOOL RandomBoolM(int mod);

@@ -56,6 +56,7 @@
     
     [self _addWorldToNode:parentNode];
     [self _addFriendliesToNode:parentNode];
+    [self _addInitialClouds];
     
     self.physicsWorld.contactDelegate = self;
     
@@ -921,8 +922,10 @@ NSString *ActionWalkingKey = @"walking";
     
     if ( self.parentNode.paused )
         return;
-    if ( ! self.suspended && ( arc4random() % 5 ) == 0 )
+    if ( ! self.suspended && RandomBoolM(5) )
         [self _addRandomAI];
+    if ( RandomBoolM(125) )
+        [self _addRandomCloud:NO];
     
     if ( ! CGRectContainsPoint(self.frame, self.bouncer.position ) )
     {
@@ -982,6 +985,45 @@ NSString *ActionWalkingKey = @"walking";
         NSString *ORIGINALSPEECH = @"abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz, when you hurr, you must not forget to durr, inside the gurr blur. thanks.";
         [self _runSpeechBubbleWithText:ORIGINALSPEECH];
     }
+}
+
+#define CLOUD_TEXTURES 4
+
+- (void)_addInitialClouds
+{
+    int nClouds = 6;
+    while ( nClouds-- > 0 )
+        [self _addRandomCloud:YES];
+}
+
+- (void)_addRandomCloud:(BOOL)initial
+{
+    int randomCloud = arc4random() % CLOUD_TEXTURES + 1;
+    NSString *textureName = [NSString stringWithFormat:@"cloud-%d",randomCloud];
+    SKTexture *texture = [SKTexture textureWithImageNamed:textureName];
+    texture.filteringMode = SKTextureFilteringNearest;
+    SKSpriteNode *node = [SKSpriteNode spriteNodeWithTexture:texture];
+    node.xScale = 2;
+    node.yScale = 2;
+    node.alpha = 0.75;
+    CGFloat randomY = ( self.gameScreenMap.screenRect.size.height - MAGICAL_MYSTERY_CLOUD_MIN_ALTITUDE ) * Random0Thru1()
+                            + self.gameScreenMap.screenRect.origin.y + MAGICAL_MYSTERY_CLOUD_MIN_ALTITUDE;
+    CGFloat stageRight = self.gameScreenMap.screenRect.origin.x + self.gameScreenMap.screenRect.size.width + node.size.width;;
+    CGFloat stageLeft = self.gameScreenMap.screenRect.origin.x - node.size.width;
+    CGFloat x;
+    if ( initial )
+        x = Random0Thru1() * self.gameScreenMap.screenRect.size.width + self.gameScreenMap.screenRect.origin.x;
+    else
+        x = stageRight;
+    node.position = CGPointMake(x, randomY);
+    node.zPosition = FRONT_BACKGROUND_Z;
+    [self.parentNode addChild:node];
+    
+    SKAction *move = [SKAction moveToX:stageLeft duration:( x - stageLeft ) / ( stageRight - stageLeft ) * 50.0 ];
+    NSLog(@"cloud from x%0.2f,y%0.2f for %0.2f",x,randomY,move.duration);
+    [node runAction:move completion:^{
+        [node removeFromParent];
+    }];
 }
 
 NSString *KillScaleKey = @"kill-scale";
@@ -1092,16 +1134,17 @@ NSString *KillScaleKey = @"kill-scale";
     }
     else if ( celebPhysics && genericAIPhysics )
     {
+        NSString *actionKey = @"generic-celeb-hit";
         EntityNode *celeb = (EntityNode *)celebPhysics.node;
-        if ( ! celeb.isFloored )
+        if ( ! celeb.isFloored && ! [self.celeb actionForKey:actionKey] )
         {
             //NSLog(@"ped->celeb spin %0.2f, %0.2f",contact.contactNormal.dx,contact.contactNormal.dy);
             CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
             SKAction *action = [SKAction rotateByAngle:angle duration:1];
             [celeb runAction:action completion:^{
-                [celeb runAction:[SKAction rotateToAngle:0 duration:0.0]];
+                [celeb runAction:[SKAction rotateToAngle:0 duration:0.0] withKey:actionKey];
             }];
-            if ( arc4random() % 10 == 0 )
+            if ( RandomBoolM(10) )
             {
                 NSString *sound = [Sound randomScream:NO];
                 SKAction *scream = [SKAction playSoundFileNamed:sound waitForCompletion:NO];
@@ -1205,9 +1248,9 @@ NSString *KillScaleKey = @"kill-scale";
     node.zPosition = ENTITY_Z;
     node.isFloored = YES;
     
-    BOOL leftToRight = ( arc4random() % 2 ) == 0;
+    BOOL leftToRight = RandomBool();
     //node.zRotation =
-    CGFloat radians = ( leftToRight ? ( M_PI_4*3 - M_PI_4 ) : ( M_PI*7 - M_PI_4 * 5 ) ) * (double)( ( arc4random() % 100 ) ) / 100.0;
+    CGFloat radians = ( leftToRight ? ( M_PI_4*3 - M_PI_4 ) : ( M_PI*7 - M_PI_4 * 5 ) ) * Random0Thru1();
     [node runAction:[SKAction rotateToAngle:radians duration:0.0]];
     node.isIncapacitated = YES;
     

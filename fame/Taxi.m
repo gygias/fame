@@ -43,7 +43,7 @@
 
 - (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap
 {
-    self.rightToLeft = ( arc4random() % 2 ) == 0;
+    self.rightToLeft = RandomBool();
     
     if ( self.rightToLeft )
         self.xScale = ( self.xScale * -1.0 );

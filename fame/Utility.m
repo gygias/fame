@@ -65,3 +65,18 @@ CGRect ScaledRect(CGRect rect, CGFloat scale)
                       rect.size.width * scale,
                       rect.size.height * scale);
 }
+
+double Random0Thru1()
+{
+    return (double)( arc4random() % 100 ) / 100.0;
+}
+
+BOOL RandomBool()
+{
+    return RandomBoolM(2);
+}
+
+BOOL RandomBoolM(int mod)
+{
+    return ( arc4random() % mod ) == 0;
+}
