@@ -52,6 +52,7 @@
                                             self.frame.size.width,
                                             quarterHeight);
     self.gameScreenMap.belowMountainsY = MAGICAL_MYSTERY_BELOW_MOUNTAINS;
+    self.gameScreenMap.minAltitude = MAGICAL_MYSTERY_BELOW_MOUNTAINS + 60.0;
     
     [self _addWorldToNode:parentNode];
     [self _addFriendliesToNode:parentNode];
@@ -962,7 +963,7 @@ NSString *ActionWalkingKey = @"walking";
     static NSArray *gAITypes;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        gAITypes = @[ [Pedestrian class], [Skater class], [Taxi class] ];
+        gAITypes = @[ [Pedestrian class], [Skater class], [Taxi class], [PoliceHeli class] ];
     });
     
     NSUInteger idx = arc4random() % gAITypes.count;

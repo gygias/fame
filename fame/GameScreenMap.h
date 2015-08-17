@@ -15,6 +15,7 @@
 @property CGRect skyRect;
 
 @property CGFloat belowMountainsY;
+@property CGFloat minAltitude;
 
 @property CGFloat controlPanelHeight;
 

@@ -10,7 +10,7 @@
 
 #import "Fame.h"
 
-#define SPEECH_LINE_HEIGHT 7.0
+#define SPEECH_LINE_HEIGHT 6.0
 #define SPEECH_TEXT_Y_INSET 5.0
 #define SPEECH_X_INSET 10.0
 #define SPEECH_IMAGE_X -35.0

@@ -49,15 +49,15 @@
     NSString *textureNamesPath = [[NSBundle mainBundle] pathForResource:@"textures" ofType:@"txt"];
     NSArray *textureNames = [[NSString stringWithContentsOfFile:textureNamesPath encoding:NSUTF8StringEncoding error:NULL] componentsSeparatedByString:@"\n"];
     
-    NSMutableArray *allTextures = [NSMutableArray new];
-    [textureNames enumerateObjectsUsingBlock:^(NSString *textureName, NSUInteger idx, BOOL *stop) {
-        SKTexture *texture = [SKTexture textureWithImageNamed:textureName];
-        [allTextures addObject:texture];
-        [texture preloadWithCompletionHandler:^{
-            NSLog(@"preloaded %@",textureName);
-        }];
-    }];
-    self.allTextures = allTextures;
+//    NSMutableArray *allTextures = [NSMutableArray new];
+//    [textureNames enumerateObjectsUsingBlock:^(NSString *textureName, NSUInteger idx, BOOL *stop) {
+//        SKTexture *texture = [SKTexture textureWithImageNamed:textureName];
+//        [allTextures addObject:texture];
+//        [texture preloadWithCompletionHandler:^{
+//            NSLog(@"preloaded %@",textureName);
+//        }];
+//    }];
+//    self.allTextures = allTextures;
     
     // Present the scene.
     [skView presentScene:scene];

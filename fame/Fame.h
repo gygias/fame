@@ -17,6 +17,7 @@
 #import "ComboBox.h"
 #import "Sound.h"
 #import "SpeechBubble.h"
+#import "PoliceHeli.h"
 
 #import "Utility.h"
 
@@ -24,6 +25,7 @@
 
 #define FOREGROUND_SPEED 0.02
 #define FOREGROUND_Z 2.0
+#define BEHIND_FOREGROUND_Z ( FOREGROUND_Z - 0.1 )
 
 #define BACKGROUND_SPEED 0.10
 #define BACKGROUND_Z 1.0
