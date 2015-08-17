@@ -19,6 +19,8 @@
 
 @property GameScreenMap *gameScreenMap;
 
+@property BOOL suspended;
+
 @property SKNode *parentNode;
 @property SKNode *streetNode;
 @property SKNode *cityNode;

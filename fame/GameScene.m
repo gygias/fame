@@ -921,7 +921,7 @@ NSString *ActionWalkingKey = @"walking";
     
     if ( self.parentNode.paused )
         return;
-    if ( ( arc4random() % 10 ) == 0 )
+    if ( ! self.suspended && ( arc4random() % 2 ) == 0 )
         [self _addRandomAI];
     
     if ( ! CGRectContainsPoint(self.frame, self.bouncer.position ) )
@@ -936,6 +936,7 @@ NSString *ActionWalkingKey = @"walking";
             }
         });
         
+        [self.bouncer removeAllActions];
         self.bouncer.position = CGPointMake(CGRectGetMidX(self.frame),
                                             CGRectGetMidY(self.frame) - 200);
     }
@@ -991,25 +992,8 @@ NSString *KillScaleKey = @"kill-scale";
         return; // XXX am i doing it wrong?
     //NSLog(@"%@ is in contact with %@",contact.bodyA.node.name,contact.bodyB.node.name);
     
-    SKSpriteNode *entityA = (EntityNode *)contact.bodyA.node;
-    SKSpriteNode *entityB = (EntityNode *)contact.bodyB.node;
-    if ( [entityA isKindOfClass:[EntityNode class]] && [entityB isKindOfClass:[EntityNode class]] )
-    {
-        if ( ((EntityNode *)entityA).isDead ^((EntityNode *)entityB).isDead )
-        {
-    #ifdef MYDEBUG
-            NSLog(@"ignoring ^dead contact between %@ and %@",entityA,entityB);
-    #endif
-            return;
-        }
-        if ( ((EntityNode *)entityA).isAirborne ^ ((EntityNode *)entityB).isAirborne )
-        {
-    #ifdef MYDEBUG
-            NSLog(@"ignoring ^airborne contact between %@ and %@",entityA,entityB);
-    #endif
-            return;
-        }
-    }
+    SKSpriteNode *nodeA = (SKSpriteNode *)contact.bodyA.node;
+    SKSpriteNode *nodeB = (SKSpriteNode *)contact.bodyB.node;
     
     if ( ! CGRectContainsPoint(self.frame, contact.contactPoint) )
     {
@@ -1027,31 +1011,54 @@ NSString *KillScaleKey = @"kill-scale";
     SKPhysicsBody *celebPhysics = nil;
     SKPhysicsBody *taxiPhysics = nil;
     SKPhysicsBody *groundEffectPhysics = nil;
+    SKPhysicsBody *helicopterPhysics = nil;
     
     NSArray *genericAIPrefixes = @[ @"pedestrian-", @"skater-" ];
     
     //NSLog(@"%@ <-!-> %@",contact.bodyA.node.name,contact.bodyB.node.name);
     
-    if ( [contact.bodyA.node.name hasPrefix:@"bouncer-"] )
+    if ( [nodeA.name hasPrefix:@"bouncer-"] )
         bouncerPhysics = contact.bodyA;
-    else if ([contact.bodyB.node.name hasPrefix:@"bouncer-"] )
+    else if ([nodeB.name hasPrefix:@"bouncer-"] )
         bouncerPhysics = contact.bodyB;
-    if ( [contact.bodyA.node.name hasPrefix:@"celeb"] )
+    if ( [nodeA.name hasPrefix:@"celeb"] )
         celebPhysics = contact.bodyA;
-    else if ( [contact.bodyB.node.name hasPrefix:@"celeb"] )
+    else if ( [nodeB.name hasPrefix:@"celeb"] )
         celebPhysics = contact.bodyB;
-    if ( [genericAIPrefixes containsPrefixOfString:contact.bodyA.node.name] )
+    if ( [genericAIPrefixes containsPrefixOfString:nodeA.name] )
         genericAIPhysics = contact.bodyA;
-    else if ( [genericAIPrefixes containsPrefixOfString:contact.bodyB.node.name] )
+    else if ( [genericAIPrefixes containsPrefixOfString:nodeB.name] )
         genericAIPhysics = contact.bodyB;
-    if ( [contact.bodyA.node.name hasPrefix:@"taxi-"] )
+    if ( [nodeA.name hasPrefix:@"taxi-"] )
         taxiPhysics = contact.bodyA;
-    else if ( [contact.bodyB.node.name hasPrefix:@"taxi-"] )
+    else if ( [nodeB.name hasPrefix:@"taxi-"] )
         taxiPhysics = contact.bodyB;
-    if ( [contact.bodyA.node.name hasPrefix:@"ground-effect-"] )
+    if ( [nodeA.name hasPrefix:@"ground-effect-"] )
         groundEffectPhysics = contact.bodyA;
-    else if ( [contact.bodyB.node.name hasPrefix:@"ground-effect-"] )
+    else if ( [nodeB.name hasPrefix:@"ground-effect-"] )
         groundEffectPhysics = contact.bodyB;
+    if ( [nodeA.name hasPrefix:@"helicopter-"] )
+        helicopterPhysics = contact.bodyA;
+    else if ( [nodeB.name hasPrefix:@"helicopter-"] )
+        helicopterPhysics = contact.bodyB;
+    
+    if ( [nodeA isKindOfClass:[EntityNode class]] && [nodeB isKindOfClass:[EntityNode class]] )
+    {
+        if ( ( ((EntityNode *)nodeA).isDead ^ ((EntityNode *)nodeB).isDead ) && ! helicopterPhysics )
+        {
+#ifdef MYDEBUG
+            NSLog(@"ignoring ^dead contact between %@ and %@",nodeA,nodeB);
+#endif
+            return;
+        }
+        if ( ((EntityNode *)nodeA).isAirborne ^ ((EntityNode *)nodeB).isAirborne )
+        {
+#ifdef MYDEBUG
+            NSLog(@"ignoring ^airborne contact between %@ and %@",nodeA,nodeB);
+#endif
+            return;
+        }
+    }
     
     if ( bouncerPhysics && genericAIPhysics )
     {
@@ -1064,7 +1071,7 @@ NSString *KillScaleKey = @"kill-scale";
         }
         //NSLog(@"%@->%@ %0.2f,%0.2f @ %0.2f,%0.2f",entityA.node.name,entityB.node.name,contact.contactNormal.dx,contact.contactNormal.dy,contact.contactPoint.x,contact.contactPoint.y);
         CGVector normal = contact.contactNormal;
-        if ( [entityB.name isEqualToString:@"bouncer-1"] )
+        if ( [nodeB.name isEqualToString:@"bouncer-1"] )
         {
             normal.dx = -(normal.dx);
             normal.dy = -(normal.dy);
@@ -1134,6 +1141,16 @@ NSString *KillScaleKey = @"kill-scale";
         NSLog(@"celeb vs taxi");
         [self _runOverNode:self.celeb withNode:(EntityNode *)taxiPhysics.node];
         [Sound playSoundNamed:@"fart-2.wav" onNode:self.celeb];
+    }
+    else if ( genericAIPhysics && helicopterPhysics )
+    {
+        CGVector normal = contact.contactNormal;
+        if ( [nodeA.name hasPrefix:@"helicopter-"] )
+        {
+            normal.dx = -(normal.dx);
+            normal.dy = -(normal.dy);
+        }
+        [self _genericKillNode:helicopterPhysics.node normal:normal];
     }
     //else NSLog(@"some collisions between %@ and %@",contact.bodyA.node.name,contact.bodyB.node.name);
 }
@@ -1414,17 +1431,31 @@ NSString *KillScaleKey = @"kill-scale";
 
 - (void)_runCataclysm
 {
+    self.suspended = YES;
+    
     self.bouncer.isMidAction = YES;
     self.bouncer.currentActionIsInterruptible = NO;
     self.bouncer.isAirborne = YES;
     self.bouncer.isManualZ = YES;
     [self.bouncer dispatchActionPause];
     
+    [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *child, NSUInteger idx, BOOL *stop) {
+        if ( [child isKindOfClass:[EntityNode class]] )
+        {
+            EntityNode *entityNode = (EntityNode *)child;
+            if ( ! entityNode.isFriendly )
+            {
+                [entityNode dispatchActionPause];
+                [entityNode removeAllActions];
+            }
+        }
+    }];
+    
     CGPoint origLocation = self.bouncer.position;
     CGFloat defaultXScale = self.bouncer.xScale, defaultYScale = self.bouncer.yScale;
     CGFloat origZPosition = self.bouncer.zPosition;
     
-    NSTimeInterval flyTowardDuration = 0.33;
+    NSTimeInterval flyTowardDuration = 1;
     SKAction *upright = [SKAction rotateToAngle:0 duration:0.0];
     SKAction *flyToward = [SKAction scaleXBy:50.0 y:50.0 duration:flyTowardDuration];
     SKAction *flyMid = [SKAction moveTo:CGRectGetMid(self.gameScreenMap.screenRect) duration:flyTowardDuration];
@@ -1525,6 +1556,7 @@ NSString *KillScaleKey = @"kill-scale";
         SKAction *fadeInAndFadeOutDead = [SKAction group:@[ fadeIn, fadeDead, fadeInCeleb ]];
         SKAction *sequence = [SKAction sequence:@[ playTeleport,fadeOut,moveBack,scaleBack,changeZ,fadeInAndFadeOutDead ]];
         [self.bouncer runAction:sequence withKey:@"return" completion:^{
+            self.suspended = NO;
             self.bouncer.isMidAction = NO;
             self.bouncer.isAirborne = NO;
             self.bouncer.isManualZ = NO;
