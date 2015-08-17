@@ -10,4 +10,6 @@
 
 @interface Celeb : EntityNode
 
+@property NSUInteger zen;
+
 @end

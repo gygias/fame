@@ -197,11 +197,11 @@ static CGFloat gLastYOffset = 0; // XXX
     }
     
     CGSize meterSize = [Meter meterSize];
-    Meter *angerMeter = [Meter meterWithLabel:@"anger" origin:fuckingBottomLeft xOffset:xOffset yOffset:(meterSize.height / 2) + 1 centered:NO];
+    Meter *angerMeter = [Meter meterWithLabel:@"anger" textureNumber:1 origin:fuckingBottomLeft xOffset:xOffset yOffset:(meterSize.height / 2) + 1 centered:NO];
     [node addChild:angerMeter];
     self.meter1 = angerMeter;
     
-    Meter *zenMeter = [Meter meterWithLabel:@"zen" origin:fuckingBottomLeft xOffset:xOffset yOffset:-(meterSize.height / 2) centered:YES];
+    Meter *zenMeter = [Meter meterWithLabel:@"zen" textureNumber:2 origin:fuckingBottomLeft xOffset:xOffset yOffset:-(meterSize.height / 2) centered:YES];
     [node addChild:zenMeter];
     self.meter2 = zenMeter;
     
@@ -209,6 +209,64 @@ static CGFloat gLastYOffset = 0; // XXX
 }
 
 NSString *FlashMeterKey = @"flash-meter";
+
+- (void)_zenDelta:(NSInteger)zenDelta
+{
+    NSInteger startZen = self.celeb.zen;
+    NSInteger endZen = startZen + zenDelta;
+    if ( endZen > MAX_ZEN )
+        endZen = MAX_ZEN;
+    if ( endZen < 0 )
+        endZen = 0;
+    
+    NSInteger realAngerDelta = endZen - startZen;
+    //NSLog(@"ad %ld orig %ld net %ld real %ld",angerDelta,origAnger,netAnger,realAngerDelta);
+    
+    self.celeb.zen = endZen;
+    
+    //NSLog(@"anger %ld + d%ld -> %lu",(long)origAnger,(long)angerDelta,(unsigned long)self.bouncer.anger);
+    
+    __block int frame = 0;
+    NSTimeInterval duration = 0.5;//, frameInterval = 10 / duration, nFrames = duration / frameInterval;
+    CGFloat origXScale = self.meter2.fillerNode.xScale;
+    //CGFloat origX = self.meter2.fillerNode.position.x;
+    //NSLog(@"going from %d anger to %d",startAnger,endAnger);
+    SKAction *setAction = [SKAction customActionWithDuration:duration actionBlock:^(SKNode *node, CGFloat elapsedTime) {
+        double perc = elapsedTime / duration;
+        if ( frame < ( perc * 10 ) )
+        {
+            SKSpriteNode *fillerNode = (SKSpriteNode *)node;
+            CGFloat xScaleDelta = perc * (float)realAngerDelta / METER_FILLER_MAX_SCALE;
+            CGFloat absoluteDelta = origXScale + xScaleDelta;
+            CGFloat drawnDelta = absoluteDelta;
+            fillerNode.xScale = drawnDelta;
+            // accidentally produces interesting grow-from-center effect
+            //fillerNode.position = CGPointMake( ( origX + xScaleDelta / 2 ) * (( absoluteDelta - drawnDelta ) / absoluteDelta), fillerNode.position.y );
+            //CGFloat newX = origX + xScaleDelta/2;
+            //fillerNode.position = CGPointMake( newX, fillerNode.position.y );
+            frame++;
+            
+            //NSLog(@"-> xScale = %0.1f + %0.1f",origXScale,xDelta);
+        }
+    }];
+    
+    [self.meter2.fillerNode runAction:setAction];
+    
+    if ( endZen == MAX_ZEN )
+    {
+        NSTimeInterval fadeDuration = 0.5;
+        SKAction *fadeOut = [SKAction fadeOutWithDuration:fadeDuration];
+        SKAction *fadeIn = [SKAction fadeInWithDuration:fadeDuration];
+        SKAction *fadeInAndOut = [SKAction sequence:@[fadeOut,fadeIn]];
+        SKAction *fadeInAndOutForever = [SKAction repeatActionForever:fadeInAndOut];
+        [self.meter2.fillerNode runAction:fadeInAndOutForever withKey:FlashMeterKey];
+    }
+    else
+    {
+        [self.meter2.fillerNode removeActionForKey:FlashMeterKey];
+        self.meter2.fillerNode.alpha = 1.0;
+    }
+}
 
 - (void)_angerDelta:(NSInteger)angerDelta
 {
@@ -869,11 +927,11 @@ NSString *ActionWalkingKey = @"walking";
     {
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
             int idx = 0;
-            for ( ; idx < 30; idx++ )
+            for ( ; idx < 10; idx++ )
             {
                 NSString *fartString = [NSString stringWithFormat:@"fart-%d.wav",( idx % 2 ) + 1];
                 [Sound playSoundNamed:fartString onNode:self.bouncer];
-                usleep(USEC_PER_SEC * 0.1);
+                usleep(USEC_PER_SEC * 0.2);
             }
         });
         
@@ -1032,12 +1090,16 @@ NSString *KillScaleKey = @"kill-scale";
             //NSLog(@"ped->celeb spin %0.2f, %0.2f",contact.contactNormal.dx,contact.contactNormal.dy);
             CGFloat angle = contact.contactNormal.dx > 0 ? 2*M_PI : -(2*M_PI);
             SKAction *action = [SKAction rotateByAngle:angle duration:1];
-            [celeb runAction:action];
-            NSString *sound = [Sound randomScream:NO];
-            SKAction *scream = [SKAction playSoundFileNamed:sound waitForCompletion:NO];
-            [self runAction:scream completion:^{
+            [celeb runAction:action completion:^{
                 [celeb runAction:[SKAction rotateToAngle:0 duration:0.0]];
             }];
+            if ( arc4random() % 10 == 0 )
+            {
+                NSString *sound = [Sound randomScream:NO];
+                SKAction *scream = [SKAction playSoundFileNamed:sound waitForCompletion:NO];
+                [self runAction:scream];
+            }
+            [self _zenDelta:CELEB_IMPACT_ZEN];
         }
     }
     else if ( genericAIPhysics && groundEffectPhysics )
@@ -1133,7 +1195,7 @@ NSString *KillScaleKey = @"kill-scale";
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         node.isIncapacitated = NO;
-        node.isFloored = YES;
+        node.isFloored = NO;
         [node dispatchActionResume];
         //node.zRotation = 0;
         [node runAction:[SKAction rotateToAngle:0.0 duration:0.0]];

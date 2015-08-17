@@ -12,11 +12,12 @@
 
 @implementation Meter
 
-NSString *MeterBorderName = @"meter-border-1";
+NSString *MeterBorderNameBase = @"meter-border-";
+NSString *MeterFillerNameBase = @"meter-filler-";
 
 + (CGSize)meterSize
 {
-    NSString *textureName = MeterBorderName;
+    NSString *textureName = [NSString stringWithFormat:@"%@1",MeterBorderNameBase];
     Meter *meter = [Meter spriteNodeWithImageNamed:textureName];
     meter.texture.filteringMode = SKTextureFilteringNearest;
     meter.name = @"meter-border";
@@ -27,9 +28,9 @@ NSString *MeterBorderName = @"meter-border-1";
     return meter.size;
 }
 
-+ (Meter *)meterWithLabel:(NSString *)label origin:(CGPoint)origin xOffset:(CGFloat)xOffset yOffset:(CGFloat)yOffset centered:(BOOL)centered
++ (Meter *)meterWithLabel:(NSString *)label textureNumber:(int)textureNumber origin:(CGPoint)origin xOffset:(CGFloat)xOffset yOffset:(CGFloat)yOffset centered:(BOOL)centered
 {
-    NSString *textureName = MeterBorderName;
+    NSString *textureName = [NSString stringWithFormat:@"%@1",MeterBorderNameBase];
     Meter *meter = [Meter spriteNodeWithImageNamed:textureName];
     meter.texture.filteringMode = SKTextureFilteringNearest;
     meter.name = @"meter-border";
@@ -51,7 +52,8 @@ NSString *MeterBorderName = @"meter-border-1";
     backLabelNode.yScale = 1 / METER_Y_SCALE;
     [meter addChild:backLabelNode];
     
-    SKSpriteNode *fillerNode = [SKSpriteNode spriteNodeWithImageNamed:@"meter-filler-1"];
+    NSString *fillerTextureName = [NSString stringWithFormat:@"%@%d",MeterFillerNameBase,textureNumber];
+    SKSpriteNode *fillerNode = [SKSpriteNode spriteNodeWithImageNamed:fillerTextureName];
     fillerNode.texture.filteringMode = SKTextureFilteringNearest;
     fillerNode.name = @"meter-filler";
     fillerNode.xScale = METER_FILLER_MIN_SCALE / METER_X_SCALE;

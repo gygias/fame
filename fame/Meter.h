@@ -12,7 +12,7 @@
 
 + (CGSize)meterSize;
 
-+ (Meter *)meterWithLabel:(NSString *)label origin:(CGPoint)origin xOffset:(CGFloat)xOffset yOffset:(CGFloat)yOffset centered:(BOOL)centered;
++ (Meter *)meterWithLabel:(NSString *)label textureNumber:(int)textureNumber origin:(CGPoint)origin xOffset:(CGFloat)xOffset yOffset:(CGFloat)yOffset centered:(BOOL)centered;
 
 @property SKSpriteNode *fillerNode;
 @property BOOL centered;

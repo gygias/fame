@@ -11,7 +11,7 @@
 #import "Fame.h"
 
 #define SPEECH_LINE_HEIGHT 7.0
-#define SPEECH_TEXT_Y_INSET 4.0
+#define SPEECH_TEXT_Y_INSET 5.0
 #define SPEECH_X_INSET 10.0
 #define SPEECH_IMAGE_X -35.0
 #define SPEECH_IMAGE_Y 0
@@ -28,7 +28,7 @@
     speechBubble.zPosition = INFO_PANEL_Z;
     speechBubble.position = origin;
     speechBubble.xScale = 5.0;
-    speechBubble.yScale = 2.0;
+    speechBubble.yScale = 2.5;
     speechBubble.text = text;
     
     if ( imageNode )
@@ -37,8 +37,8 @@
         imageNode.name = @"speaker-image";
         imageNode.zPosition = INFO_PANEL_CONTENT_Z;
         imageNode.position = CGPointMake(SPEECH_IMAGE_X, SPEECH_IMAGE_Y);
-        imageNode.xScale = 0.2;
-        imageNode.yScale = 0.5;
+        imageNode.xScale = 1 / speechBubble.xScale;
+        imageNode.yScale = 1 / speechBubble.yScale;
         [speechBubble addChild:imageNode];
     }
     
