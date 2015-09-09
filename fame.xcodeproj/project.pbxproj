@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		635F10F31B7AFBE700653715 /* GameScreenMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 635F10F21B7AFBE700653715 /* GameScreenMap.m */; };
+		636990371B82820A0077D15C /* pop-2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 636990331B82820A0077D15C /* pop-2.wav */; };
+		636990381B82820A0077D15C /* pop-3.wav in Resources */ = {isa = PBXBuildFile; fileRef = 636990341B82820A0077D15C /* pop-3.wav */; };
+		636990391B82820A0077D15C /* pop-4.wav in Resources */ = {isa = PBXBuildFile; fileRef = 636990351B82820A0077D15C /* pop-4.wav */; };
+		6369903A1B82820A0077D15C /* pop-5.wav in Resources */ = {isa = PBXBuildFile; fileRef = 636990361B82820A0077D15C /* pop-5.wav */; };
 		637D561B1B7456200013B155 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D561A1B7456200013B155 /* main.m */; };
 		637D561E1B7456200013B155 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D561D1B7456200013B155 /* AppDelegate.m */; };
 		637D56211B7456200013B155 /* GameScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 637D56201B7456200013B155 /* GameScene.m */; };
@@ -94,6 +98,10 @@
 /* Begin PBXFileReference section */
 		635F10F11B7AFBE700653715 /* GameScreenMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameScreenMap.h; sourceTree = "<group>"; };
 		635F10F21B7AFBE700653715 /* GameScreenMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameScreenMap.m; sourceTree = "<group>"; };
+		636990331B82820A0077D15C /* pop-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "pop-2.wav"; path = "Sound/pop-2.wav"; sourceTree = "<group>"; };
+		636990341B82820A0077D15C /* pop-3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "pop-3.wav"; path = "Sound/pop-3.wav"; sourceTree = "<group>"; };
+		636990351B82820A0077D15C /* pop-4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "pop-4.wav"; path = "Sound/pop-4.wav"; sourceTree = "<group>"; };
+		636990361B82820A0077D15C /* pop-5.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "pop-5.wav"; path = "Sound/pop-5.wav"; sourceTree = "<group>"; };
 		637D56151B7456200013B155 /* fame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = fame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		637D56191B7456200013B155 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		637D561A1B7456200013B155 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -298,6 +306,10 @@
 		6399451C1B753EEE00A62D1B /* Sound */ = {
 			isa = PBXGroup;
 			children = (
+				636990331B82820A0077D15C /* pop-2.wav */,
+				636990341B82820A0077D15C /* pop-3.wav */,
+				636990351B82820A0077D15C /* pop-4.wav */,
+				636990361B82820A0077D15C /* pop-5.wav */,
 				6395C96C1B813CEE003D4EA6 /* carriage-return-1.wav */,
 				6395C96A1B81384C003D4EA6 /* typewriter-1.wav */,
 				6395C95D1B805D71003D4EA6 /* chant-1.wav */,
@@ -430,7 +442,10 @@
 				6383CC011B7C48A0002073A2 /* clown-squeak.wav in Resources */,
 				6395C9621B805D71003D4EA6 /* explosion-1.wav in Resources */,
 				6399454D1B75F94A00A62D1B /* slot-machine-spin-3.wav in Resources */,
+				636990371B82820A0077D15C /* pop-2.wav in Resources */,
 				6383CBFD1B7C0DA3002073A2 /* whistle-1.wav in Resources */,
+				6369903A1B82820A0077D15C /* pop-5.wav in Resources */,
+				636990391B82820A0077D15C /* pop-4.wav in Resources */,
 				639945511B75F9CF00A62D1B /* slot-machine-cash-out-2.wav in Resources */,
 				637D562E1B7456200013B155 /* LaunchScreen.xib in Resources */,
 				6399452B1B753F0300A62D1B /* male_grunt_02.wav in Resources */,
@@ -449,6 +464,7 @@
 				637D56231B7456200013B155 /* GameScene.sks in Resources */,
 				6395C95A1B803B0A003D4EA6 /* fart-2.wav in Resources */,
 				6399454E1B75F94A00A62D1B /* slot-machine-spin-4.wav in Resources */,
+				636990381B82820A0077D15C /* pop-3.wav in Resources */,
 				639945271B753F0300A62D1B /* child_scream_01.wav in Resources */,
 				6399454F1B75F94A00A62D1B /* slot-machine-win-1.wav in Resources */,
 				637D56291B7456200013B155 /* Main.storyboard in Resources */,

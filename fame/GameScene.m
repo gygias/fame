@@ -45,8 +45,13 @@
     
     [Sound setScene:self];
     self.gameScreenMap = [GameScreenMap new];
+    //CGPoint translatedOrigin = [self convertPointFromView:self.view.frame.origin];
     self.gameScreenMap.screenRect = self.frame;
-    CGFloat quarterHeight = ( self.frame.size.height / 4 );
+//                                                CGRectMake( translatedOrigin.x,
+//                                               translatedOrigin.y,
+//                                               self.view.frame.size.width,
+//                                               self.view.frame.size.height);
+    CGFloat quarterHeight = self.frame.size.height / 4;
     self.gameScreenMap.skyRect = CGRectMake(self.frame.origin.x,
                                             self.frame.origin.y + self.frame.size.height - quarterHeight,
                                             self.frame.size.width,
@@ -54,13 +59,12 @@
     self.gameScreenMap.belowMountainsY = MAGICAL_MYSTERY_BELOW_MOUNTAINS;
     self.gameScreenMap.minAltitude = MAGICAL_MYSTERY_BELOW_MOUNTAINS + 60.0;
     
-    [self _addWorldToNode:parentNode];
-    [self _addFriendliesToNode:parentNode];
-    [self _addInitialClouds];
-    
     self.physicsWorld.contactDelegate = self;
-    
     self.parentNode = parentNode;
+    
+    [self _addWorldToNode];
+    [self _addFriendliesToNode];
+    [self _addInitialClouds];
     
 //    UITapGestureRecognizer *tripleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
 //    tripleTap.numberOfTapsRequired = 3;
@@ -81,7 +85,7 @@
     [self.view addGestureRecognizer:_panRecognizer];
 }
 
-- (void)_addFriendliesToNode:(SKNode *)node
+- (void)_addFriendliesToNode
 {
     NSArray *startEntities = @[ [Pedestrian class], [Bouncer class], [Celeb class] ];
     CGFloat xOffset = 0;
@@ -92,7 +96,7 @@
                                       CGRectGetMidY(self.frame) - 200);
         xOffset -= (entityNode.size.width * 1.5);
         
-        [node addChild:entityNode];
+        [self.parentNode addChild:entityNode];
         
         BOOL isBouncer = [entityNode isKindOfClass:[Bouncer class]];
         if ( isBouncer )
@@ -118,7 +122,7 @@
     }
 }
 
-- (void)_addWorldToNode:(SKNode *)node
+- (void)_addWorldToNode
 {
     NSNumber *foregroundSpeed = @( FOREGROUND_SPEED );
     NSNumber *foregroundZ = @( FOREGROUND_Z );
@@ -148,14 +152,14 @@
                                          @"zPosition" : backgroundZ,
                                          @"setKey" : @"backgroundNode" }
                                       ];
-    [self _addControlPanel:node];
+    [self _addControlPanel];
     for ( NSDictionary *textureDict in textureMap )
-        [self _addForegroundTextureToNode:node info:textureDict];
+        [self _addForegroundTextureWithInfo:textureDict];
 }
 
 static CGFloat gLastYOffset = 0; // XXX
 
-- (void)_addControlPanel:(SKNode *)node
+- (void)_addControlPanel
 {
     SKTexture *backgroundTexture = [SKTexture textureWithImageNamed:@"control-panel-1"];
     backgroundTexture.filteringMode = SKTextureFilteringNearest;
@@ -171,7 +175,7 @@ static CGFloat gLastYOffset = 0; // XXX
     backgroundSprite.yScale = 1.0 * scale;
     backgroundSprite.position = fuckingBottomLeft;
     
-    [node addChild:backgroundSprite];
+    [self.parentNode addChild:backgroundSprite];
     gLastYOffset += backgroundSprite.size.height;
     self.gameScreenMap.bottomSidewalkLower = backgroundSprite.size.height;
     self.gameScreenMap.bottomSidewalkUpper = BOTTOM_SIDEWALK_UPPER;
@@ -190,7 +194,7 @@ static CGFloat gLastYOffset = 0; // XXX
     {
         NSString *buttonName = buttonNames[idx - 1];
         Button *aButton = [Button buttonWithName:buttonName origin:fuckingBottomLeft xOffset:xOffset];
-        [node addChild:aButton];
+        [self.parentNode addChild:aButton];
         xOffset += ( idx == buttonNames.count ? 0 : aButton.size.width ) + 1;//buttonFrameSprite.size.width * 1.05 * scale;
         [self setValue:aButton forKey:[NSString stringWithFormat:@"button%d",idx]];
         
@@ -200,11 +204,11 @@ static CGFloat gLastYOffset = 0; // XXX
     
     CGSize meterSize = [Meter meterSize];
     Meter *angerMeter = [Meter meterWithLabel:@"anger" textureNumber:1 origin:fuckingBottomLeft xOffset:xOffset yOffset:(meterSize.height / 2) + 1 centered:NO];
-    [node addChild:angerMeter];
+    [self.parentNode addChild:angerMeter];
     self.meter1 = angerMeter;
     
     Meter *zenMeter = [Meter meterWithLabel:@"zen" textureNumber:2 origin:fuckingBottomLeft xOffset:xOffset yOffset:-(meterSize.height / 2) centered:YES];
-    [node addChild:zenMeter];
+    [self.parentNode addChild:zenMeter];
     self.meter2 = zenMeter;
     
     //[backgroundSprite runAction:rotateForever];
@@ -220,6 +224,9 @@ NSString *FlashMeterKey = @"flash-meter";
         endZen = MAX_ZEN;
     if ( endZen < 0 )
         endZen = 0;
+    
+    if ( startZen == endZen )
+        return;
     
     NSInteger realAngerDelta = endZen - startZen;
     //NSLog(@"ad %ld orig %ld net %ld real %ld",angerDelta,origAnger,netAnger,realAngerDelta);
@@ -278,6 +285,9 @@ NSString *FlashMeterKey = @"flash-meter";
         endAnger = MAX_ANGER;
     if ( endAnger < 0 )
         endAnger = 0;
+    
+    if ( startAnger == endAnger )
+        return;
     
     NSInteger realAngerDelta = endAnger - startAnger;
     //NSLog(@"ad %ld orig %ld net %ld real %ld",angerDelta,origAnger,netAnger,realAngerDelta);
@@ -342,7 +352,7 @@ NSString *FlashMeterKey = @"flash-meter";
     }
 }
 
-- (void)_addForegroundTextureToNode:(SKNode *)node info:(NSDictionary *)textureDict
+- (void)_addForegroundTextureWithInfo:(NSDictionary *)textureDict
 {
     NSString *baseTexturePrefix = textureDict[@"name"];
     NSNumber *nFrames = textureDict[@"nFrames"];
@@ -397,7 +407,7 @@ NSString *FlashMeterKey = @"flash-meter";
         
         sprite.zPosition = ((NSNumber *)textureDict[@"zPosition"]).doubleValue;
             
-        [node addChild:sprite];
+        [self.parentNode addChild:sprite];
     }
     self.foregroundXMovement = i * foregroundXMovement;
     gLastYOffset += spriteHeight * foregroundScale;
@@ -929,6 +939,7 @@ NSString *ActionWalkingKey = @"walking";
     
     if ( ! CGRectContainsPoint(self.frame, self.bouncer.position ) )
     {
+#ifdef SUPER_DEBUG_FART_NOISE
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
             int idx = 0;
             for ( ; idx < 10; idx++ )
@@ -938,10 +949,11 @@ NSString *ActionWalkingKey = @"walking";
                 usleep(USEC_PER_SEC * 0.2);
             }
         });
+#endif
         
-        [self.bouncer removeAllActions];
-        self.bouncer.position = CGPointMake(CGRectGetMidX(self.frame),
-                                            CGRectGetMidY(self.frame) - 200);
+        //[self.bouncer removeAllActions];
+        //self.bouncer.position = CGPointMake(CGRectGetMidX(self.frame),
+        //                                    CGRectGetMidY(self.frame) - 200);
     }
     
     [self.parentNode.children enumerateObjectsUsingBlock:^(SKSpriteNode *obj, NSUInteger idx, BOOL *stop) {
@@ -1003,12 +1015,12 @@ NSString *ActionWalkingKey = @"walking";
     SKTexture *texture = [SKTexture textureWithImageNamed:textureName];
     texture.filteringMode = SKTextureFilteringNearest;
     SKSpriteNode *node = [SKSpriteNode spriteNodeWithTexture:texture];
-    node.xScale = 2;
-    node.yScale = 2;
+    node.xScale = RandomBool() ? -2 : 2;
+    node.yScale = RandomBool() ? -2 : 2;
     node.alpha = 0.75;
     CGFloat randomY = ( self.gameScreenMap.screenRect.size.height - MAGICAL_MYSTERY_CLOUD_MIN_ALTITUDE ) * Random0Thru1()
                             + self.gameScreenMap.screenRect.origin.y + MAGICAL_MYSTERY_CLOUD_MIN_ALTITUDE;
-    CGFloat stageRight = self.gameScreenMap.screenRect.origin.x + self.gameScreenMap.screenRect.size.width + node.size.width;;
+    CGFloat stageRight = self.gameScreenMap.screenRect.origin.x + self.gameScreenMap.screenRect.size.width + node.size.width;
     CGFloat stageLeft = self.gameScreenMap.screenRect.origin.x - node.size.width;
     CGFloat x;
     if ( initial )
@@ -1020,7 +1032,7 @@ NSString *ActionWalkingKey = @"walking";
     [self.parentNode addChild:node];
     
     SKAction *move = [SKAction moveToX:stageLeft duration:( x - stageLeft ) / ( stageRight - stageLeft ) * 50.0 ];
-    NSLog(@"cloud from x%0.2f,y%0.2f for %0.2f",x,randomY,move.duration);
+    //NSLog(@"cloud from x%0.2f,y%0.2f for %0.2f",x,randomY,move.duration);
     [node runAction:move completion:^{
         [node removeFromParent];
     }];
@@ -1048,7 +1060,7 @@ NSString *KillScaleKey = @"kill-scale";
         return;
     }
     
-    SKPhysicsBody *genericAIPhysics = nil;
+    SKPhysicsBody *genericAIPhysicsA = nil, *genericAIPhysicsB = nil;;
     SKPhysicsBody *bouncerPhysics = nil;
     SKPhysicsBody *celebPhysics = nil;
     SKPhysicsBody *taxiPhysics = nil;
@@ -1068,9 +1080,9 @@ NSString *KillScaleKey = @"kill-scale";
     else if ( [nodeB.name hasPrefix:@"celeb"] )
         celebPhysics = contact.bodyB;
     if ( [genericAIPrefixes containsPrefixOfString:nodeA.name] )
-        genericAIPhysics = contact.bodyA;
+        genericAIPhysicsA = contact.bodyA;
     else if ( [genericAIPrefixes containsPrefixOfString:nodeB.name] )
-        genericAIPhysics = contact.bodyB;
+        genericAIPhysicsB = contact.bodyB;
     if ( [nodeA.name hasPrefix:@"taxi-"] )
         taxiPhysics = contact.bodyA;
     else if ( [nodeB.name hasPrefix:@"taxi-"] )
@@ -1083,6 +1095,8 @@ NSString *KillScaleKey = @"kill-scale";
         helicopterPhysics = contact.bodyA;
     else if ( [nodeB.name hasPrefix:@"helicopter-"] )
         helicopterPhysics = contact.bodyB;
+    
+    SKPhysicsBody *genericAIPhysics = ( genericAIPhysicsA && genericAIPhysicsB ) ? nil : ( genericAIPhysicsA ? genericAIPhysicsA : genericAIPhysicsB );
     
     if ( [nodeA isKindOfClass:[EntityNode class]] && [nodeB isKindOfClass:[EntityNode class]] )
     {
@@ -1118,7 +1132,7 @@ NSString *KillScaleKey = @"kill-scale";
             normal.dx = -(normal.dx);
             normal.dy = -(normal.dy);
         }
-        [self _genericKillNode:genericAIPhysics.node normal:normal];
+        [self _genericKillNode:(EntityNode *)genericAIPhysics.node withNode:self.bouncer normal:normal];
         
         //CGFloat scale = self.bouncer.xScale * 1.1;
         if ( ! [self.bouncer actionForKey:KillScaleKey] )
@@ -1185,7 +1199,7 @@ NSString *KillScaleKey = @"kill-scale";
         [self _runOverNode:self.celeb withNode:(EntityNode *)taxiPhysics.node];
         [Sound playSoundNamed:@"fart-2.wav" onNode:self.celeb];
     }
-    else if ( genericAIPhysics && helicopterPhysics )
+    else if ( (genericAIPhysics && helicopterPhysics) || (genericAIPhysicsA && genericAIPhysicsB) )
     {
         CGVector normal = contact.contactNormal;
         if ( [nodeA.name hasPrefix:@"helicopter-"] )
@@ -1193,7 +1207,12 @@ NSString *KillScaleKey = @"kill-scale";
             normal.dx = -(normal.dx);
             normal.dy = -(normal.dy);
         }
-        [self _genericKillNode:helicopterPhysics.node normal:normal];
+        // XXX torture
+        EntityNode *killingNode = helicopterPhysics ? (EntityNode *)genericAIPhysics.node :
+                                   (((EntityNode *)genericAIPhysicsA.node).isDead ? (EntityNode *)genericAIPhysicsA.node : (EntityNode *)genericAIPhysicsB.node );
+        EntityNode *killedNode = helicopterPhysics ? (EntityNode *)helicopterPhysics.node :
+                                    (((EntityNode *)genericAIPhysicsA.node).isDead ? (EntityNode *)genericAIPhysicsB.node : (EntityNode *)genericAIPhysicsA.node );
+        [self _genericKillNode:killedNode withNode:killingNode normal:normal];
     }
     //else NSLog(@"some collisions between %@ and %@",contact.bodyA.node.name,contact.bodyB.node.name);
 }
@@ -1205,25 +1224,69 @@ NSString *KillScaleKey = @"kill-scale";
     //NSLog(@"%@ is no longer in contact with %@",contact.bodyA.node.name,contact.bodyB.node.name);
 }
 
-- (void)_genericKillNode:(SKNode *)node normal:(CGVector)normal
+- (void)_genericKillNode:(EntityNode *)killedNode withNode:(EntityNode *)killingNode normal:(CGVector)normal
 {
     NSTimeInterval flightTime = 1;
-    CGFloat notSoRandomX = node.position.x + normal.dx * self.frame.size.width;
+    CGFloat notSoRandomX = killedNode.position.x + normal.dx * self.frame.size.width;
     SKAction *flyAway = [SKAction moveTo:CGPointMake(notSoRandomX,FLYAWAY_Y) duration:flightTime];
     SKAction *spin = [SKAction rotateByAngle:4*M_PI duration:flightTime];
     SKAction *shrink = [SKAction scaleBy:0.25 duration:flightTime];
     SKAction *flyAwaySpinAndShrink = [SKAction group:@[ flyAway, spin, shrink ]];
-    [node removeAllActions];
-    [node runAction:flyAwaySpinAndShrink completion:^{
+    [killedNode removeAllActions];
+    [killedNode runAction:flyAwaySpinAndShrink completion:^{
         SKAction *disappear = [SKAction fadeOutWithDuration:0.25];
-        [node runAction:disappear completion:^{
-            [node removeFromParent];
+        [killedNode runAction:disappear completion:^{
+            [killedNode removeFromParent];
         }];
     }];
     
-    [Sound playSoundNamed:@"pop-1.wav" onNode:node];
-    ((EntityNode *)node).isDead = YES;
+    unsigned popIdx = (unsigned)killingNode.impactChain + 1;
+    if ( popIdx > 5 )
+        popIdx = 5;
+    //NSLog(@"pop %u",popIdx);
+    [Sound playSoundNamed:[NSString stringWithFormat:@"pop-%u.wav",popIdx] onNode:killedNode];
+    killedNode.isDead = YES;
+    killedNode.impactChain = killingNode.impactChain + 1;
+    if ( ! killingNode.isFriendly )
+        killingNode.impactChain = killingNode.impactChain + 1;
     [self _handleKill];
+    
+    if ( popIdx > 1 )
+    {
+        SKLabelNode *labelNode = [SKLabelNode labelNodeWithFontNamed:@"Menlo"];
+        labelNode.fontSize = 3.0 * ((float)popIdx / 5.0) * 5.0;
+        labelNode.fontColor = [[UIColor redColor] colorWithAlphaComponent:1.0];
+        NSString *text;
+        switch(popIdx)
+        {
+            case 2:
+                text = @"double kill!";
+                break;
+            case 3:
+                text = @"triple kill!!";
+                break;
+            case 4:
+                text = @"monster kill!!!";
+                break;
+            default:
+                text = @"ULTRA KILL!!!!";
+                break;
+        }
+        labelNode.text = text;
+        
+        labelNode.position = killedNode.position;
+        labelNode.zPosition = CONTROL_PANEL_FRAME_Z;
+        
+        [self.parentNode addChild:labelNode];
+        
+        //NSLog(@"%@",text);
+        
+        SKAction *fade = [SKAction fadeOutWithDuration:0.4];
+        fade.timingMode = SKActionTimingEaseIn;
+        [labelNode runAction:fade completion:^{
+            [labelNode removeFromParent];
+        }];
+    }
     
 }
 
@@ -1239,6 +1302,7 @@ NSString *KillScaleKey = @"kill-scale";
     [node runAction:[SKAction moveTo:point duration:0.0]];
     
     SKSpriteNode *tireTread = [SKSpriteNode spriteNodeWithImageNamed:@"tire-tread-1"];
+    tireTread.texture.filteringMode = SKTextureFilteringNearest;
     tireTread.zPosition = ENTITY_Z + ENTITY_Z_INC;
     tireTread.xScale = node.xScale;
     tireTread.yScale = node.yScale;
@@ -1564,6 +1628,7 @@ NSString *KillScaleKey = @"kill-scale";
             }];
         }];
     }];
+    
     SKAction *explosionAndRed = [SKAction group:@[playExplosion, paintWorldRed]];
     //SKAction *leerSomeMore = leer;
     SKAction *sequence = [SKAction sequence:@[ upright, flyTowardMid, peekScale, disappear, hide, wait, peek, leer, flyAwayAndDisappear, explosionAndRed/*, leerSomeMore*/ ]];

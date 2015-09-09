@@ -24,6 +24,7 @@ static SKScene *sScene;
         //dispatch_async(dispatch_get_global_queue(0, 0), ^{
             SKAction *soundEffect = [SKAction playSoundFileNamed:soundName waitForCompletion:NO];
             NSString *key = [NSString stringWithFormat:@"sound-%@-%u",soundName,arc4random()];
+            //NSLog(@"playing '%@'",key);
             [sScene runAction:soundEffect withKey:key];
         //});
     }
@@ -37,6 +38,8 @@ static SKScene *sScene;
     AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:&error];
     //player.numberOfLoops = 1;
     
+    //NSLog(@"playing stoppable '%@'",url);
+    
     if (!player)
         NSLog(@"%@",[error localizedDescription]);
     else
@@ -47,6 +50,7 @@ static SKScene *sScene;
 
 + (void)stopSound:(NSObject *)sound
 {
+    //NSLog(@"stopping %@",[(AVAudioPlayer *)sound url]);
     [(AVAudioPlayer *)sound stop];
 }
 

@@ -87,9 +87,9 @@ typedef void (^AnimateBlock)();
             {
                 //NSLog(@"end of page...?");
                 [self _stopAnimation];
-                self.currentPage++;
-                _lineIdx = 0;
-                BOOL moreToCome = self.currentPage < self.lines.count;
+                //self.currentPage++;
+                //_lineIdx = 0;
+                BOOL moreToCome = ( self.currentPage + 1 ) < self.lines.count;
                 if ( moreToCome )
                     [Sound playSoundNamed:@"carriage-return-1.wav" onNode:self];
                 if ( self.pageFinishedAnimatingHandler )
@@ -167,8 +167,8 @@ typedef void (^AnimateBlock)();
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     //NSLog(@"touched speech?");
-    if ( ( self.currentPage * LINES_PER_PAGE + _lineIdx ) < self.lines.count )
-        [self _animateFromChar:0 line:0 page:self.currentPage];
+    if ( ( ( self.currentPage + 1 ) * LINES_PER_PAGE ) < self.lines.count )
+        [self _animateFromChar:0 line:0 page:self.currentPage + 1];
     else
     {
         SKAction *fadeOut = [SKAction fadeOutWithDuration:0.25];

@@ -30,6 +30,8 @@
 @property BOOL currentActionIsInterruptible;
 @property NSArray *actionDispatchSources;
 
+@property NSUInteger impactChain;
+
 - (id)initWithImageNamed:(NSString *)name withPhysics:(BOOL)withPhysics;
 - (void)dispatchActionPause;
 - (void)dispatchActionResume;
