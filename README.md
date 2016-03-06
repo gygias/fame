@@ -12,7 +12,7 @@ the setting is melrose ave. it's crowded. wannabes, skaters, angry drivers, walk
 ![Alt text](http://gygias.com/img/screens/f1.jpg "one")
 
 
-**at 75% anger, double tap anywhere to slam the ground, making tame everyone in a large radius.**
+**at 75% anger, double tap anywhere to slam the ground, impressing everyone in a large radius.**
 
 ![Alt text](http://gygias.com/img/screens/f2.jpg "two")
 
