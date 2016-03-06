@@ -1,6 +1,6 @@
 **fame**
 
-your first gig upon arriving in los angeles with money much smaller than your dreams: generating buzz by following around a local socialite. bodyguard, entourage, errand boy. you are whatever she needs you to be.
+your first gig upon arriving in los angeles with money much smaller than your dreams: generating buzz by following around a local socialite. bodyguard, entourage, emotional support, errand boy. you are whatever she needs you to be.
 
 ensure quality entertainment for future generations by elbowing, stomping, and otherwise piledriving anything that stands in your way, while obtaining the kale smoothies and gummy bear edibles you need to stay on top of your game.
 
