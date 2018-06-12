@@ -60,13 +60,13 @@
     return speechBubble;
 }
 
-typedef void (^AnimateBlock)();
+typedef void (^AnimateBlock)(void);
 - (AnimateBlock)_animateBlock
 {
     return ^(){
         NSString *animatingLineKey = @"animating-line";
         NSString *animatedLineKey = @"animated-line";
-        NSUInteger lineIdx = _lineIdx + self.currentPage * LINES_PER_PAGE;
+        NSUInteger lineIdx = self->_lineIdx + self.currentPage * LINES_PER_PAGE;
         
         if ( lineIdx == self.lines.count )
         {
@@ -80,10 +80,10 @@ typedef void (^AnimateBlock)();
         if ( [theLine isEqualToString:@"f"] )
             NSLog(@"??");
         
-        if ( _charIdx == theLine.length )
+        if ( self->_charIdx == theLine.length )
         {
-            _lineIdx++;
-            if ( _lineIdx == ( LINES_PER_PAGE * self.currentPage + LINES_PER_PAGE ) )
+            self->_lineIdx++;
+            if ( self->_lineIdx == ( LINES_PER_PAGE * self.currentPage + LINES_PER_PAGE ) )
             {
                 //NSLog(@"end of page...?");
                 [self _stopAnimation];
@@ -96,28 +96,28 @@ typedef void (^AnimateBlock)();
                     self.pageFinishedAnimatingHandler(self, moreToCome);
                 return;
             }
-            else if ( _lineIdx == self.lines.count )
+            else if ( self->_lineIdx == self.lines.count )
             {
                 [self _stopAnimation];
                 if ( self.pageFinishedAnimatingHandler )
                     self.pageFinishedAnimatingHandler(self,NO);
                 return;
             }
-            theLine = self.lines[_lineIdx];
-            _charIdx = 0;
+            theLine = self.lines[self->_lineIdx];
+            self->_charIdx = 0;
             
-            [self.children enumerateObjectsUsingBlock:^(SKLabelNode *child, NSUInteger idx, BOOL *stop) {
+            [self.children enumerateObjectsUsingBlock:^(SKNode *child, NSUInteger idx, BOOL *stop) {
                 child.name = animatedLineKey;
             }];
             NSLog(@"new line");
         }
         
-        NSString *drawnPortion = [theLine substringToIndex:++_charIdx];
+        NSString *drawnPortion = [theLine substringToIndex:++self->_charIdx];
         SKLabelNode *label = (SKLabelNode *)[self childNodeWithName:animatingLineKey];
         if ( ! label )
         {
             NSLog(@"new node");
-            CGPoint lineOrigin = CGPointMake( [self _xOriginForTextWithLength:theLine.length], [self _yOriginForLineNumber:_lineIdx] );
+            CGPoint lineOrigin = CGPointMake( [self _xOriginForTextWithLength:theLine.length], [self _yOriginForLineNumber:self->_lineIdx] );
             label = [self _labelNodeWithText:drawnPortion origin:lineOrigin];
             label.name = animatingLineKey;
             [self addChild:label];

@@ -23,6 +23,6 @@ CGPoint CGRectGetMid(CGRect rect);
 
 CGRect ScaledRect(CGRect rect, CGFloat scale);
 
-double Random0Thru1();
-BOOL RandomBool();
+double Random0Thru1(void);
+BOOL RandomBool(void);
 BOOL RandomBoolM(int mod);

@@ -136,7 +136,7 @@
 
 NSString *MyActionsKey = @"myActions";
 
-- (void)runAction:(SKAction *)action withKey:(NSString *)key completion:(void (^)())block
+- (void)runAction:(SKAction *)action withKey:(NSString *)key completion:(void (^)(void))block
 {
     if ( ! self.userData[MyActionsKey] )
         self.userData[MyActionsKey] = [NSMutableDictionary new];

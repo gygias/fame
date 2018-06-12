@@ -74,14 +74,14 @@
     SKAction *move = [SKAction followPath:path.CGPath asOffset:NO orientToPath:NO duration:duration];
     
     SKAction *animate = [SKAction customActionWithDuration:duration actionBlock:^(SKNode *node, CGFloat elapsedTime) {
-        BOOL shouldAnimate = RandomBoolM( _isManual ? 10 : 20 );
+        BOOL shouldAnimate = RandomBoolM( self->_isManual ? 10 : 20 );
         if ( shouldAnimate )
         {
-            NSString *textureName = _isManual ? @"skater-1" : @"skater-2";
+            NSString *textureName = self->_isManual ? @"skater-1" : @"skater-2";
             SKTexture *texture = [SKTexture textureWithImageNamed:textureName];
             texture.filteringMode = SKTextureFilteringNearest;
             [self setTexture:texture];
-            _isManual = !_isManual;
+            self->_isManual = !self->_isManual;
         }
     }];
     

@@ -92,17 +92,17 @@ NSString *ComboBoxLabelChildName = @"label-node";
     }
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(self.comboDuration * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        if ( [[NSDate date] timeIntervalSinceDate:_lastUpdate] > COMBO_TIMEOUT )
+        if ( [[NSDate date] timeIntervalSinceDate:self->_lastUpdate] > COMBO_TIMEOUT )
         {
             if ( self.combo > 0 )
             {
                 NSLog(@"removing combo node");
-                _combo = 0;
+                self->_combo = 0;
                 [Sound playSoundNamed:@"slot-machine-cash-out-2.wav" onNode:self];
                 
                 NSTimeInterval duration = 1.0;
                 SKAction *fade = [SKAction fadeOutWithDuration:duration];
-                SKAction *center = [SKAction moveTo:_endPoint duration:duration];
+                SKAction *center = [SKAction moveTo:self->_endPoint duration:duration];
                 SKAction *fadeAndCenter = [SKAction group:@[fade,center]];
                 [self runAction:fadeAndCenter completion:^{
                     if ( self.comboEndedHandler )

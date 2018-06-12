@@ -502,7 +502,7 @@ NSString *FlashMeterKey = @"flash-meter";
         self.lastTapDate = nowAndLater;
         
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MULTI_TAP_THRESHOLD * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            CGPoint skStartPoint = [self convertPointFromView:_panRecognizer.currentStartPoint];
+            CGPoint skStartPoint = [self convertPointFromView:self->_panRecognizer.currentStartPoint];
             if ( CGPointEqualToPoint(self.firstTapLocation, skStartPoint) )
             {
                 //NSLog(@"eating %@ being tracked by pan recognizer",PointString(self.firstTapLocation));
@@ -956,7 +956,7 @@ NSString *ActionWalkingKey = @"walking";
         //                                    CGRectGetMidY(self.frame) - 200);
     }
     
-    [self.parentNode.children enumerateObjectsUsingBlock:^(SKSpriteNode *obj, NSUInteger idx, BOOL *stop) {
+    [self.parentNode.children enumerateObjectsUsingBlock:^(SKNode *obj, NSUInteger idx, BOOL *stop) {
         if ( [obj isKindOfClass:[EntityNode class]] )
         {
             EntityNode *node = (EntityNode *)obj;

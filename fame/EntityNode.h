@@ -37,7 +37,7 @@
 - (void)dispatchActionResume;
 
 // super overrides
-- (void)runAction:(SKAction *)action withKey:(NSString *)key completion:(void (^)())block;
+- (void)runAction:(SKAction *)action withKey:(NSString *)key completion:(void (^)(void))block;
 
 // subclass overrides
 - (BOOL)introduceWithScreenMap:(GameScreenMap *)screenMap;
